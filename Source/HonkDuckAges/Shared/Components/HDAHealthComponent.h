@@ -7,6 +7,8 @@
 #include "Components/ActorComponent.h"
 #include "HDAHealthComponent.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogHealthComponent, Log, All);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHealthChangedDynamicSignature,
                                                UHDAHealthComponent*, Component,
                                                const FTrickyPropertyInt&, CurrentHealth,
@@ -59,4 +61,12 @@ public:
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetHealth, Category="Health")
 	FTrickyPropertyInt CurrentHealth{0, 100, 100};
+
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+	static void PrintLog(const FString& Message);
+
+	static void PrintWarning(const FString& Message);
+
+	static void PrintError(const FString& Message);
+#endif
 };
