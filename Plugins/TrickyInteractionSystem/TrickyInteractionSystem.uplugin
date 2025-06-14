@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 2,
+	"VersionName": "3.55.1",
+	"FriendlyName": "TrickyInteractionSystem",
+	"Description": "Provides a simple interaction system.",
+	"Category": "Tricky Prototyping",
+	"CreatedBy": "Artyom \"Tricky_Fat_Cat\" Volkov",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "TrickyInteractionSystem",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

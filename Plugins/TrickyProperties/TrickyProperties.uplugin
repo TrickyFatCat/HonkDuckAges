@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 5,
+	"VersionName": "3.55.4",
+	"FriendlyName": "TrickyProperties",
+	"Description": "A plugin for rapid prototyping to easily create and adjust properties like health, stamina, armor, etc.",
+	"Category": "Tricky Prototyping",
+	"CreatedBy": "Artyom \"Tricky_Fat_Cat\" Volkov",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "TrickyProperties",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

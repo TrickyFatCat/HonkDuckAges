@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 3,
+	"VersionName": "3.55.2",
+	"FriendlyName": "TrickyStatusEffects",
+	"Description": "Provides a flexible and comprehensive status effect system.",
+	"Category": "Tricky Prototyping",
+	"CreatedBy": "Artyom \"Tricky_Fat_Cat\" Volkov",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "TrickyStatusEffects",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 3,
+	"VersionName": "3.55.2",
+	"FriendlyName": "TrickyRulers",
+	"Description": "Provides a set of measurement tools for level designers and developers to easily visualize distances and dimensions within the editor.",
+	"Category": "Tricky Prototyping",
+	"CreatedBy": "Artyom \"Tricky_Fat_Cat\" Volkov",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "TrickyRulers",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}

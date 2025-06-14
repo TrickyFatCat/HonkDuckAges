@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "3.55.0",
+	"FriendlyName": "TrickyGameMode",
+	"Description": "Provides a robust and flexible game state management system for Unreal Engine 5 prototype projects.",
+	"Category": "Tricky Prototyping",
+	"CreatedBy": "Artyom \"Tricky_Fat_Cat\" Volkov",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "TrickyGameMode",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

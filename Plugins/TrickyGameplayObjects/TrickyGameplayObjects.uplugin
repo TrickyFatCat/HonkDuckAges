@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 5,
+	"VersionName": "3.55.3",
+	"FriendlyName": "TrickyGameplayObjects",
+	"Description": "Provides reusable components and interfaces for managing common gameplay mechanics such as doors, chests, locks, buttons, and more.",
+	"Category": "Tricky Prototyping",
+	"CreatedBy": "Artyom \"Tricky_Fat_Cat\" Volkov",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": true,
+	"Installed": true,
+	"Modules": [
+		{
+			"Name": "TrickyGameplayObjects",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
