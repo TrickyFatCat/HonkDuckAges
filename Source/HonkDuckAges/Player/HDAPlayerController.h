@@ -3,13 +3,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "HDEPlayerController.generated.h"
+#include "HDAPlayerController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class HONKDUCKAGES_API AHDEPlayerController : public APlayerController
+class HONKDUCKAGES_API AHDAPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 };

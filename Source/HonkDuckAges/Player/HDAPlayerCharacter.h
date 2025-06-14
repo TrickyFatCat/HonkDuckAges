@@ -3,15 +3,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "HDEPlayerCharacter.generated.h"
+#include "HDAPlayerCharacter.generated.h"
 
 UCLASS(Abstract)
-class HONKDUCKAGES_API AHDEPlayerCharacter : public ACharacter
+class HONKDUCKAGES_API AHDAPlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	AHDEPlayerCharacter();
+	AHDAPlayerCharacter();
 
 protected:
 	virtual void BeginPlay() override;
