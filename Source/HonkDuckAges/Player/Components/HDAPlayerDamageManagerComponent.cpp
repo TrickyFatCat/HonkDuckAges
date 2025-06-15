@@ -1,18 +1,18 @@
 ﻿// 
 
 
-#include "PlayerDamageManagerComponent.h"
+#include "HDAPlayerDamageManagerComponent.h"
 
 #include "HonkDuckAges/Shared/Components/HDAArmorComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAHealthComponent.h"
 
 
-UPlayerDamageManagerComponent::UPlayerDamageManagerComponent()
+UHDAPlayerDamageManagerComponent::UHDAPlayerDamageManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UPlayerDamageManagerComponent::InitializeComponent()
+void UHDAPlayerDamageManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
@@ -30,7 +30,7 @@ void UPlayerDamageManagerComponent::InitializeComponent()
 	}
 }
 
-void UPlayerDamageManagerComponent::HandleDamageTaken(AActor* DamagedActor,
+void UHDAPlayerDamageManagerComponent::HandleDamageTaken(AActor* DamagedActor,
                                                       float Damage,
                                                       const UDamageType* DamageType,
                                                       AController* InstigatedBy,

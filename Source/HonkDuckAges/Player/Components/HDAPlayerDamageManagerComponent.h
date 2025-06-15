@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "HonkDuckAges/Shared/Components/HDADamageManagerBase.h"
-#include "PlayerDamageManagerComponent.generated.h"
+#include "HDAPlayerDamageManagerComponent.generated.h"
 
 
 class UHDAArmorComponent;
 
 UCLASS(ClassGroup=(Player), meta=(BlueprintSpawnableComponent))
-class HONKDUCKAGES_API UPlayerDamageManagerComponent : public UHDADamageManagerBase
+class HONKDUCKAGES_API UHDAPlayerDamageManagerComponent : public UHDADamageManagerBase
 {
 	GENERATED_BODY()
 
 public:
-	UPlayerDamageManagerComponent();
+	UHDAPlayerDamageManagerComponent();
 
 protected:
 	virtual void InitializeComponent() override;
