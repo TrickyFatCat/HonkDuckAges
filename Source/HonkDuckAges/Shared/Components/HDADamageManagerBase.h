@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HDADamageManagerBase.generated.h"
 
+class UHDAHealthComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvulnerabilityChangedDynamicSignature,
                                             UHDADamageManagerBase*, Component);
 
