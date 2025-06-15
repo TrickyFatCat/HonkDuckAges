@@ -15,6 +15,9 @@ UHDAArmorComponent::UHDAArmorComponent()
 void UHDAArmorComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
+	
+	CurrentArmor.Value = DefaultArmor;
+	CurrentArmor.MaxValue = DefaultArmor;
 }
 
 bool UHDAArmorComponent::IncreaseArmor(const int32 Amount)
