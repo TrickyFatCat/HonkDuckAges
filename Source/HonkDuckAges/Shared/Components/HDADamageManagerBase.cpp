@@ -27,7 +27,7 @@ void UHDADamageManagerBase::InitializeComponent()
 
 	HealthComponent = GetOwner()->GetComponentByClass<UHDAHealthComponent>();
 
-	ensureMsgf(!IsValid(HealthComponent),
+	ensureMsgf(IsValid(HealthComponent),
 	           TEXT("Can't find health component in %s for DamageManagerComponent"),
 	           *GetOwner()->GetActorNameOrLabel());
 

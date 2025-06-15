@@ -26,11 +26,11 @@ void UHDAPlayerDamageManagerComponent::InitializeComponent()
 
 	ArmorComponent = GetOwner()->GetComponentByClass<UHDAArmorComponent>();
 
-	ensureMsgf(!IsValid(ArmorComponent),
+	ensureMsgf(IsValid(ArmorComponent),
 	           TEXT("Can't find ArmorComponent in %s for DamageManagerComponent"),
 	           *GetOwner()->GetActorNameOrLabel());
 
-	ensureMsgf(!GetOwner()->IsA(AHDAPlayerCharacter::StaticClass()),
+	ensureMsgf(GetOwner()->IsA(AHDAPlayerCharacter::StaticClass()),
 	           TEXT("Please don't use PlayerDamageManagerComponent in non player classes like %s"),
 	           *GetOwner()->GetActorNameOrLabel());
 }
