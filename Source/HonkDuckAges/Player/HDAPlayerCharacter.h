@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "HDAPlayerCharacter.generated.h"
 
+class UHDAPlayerDamageManagerComponent;
 class UHDAArmorComponent;
 class UHDAHealthComponent;
 
@@ -30,4 +31,7 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDAArmorComponent> ArmorComponent = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UHDAPlayerDamageManagerComponent> DamageManagerComponent = nullptr;
 };

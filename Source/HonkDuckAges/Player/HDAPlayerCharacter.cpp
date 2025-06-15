@@ -2,6 +2,7 @@
 
 #include "HDAPlayerCharacter.h"
 
+#include "Components/HDAPlayerDamageManagerComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAArmorComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAHealthComponent.h"
 
@@ -12,6 +13,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter()
 
 	HealthComponent = CreateDefaultSubobject<UHDAHealthComponent>(TEXT("HealthComponent"));
 	ArmorComponent = CreateDefaultSubobject<UHDAArmorComponent>(TEXT("ArmorComponent"));
+	DamageManagerComponent = CreateDefaultSubobject<UHDAPlayerDamageManagerComponent>(TEXT("DamageManagerComponent"));
 }
 
 void AHDAPlayerCharacter::BeginPlay()
