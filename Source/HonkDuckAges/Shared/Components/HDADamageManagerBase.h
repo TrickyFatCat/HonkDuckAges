@@ -7,6 +7,9 @@
 #include "HDADamageManagerBase.generated.h"
 
 class UHDAHealthComponent;
+
+DECLARE_LOG_CATEGORY_EXTERN(LogDamageManagerComponent, Log, All);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvulnerabilityChangedDynamicSignature,
                                             UHDADamageManagerBase*, Component);
 
@@ -37,6 +40,14 @@ public:
 protected:
 	UPROPERTY()
 	TObjectPtr<UHDAHealthComponent> HealthComponent = nullptr;
+
+#if WITH_EDITOR
+	static void PrintLog(const FString& Message);
+
+	static void PrintWarning(const FString& Message);
+
+	static void PrintError(const FString& Message);
+#endif
 
 private:
 	UPROPERTY(VisibleInstanceOnly,

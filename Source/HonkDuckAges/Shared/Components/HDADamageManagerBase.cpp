@@ -5,6 +5,7 @@
 
 #include "HDAHealthComponent.h"
 
+DEFINE_LOG_CATEGORY(LogDamageManagerComponent)
 
 UHDADamageManagerBase::UHDADamageManagerBase()
 {
@@ -26,11 +27,10 @@ void UHDADamageManagerBase::InitializeComponent()
 
 	HealthComponent = GetOwner()->GetComponentByClass<UHDAHealthComponent>();
 
-	if (!IsValid(HealthComponent))
-	{
-		
-	}
-	
+	ensureMsgf(!IsValid(HealthComponent),
+	           TEXT("Can't find health component in %s for DamageManagerComponent"),
+	           *GetOwner()->GetActorNameOrLabel());
+
 	GetOwner()->OnTakeAnyDamage.AddUniqueDynamic(this, &UHDADamageManagerBase::HandleDamageTaken);
 }
 
@@ -46,12 +46,35 @@ void UHDADamageManagerBase::SetIsInvulnerable(const bool Value)
 	if (bIsInvulnerable)
 	{
 		OnInvulnerabilityEnabled.Broadcast(this);
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+		PrintLog(FString::Printf(TEXT("Invulnerability enabled for %s"), *GetOwner()->GetActorNameOrLabel()));
+#endif
 	}
 	else
 	{
 		OnInvulnerabilityDisabled.Broadcast(this);
+#if WITH_EDITOR && !UE_BUILD_SHIPPING
+		PrintLog(FString::Printf(TEXT("Invulnerability disabled for %s"), *GetOwner()->GetActorNameOrLabel()));
+#endif
 	}
 }
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+void UHDADamageManagerBase::PrintLog(const FString& Message)
+{
+	UE_LOG(LogDamageManagerComponent, Log, TEXT("%s"), *Message)
+}
+
+void UHDADamageManagerBase::PrintWarning(const FString& Message)
+{
+	UE_LOG(LogDamageManagerComponent, Warning, TEXT("%s"), *Message)
+}
+
+void UHDADamageManagerBase::PrintError(const FString& Message)
+{
+	UE_LOG(LogDamageManagerComponent, Error, TEXT("%s"), *Message)
+}
+#endif
 
 void UHDADamageManagerBase::HandleDamageTaken(AActor* DamagedActor,
                                               float Damage,
@@ -59,7 +82,7 @@ void UHDADamageManagerBase::HandleDamageTaken(AActor* DamagedActor,
                                               AController* InstigatedBy,
                                               AActor* DamageCauser)
 {
-	if (!IsValid(HealthComponent))
+	if (!IsValid(HealthComponent) || HealthComponent->GetHealth().ReachedMinValue())
 	{
 		return;
 	}
