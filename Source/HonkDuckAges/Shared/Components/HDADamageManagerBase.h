@@ -56,7 +56,7 @@ private:
 		Category="DamageManager")
 	bool bIsInvulnerable = false;
 
-	UFUNCTION();
+	UFUNCTION()
 	virtual void HandleDamageTaken(AActor* DamagedActor,
 	                               float Damage,
 	                               const UDamageType* DamageType,
