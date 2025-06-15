@@ -28,6 +28,7 @@ public:
 protected:
 	virtual void InitializeComponent() override;
 
+public:
 	UPROPERTY(BlueprintAssignable, Category="Armor")
 	FOnArmorChangedDynamicSignature OnArmorIncreased;
 
