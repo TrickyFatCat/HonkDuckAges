@@ -18,6 +18,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetRootComponent());
+	CameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, BaseEyeHeight));
 }
 
 void AHDAPlayerCharacter::BeginPlay()
