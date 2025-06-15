@@ -3,6 +3,7 @@
 
 #include "HDAPlayerDamageManagerComponent.h"
 
+#include "HonkDuckAges/Player/HDAPlayerCharacter.h"
 #include "HonkDuckAges/Shared/Components/HDAArmorComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAHealthComponent.h"
 
@@ -25,16 +26,20 @@ void UHDAPlayerDamageManagerComponent::InitializeComponent()
 
 	ArmorComponent = GetOwner()->GetComponentByClass<UHDAArmorComponent>();
 
-	if (!IsValid(ArmorComponent))
-	{
-	}
+	ensureMsgf(!IsValid(ArmorComponent),
+	           TEXT("Can't find ArmorComponent in %s for DamageManagerComponent"),
+	           *GetOwner()->GetActorNameOrLabel());
+
+	ensureMsgf(!GetOwner()->IsA(AHDAPlayerCharacter::StaticClass()),
+	           TEXT("Please don't use PlayerDamageManagerComponent in non player classes like %s"),
+	           *GetOwner()->GetActorNameOrLabel());
 }
 
 void UHDAPlayerDamageManagerComponent::HandleDamageTaken(AActor* DamagedActor,
-                                                      float Damage,
-                                                      const UDamageType* DamageType,
-                                                      AController* InstigatedBy,
-                                                      AActor* DamageCauser)
+                                                         float Damage,
+                                                         const UDamageType* DamageType,
+                                                         AController* InstigatedBy,
+                                                         AActor* DamageCauser)
 {
 	if (!IsValid(ArmorComponent) || !IsValid(HealthComponent))
 	{
@@ -43,7 +48,7 @@ void UHDAPlayerDamageManagerComponent::HandleDamageTaken(AActor* DamagedActor,
 
 	int32 RemainingDamage = Damage;
 	const FTrickyPropertyInt Armor = ArmorComponent->GetArmor();
-	
+
 	if (!Armor.ReachedMinValue())
 	{
 		if (RemainingDamage > Armor.Value)
