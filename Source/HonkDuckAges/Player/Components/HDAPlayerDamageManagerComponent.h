@@ -9,7 +9,7 @@
 
 class UHDAArmorComponent;
 
-UCLASS(ClassGroup=(Player), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Player))
 class HONKDUCKAGES_API UHDAPlayerDamageManagerComponent : public UHDADamageManagerBase
 {
 	GENERATED_BODY()
