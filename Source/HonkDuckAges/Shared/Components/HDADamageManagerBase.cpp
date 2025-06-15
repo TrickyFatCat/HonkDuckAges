@@ -9,6 +9,8 @@
 UHDADamageManagerBase::UHDADamageManagerBase()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	bWantsInitializeComponent = true;
+	UActorComponent::SetAutoActivate(true);
 }
 
 void UHDADamageManagerBase::InitializeComponent()
