@@ -36,6 +36,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* MoveAction = nullptr;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputAction* AimAction = nullptr;
+	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDAHealthComponent> HealthComponent = nullptr;
 
@@ -51,4 +54,7 @@ protected:
 private:
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void Aim(const FInputActionValue& Value);
 };
