@@ -19,7 +19,7 @@ class HONKDUCKAGES_API AHDAPlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	AHDAPlayerCharacter();
+	AHDAPlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,6 +38,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* AimAction = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputAction* JumpAction = nullptr;
 	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDAHealthComponent> HealthComponent = nullptr;

@@ -4,11 +4,13 @@
 #include "Components/HDAPlayerDamageManagerComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/HDAPlayerMovementComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAArmorComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAHealthComponent.h"
 
 
-AHDAPlayerCharacter::AHDAPlayerCharacter()
+AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
+Super(ObjectInitializer.SetDefaultSubobjectClass<UHDAPlayerMovementComponent>(TEXT("CharMoveComp")))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -61,6 +63,8 @@ void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Aim);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AHDAPlayerCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AHDAPlayerCharacter::StopJumping);
 	}
 }
 
