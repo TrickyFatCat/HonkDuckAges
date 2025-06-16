@@ -1,9 +1,9 @@
-﻿
-
-#include "HDAPlayerCharacter.h"
+﻿#include "HDAPlayerCharacter.h"
 
 #include "Camera/CameraComponent.h"
 #include "Components/HDAPlayerDamageManagerComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "HonkDuckAges/Shared/Components/HDAArmorComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAHealthComponent.h"
 
@@ -24,7 +24,24 @@ AHDAPlayerCharacter::AHDAPlayerCharacter()
 void AHDAPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	ensureMsgf(DefaultMappingContext != nullptr, TEXT("DefaultMappingContext wasn't set for %s"),
+	           *GetActorNameOrLabel());
+
+	ensureMsgf(MoveAction != nullptr, TEXT("MoveAction wasn't set for %s"), *GetActorNameOrLabel());
+
+	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+
+	if (IsValid(PlayerController))
+	{
+		UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem = ULocalPlayer::GetSubsystem<
+			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+
+		if (EnhancedInputSubsystem)
+		{
+			EnhancedInputSubsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
 }
 
 void AHDAPlayerCharacter::Tick(float DeltaTime)
@@ -35,5 +52,16 @@ void AHDAPlayerCharacter::Tick(float DeltaTime)
 void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Move);
+	}
 }
 
+void AHDAPlayerCharacter::Move(const FInputActionValue& Value)
+{
+	const FVector2D MovementDirection = Value.Get<FVector2D>();
+	AddMovementInput(GetActorForwardVector(), MovementDirection.X);
+	AddMovementInput(GetActorRightVector(), MovementDirection.Y);
+}

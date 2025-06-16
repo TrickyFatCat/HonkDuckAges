@@ -5,6 +5,9 @@
 #include "GameFramework/Character.h"
 #include "HDAPlayerCharacter.generated.h"
 
+struct FInputActionValue;
+class UInputAction;
+class UInputMappingContext;
 class UCameraComponent;
 class UHDAPlayerDamageManagerComponent;
 class UHDAArmorComponent;
@@ -27,6 +30,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputMappingContext* DefaultMappingContext = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputAction* MoveAction = nullptr;
+	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDAHealthComponent> HealthComponent = nullptr;
 
@@ -38,4 +47,8 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent = nullptr;
+
+private:
+	UFUNCTION()
+	void Move(const FInputActionValue& Value);
 };
