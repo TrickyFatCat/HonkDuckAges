@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "HDAPlayerCharacter.generated.h"
 
+class UHDAPlayerMovementComponent;
 struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
@@ -41,6 +42,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* JumpAction = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputAction* DashAction = nullptr;
 	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDAHealthComponent> HealthComponent = nullptr;
@@ -54,10 +58,21 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent = nullptr;
 
+	UPROPERTY()
+	TObjectPtr<UHDAPlayerMovementComponent> PlayerMovementComponent = nullptr;
+
 private:
+	FVector MovementDirection = FVector::ZeroVector;
+	
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 
 	UFUNCTION()
+	void StopMoving(const FInputActionValue& Value);
+
+	UFUNCTION()
 	void Aim(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void Dash();
 };

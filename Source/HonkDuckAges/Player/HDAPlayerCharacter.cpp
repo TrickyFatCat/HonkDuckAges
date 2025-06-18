@@ -10,7 +10,7 @@
 
 
 AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
-Super(ObjectInitializer.SetDefaultSubobjectClass<UHDAPlayerMovementComponent>(TEXT("CharMoveComp")))
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UHDAPlayerMovementComponent>(TEXT("CharMoveComp")))
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -35,7 +35,11 @@ void AHDAPlayerCharacter::BeginPlay()
 	ensureMsgf(MoveAction != nullptr, TEXT("MoveAction wasn't set for %s"), *GetActorNameOrLabel());
 
 	ensureMsgf(AimAction != nullptr, TEXT("AimAction wasn't set for %s"), *GetActorNameOrLabel());
-	
+
+	ensureMsgf(JumpAction != nullptr, TEXT("JumpAction wasn't set for %s"), *GetActorNameOrLabel());
+
+	ensureMsgf(DashAction != nullptr, TEXT("DashAction wasn't set for %s"), *GetActorNameOrLabel());
+
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
 	if (IsValid(PlayerController))
@@ -48,6 +52,12 @@ void AHDAPlayerCharacter::BeginPlay()
 			EnhancedInputSubsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	PlayerMovementComponent = Cast<UHDAPlayerMovementComponent>(GetMovementComponent());
+
+	ensureMsgf(PlayerMovementComponent != nullptr,
+	           TEXT("%s movement component isn't changed to UHDAPlayerMovementComponent"),
+	           *GetActorNameOrLabel());
 }
 
 void AHDAPlayerCharacter::Tick(float DeltaTime)
@@ -62,17 +72,35 @@ void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AHDAPlayerCharacter::StopMoving);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Aim);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AHDAPlayerCharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AHDAPlayerCharacter::StopJumping);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
+		                                   &AHDAPlayerCharacter::StopJumping);
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AHDAPlayerCharacter::Dash);
 	}
 }
 
 void AHDAPlayerCharacter::Move(const FInputActionValue& Value)
 {
-	const FVector2D MovementDirection = Value.Get<FVector2D>();
-	AddMovementInput(GetActorForwardVector(), MovementDirection.X);
-	AddMovementInput(GetActorRightVector(), MovementDirection.Y);
+	const FVector2D InputDirection = Value.Get<FVector2D>();
+	MovementDirection = FVector(InputDirection.X, InputDirection.Y, 0.f);
+	
+	FVector ForwardDirection = GetActorForwardVector();
+	ForwardDirection.Z = 0.f;
+	ForwardDirection.Normalize();
+
+	FVector RightDirection = GetActorRightVector();
+	RightDirection.Z = 0.f;
+	RightDirection.Normalize();
+	
+	AddMovementInput(ForwardDirection, MovementDirection.X);
+	AddMovementInput(RightDirection, MovementDirection.Y);
+}
+
+void AHDAPlayerCharacter::StopMoving(const FInputActionValue& Value)
+{
+	MovementDirection = FVector::ZeroVector;
 }
 
 void AHDAPlayerCharacter::Aim(const FInputActionValue& Value)
@@ -80,4 +108,21 @@ void AHDAPlayerCharacter::Aim(const FInputActionValue& Value)
 	const FVector2D AimDirection = Value.Get<FVector2D>();
 	AddControllerYawInput(AimDirection.X);
 	AddControllerPitchInput(AimDirection.Y);
+}
+
+void AHDAPlayerCharacter::Dash()
+{
+	FVector ForwardDirection = GetActorForwardVector();
+	ForwardDirection.Z = 0.f;
+	ForwardDirection = ForwardDirection.GetSafeNormal();
+	
+	const FVector RightDirection = GetActorRightVector();
+	FVector DashDirection = ForwardDirection;
+
+	if (!MovementDirection.IsNearlyZero())
+	{
+		DashDirection = (ForwardDirection * MovementDirection.X + RightDirection * MovementDirection.Y).GetSafeNormal();
+	}
+	
+	PlayerMovementComponent->StartDashing(DashDirection);
 }
