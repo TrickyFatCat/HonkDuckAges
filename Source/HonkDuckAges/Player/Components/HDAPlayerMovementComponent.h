@@ -6,6 +6,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HDAPlayerMovementComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDashStartedDynamicSignature);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDashCooldownStartedDynamicSignature, const FTimerHandle&, CooldownTimer);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDashFinishedDynamicSignature);
 
 UCLASS(ClassGroup=(Custom))
 class HONKDUCKAGES_API UHDAPlayerMovementComponent : public UCharacterMovementComponent
@@ -32,6 +37,15 @@ private:
 	virtual void ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations) override;
 
 public:
+	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
+	FOnDashStartedDynamicSignature OnDashStarted;
+
+	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
+	FOnDashCooldownStartedDynamicSignature OnDashCooldownStarted;
+	
+	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
+	FOnDashFinishedDynamicSignature OnDashFinished;
+	
 	UFUNCTION(BlueprintCallable, Category="Character Movement: Dash")
 	void StartDashing(const FVector& Direction);
 
@@ -59,7 +73,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement (General Settings)",
-		meta=(UIMin=0, UIMax=1))
+		meta=(ClampMin=0, UIMin=0))
 	float FallingGravityScale = 4.0f;
 	
 	UPROPERTY(EditDefaultsOnly,
@@ -86,7 +100,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement: Dash",
-		meta=(ClampMin=0.1, UIMin=0.1, Delta=0.1, ForceUnits="Seconds"))
+		meta=(ClampMin=0, UIMin=0, Delta=0.1, ForceUnits="Seconds"))
 	float DashDuration = 0.35f;
 
 	UPROPERTY(EditDefaultsOnly,

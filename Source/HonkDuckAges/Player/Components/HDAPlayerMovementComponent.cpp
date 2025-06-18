@@ -112,6 +112,9 @@ void UHDAPlayerMovementComponent::StartDashing(const FVector& Direction)
 	                      &UHDAPlayerMovementComponent::HandleDashCooldownFinished,
 	                      DashCooldownDuration,
 	                      false);
+	
+	OnDashStarted.Broadcast();
+	OnDashCooldownStarted.Broadcast(DashCooldownTimer);
 }
 
 void UHDAPlayerMovementComponent::FinishDashing()
@@ -129,6 +132,7 @@ void UHDAPlayerMovementComponent::FinishDashing()
 	BrakingFrictionFactor = DefaultBrakingFrictionFactor;
 	BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
 	AirControl = DefaultAirControl;
+	OnDashFinished.Broadcast();
 }
 
 void UHDAPlayerMovementComponent::HandleDashCooldownFinished()
