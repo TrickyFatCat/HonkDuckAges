@@ -16,7 +16,7 @@ public:
 	UHDAPlayerMovementComponent();
 
 protected:
-	virtual void BeginPlay() override;
+	virtual void InitializeComponent() override;
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
@@ -27,11 +27,13 @@ private:
 
 	virtual bool CanEverJump() const override;
 
+	virtual bool DoJump(bool bReplayingMoves, float DeltaTime) override;
+
 	virtual void ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations) override;
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Character Movement: Dash")
-	void StartDashing();
+	void StartDashing(const FVector& Direction);
 
 	UFUNCTION(BlueprintGetter)
 	bool IsDashing() const { return bIsDashing; }
@@ -51,7 +53,15 @@ public:
 	UFUNCTION(BlueprintSetter)
 	void SetCanDash(const bool Value);
 
+	void SetGravityScaleToDefault();
+
 protected:
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="Character Movement (General Settings)",
+		meta=(UIMin=0, UIMax=1))
+	float FallingGravityScale = 4.0f;
+	
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement: Jumping / Falling",
@@ -66,6 +76,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Character Movement: Dash")
 	float DashSpeed = 200.f;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="Character Movement: Dash",
+		meta=(ClampMin=0, UIMin=0, ClampMax=1, UIMax=1))
+	float PostDashVelocityFactor = 0.25;
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
@@ -95,6 +111,18 @@ protected:
 	FTimerHandle DashCooldownTimer;
 
 private:
+	UPROPERTY()
+	float DefaultGravityScale = 1.f;
+
+	UPROPERTY()
+	float DefaultBrakingFrictionFactor = 1.f;
+
+	UPROPERTY()
+	float DefaultBrakingDecelerationWalking = 1.f;
+
+	UPROPERTY()
+	float DefaultAirControl = 0.25f;
+
 	UFUNCTION()
 	void FinishDashing();
 
@@ -102,6 +130,4 @@ private:
 	void HandleDashCooldownFinished();
 
 	float CalculateJumpZVelocity() const;
-
-	void CalculateDashVelocity(FVector& OutVelocity) const;
 };

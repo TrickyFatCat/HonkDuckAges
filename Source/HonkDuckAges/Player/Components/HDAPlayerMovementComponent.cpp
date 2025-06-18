@@ -7,19 +7,32 @@
 UHDAPlayerMovementComponent::UHDAPlayerMovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	bWantsInitializeComponent = true;
+	bMaintainHorizontalGroundVelocity = false;
 }
 
-
-void UHDAPlayerMovementComponent::BeginPlay()
+void UHDAPlayerMovementComponent::InitializeComponent()
 {
-	Super::BeginPlay();
-}
+	Super::InitializeComponent();
 
+	DefaultGravityScale = GravityScale;
+	DefaultBrakingFrictionFactor = BrakingFrictionFactor;
+	DefaultBrakingDecelerationWalking = BrakingDecelerationWalking;
+	DefaultAirControl = AirControl;
+	
+	DashSpeed = DashDistance / DashDuration;
+	JumpZVelocity = CalculateJumpZVelocity();
+}
 
 void UHDAPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                                 FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (IsFalling() && Velocity.Z < 0.f && !IsDashing())
+	{
+		GravityScale = FallingGravityScale;
+	}
 }
 
 void UHDAPlayerMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -29,51 +42,64 @@ void UHDAPlayerMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& 
 	const FName PropertyName = PropertyChangedEvent.GetPropertyName();
 	const FName JumpHeightName = GET_MEMBER_NAME_CHECKED(UHDAPlayerMovementComponent, JumpHeight);
 	const FName GravityScaleName = GET_MEMBER_NAME_CHECKED(UHDAPlayerMovementComponent, GravityScale);
-
-	if (PropertyName == JumpHeightName || PropertyName == GravityScaleName)
-	{
-		JumpZVelocity = CalculateJumpZVelocity();
-	}
-
 	const FName JumpZVelocityName = GET_MEMBER_NAME_CHECKED(UHDAPlayerMovementComponent, JumpZVelocity);
 
-	if (PropertyName == JumpZVelocityName)
+	if (PropertyName == JumpHeightName || PropertyName == GravityScaleName || PropertyName == JumpZVelocityName)
 	{
-		JumpHeight = GetMaxJumpHeight();
-	}
-
-	const FName DashDurationName = GET_MEMBER_NAME_CHECKED(UHDAPlayerMovementComponent, DashDuration);
-	const FName DashDistanceName = GET_MEMBER_NAME_CHECKED(UHDAPlayerMovementComponent, DashDistance);
-
-	if (PropertyName == DashDurationName || PropertyName == DashDistanceName)
-	{
-		DashSpeed = DashDistance / DashDuration;
+		JumpZVelocity = CalculateJumpZVelocity();
 	}
 }
 
 bool UHDAPlayerMovementComponent::CanEverJump() const
 {
-	return Super::CanEverJump() && !bIsDashing;
+	return Super::CanEverJump() && !IsDashing();
+}
+
+bool UHDAPlayerMovementComponent::DoJump(bool bReplayingMoves, float DeltaTime)
+{
+	if (IsDashing())
+	{
+		return false;
+	}
+
+	if (!CanEverJump())
+	{
+		return false;
+	}
+
+	GravityScale = DefaultGravityScale;
+	return Super::DoJump(bReplayingMoves, DeltaTime);
 }
 
 void UHDAPlayerMovementComponent::ProcessLanded(const FHitResult& Hit, float remainingTime, int32 Iterations)
 {
 	Super::ProcessLanded(Hit, remainingTime, Iterations);
 
-	bCanDash = !IsDashOnCooldown();
+	bCanDash = !IsDashing() && !IsDashOnCooldown();
+	GravityScale = DefaultGravityScale;
 }
 
-void UHDAPlayerMovementComponent::StartDashing()
+void UHDAPlayerMovementComponent::StartDashing(const FVector& Direction)
 {
 	if (bIsDashing || IsDashOnCooldown() || !bCanDash)
 	{
 		return;
 	}
 
+	if (Direction.IsNearlyZero())
+	{
+		return;
+	}
+	
 	bIsDashing = true;
 	bCanDash = false;
 
-	CalculateDashVelocity(Velocity);
+	GravityScale = 0.f;
+	BrakingFrictionFactor = 0.f;
+	BrakingDecelerationWalking = 0.f;
+	AirControl = 0.f;
+
+	Velocity = DashSpeed * Direction;
 
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 	TimerManager.SetTimer(DashDurationTimer,
@@ -97,6 +123,12 @@ void UHDAPlayerMovementComponent::FinishDashing()
 
 	bIsDashing = false;
 	bCanDash = !IsDashOnCooldown() && !IsFalling();
+
+	Velocity *= PostDashVelocityFactor;
+	GravityScale = IsFalling() ? FallingGravityScale : DefaultGravityScale;
+	BrakingFrictionFactor = DefaultBrakingFrictionFactor;
+	BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
+	AirControl = DefaultAirControl;
 }
 
 void UHDAPlayerMovementComponent::HandleDashCooldownFinished()
@@ -159,20 +191,12 @@ void UHDAPlayerMovementComponent::SetCanDash(const bool Value)
 	bCanDash = Value;
 }
 
+void UHDAPlayerMovementComponent::SetGravityScaleToDefault()
+{
+	GravityScale = DefaultGravityScale;
+}
+
 float UHDAPlayerMovementComponent::CalculateJumpZVelocity() const
 {
 	return FMath::Sqrt(-2 * GetGravityZ() * JumpHeight);
-}
-
-void UHDAPlayerMovementComponent::CalculateDashVelocity(FVector& OutVelocity) const
-{
-	FVector Direction = GetOwner()->GetActorForwardVector();
-
-	if (IsMovingOnGround())
-	{
-		Direction = GetOwner()->GetActorRightVector();
-		Direction = Direction.Cross(CurrentFloor.HitResult.Normal);
-	}
-
-	OutVelocity = Direction * DashSpeed;
 }
