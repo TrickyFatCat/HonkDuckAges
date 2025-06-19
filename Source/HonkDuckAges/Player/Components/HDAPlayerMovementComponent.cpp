@@ -19,9 +19,10 @@ void UHDAPlayerMovementComponent::InitializeComponent()
 	DefaultBrakingFrictionFactor = BrakingFrictionFactor;
 	DefaultBrakingDecelerationWalking = BrakingDecelerationWalking;
 	DefaultAirControl = AirControl;
-	
+
 	DashSpeed = DashDistance / DashDuration;
 	JumpZVelocity = CalculateJumpZVelocity();
+	DashCharges = DashMaxCharges;
 }
 
 void UHDAPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -75,31 +76,33 @@ void UHDAPlayerMovementComponent::ProcessLanded(const FHitResult& Hit, float rem
 {
 	Super::ProcessLanded(Hit, remainingTime, Iterations);
 
-	bCanDash = !IsDashing() && !IsDashOnCooldown();
+	DashCharges += CachedDashCharges;
+	DashCharges = FMath::Min(DashCharges, DashMaxCharges);
+	CachedDashCharges = 0;
 	GravityScale = DefaultGravityScale;
+
+	if (DashCharges < DashMaxCharges)
+	{
+		StartDashCooldown();
+	}
 }
 
 void UHDAPlayerMovementComponent::StartDashing(const FVector& Direction)
 {
-	if (bIsDashing || IsDashOnCooldown() || !bCanDash)
+	if (!bCanDash || IsDashing() || Direction.IsNearlyZero() || DashCharges <= 0)
 	{
 		return;
 	}
 
-	if (Direction.IsNearlyZero())
-	{
-		return;
-	}
-	
-	bIsDashing = true;
-	bCanDash = false;
+	DashCharges--;
+	DashCharges = FMath::Max(0, DashCharges);
 
 	GravityScale = 0.f;
 	BrakingFrictionFactor = 0.f;
 	BrakingDecelerationWalking = 0.f;
 	AirControl = 0.f;
 
-	Velocity = DashSpeed * Direction;
+	Launch(DashSpeed * Direction);
 
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 	TimerManager.SetTimer(DashDurationTimer,
@@ -107,25 +110,22 @@ void UHDAPlayerMovementComponent::StartDashing(const FVector& Direction)
 	                      &UHDAPlayerMovementComponent::FinishDashing,
 	                      DashDuration,
 	                      false);
-	TimerManager.SetTimer(DashCooldownTimer,
-	                      this,
-	                      &UHDAPlayerMovementComponent::HandleDashCooldownFinished,
-	                      DashCooldownDuration,
-	                      false);
-	
+
+	UE_LOG(LogTemp, Warning, TEXT("Dash Started"));
 	OnDashStarted.Broadcast();
-	OnDashCooldownStarted.Broadcast(DashCooldownTimer);
+}
+
+bool UHDAPlayerMovementComponent::IsDashing() const
+{
+	return GetWorld()->GetTimerManager().IsTimerActive(DashDurationTimer);
 }
 
 void UHDAPlayerMovementComponent::FinishDashing()
 {
-	if (!bIsDashing)
+	if (!IsDashing())
 	{
 		return;
 	}
-
-	bIsDashing = false;
-	bCanDash = !IsDashOnCooldown() && !IsFalling();
 
 	Velocity *= PostDashVelocityFactor;
 	GravityScale = IsFalling() ? FallingGravityScale : DefaultGravityScale;
@@ -133,11 +133,31 @@ void UHDAPlayerMovementComponent::FinishDashing()
 	BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
 	AirControl = DefaultAirControl;
 	OnDashFinished.Broadcast();
+	StartDashCooldown();
 }
 
 void UHDAPlayerMovementComponent::HandleDashCooldownFinished()
 {
-	bCanDash = !IsFalling();
+	// Need to do this to avoid a bug when the cooldown timer is still valid in the same frame
+	GetWorld()->GetTimerManager().ClearTimer(DashCooldownTimer);
+	
+	if (IsFalling())
+	{
+		CachedDashCharges++;
+		CachedDashCharges = FMath::Min(CachedDashCharges, DashMaxCharges);
+	}
+	else
+	{
+		DashCharges++;
+		DashCharges = FMath::Min(DashCharges, DashMaxCharges);
+	}
+
+	if (DashCharges + CachedDashCharges < DashMaxCharges)
+	{
+		StartDashCooldown();
+	}
+
+	OnDashCooldownFinished.Broadcast();
 }
 
 float UHDAPlayerMovementComponent::GetDashCooldownElapsedTime() const
@@ -195,12 +215,25 @@ void UHDAPlayerMovementComponent::SetCanDash(const bool Value)
 	bCanDash = Value;
 }
 
-void UHDAPlayerMovementComponent::SetGravityScaleToDefault()
-{
-	GravityScale = DefaultGravityScale;
-}
-
 float UHDAPlayerMovementComponent::CalculateJumpZVelocity() const
 {
 	return FMath::Sqrt(-2 * GetGravityZ() * JumpHeight);
+}
+
+void UHDAPlayerMovementComponent::StartDashCooldown()
+{
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	if (TimerManager.IsTimerActive(DashCooldownTimer))
+	{
+		return;
+	}
+
+	TimerManager.SetTimer(DashCooldownTimer,
+	                      this,
+	                      &UHDAPlayerMovementComponent::HandleDashCooldownFinished,
+	                      DashCooldownDuration,
+	                      false);
+
+	OnDashCooldownStarted.Broadcast(DashCooldownTimer);
 }

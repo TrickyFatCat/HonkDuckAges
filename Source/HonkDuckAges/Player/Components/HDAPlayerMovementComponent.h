@@ -8,9 +8,11 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDashStartedDynamicSignature);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDashFinishedDynamicSignature);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDashCooldownStartedDynamicSignature, const FTimerHandle&, CooldownTimer);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDashFinishedDynamicSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDashCooldownFinishedDynamicSignature);
 
 UCLASS(ClassGroup=(Custom))
 class HONKDUCKAGES_API UHDAPlayerMovementComponent : public UCharacterMovementComponent
@@ -41,16 +43,19 @@ public:
 	FOnDashStartedDynamicSignature OnDashStarted;
 
 	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
-	FOnDashCooldownStartedDynamicSignature OnDashCooldownStarted;
+	FOnDashFinishedDynamicSignature OnDashFinished;
 	
 	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
-	FOnDashFinishedDynamicSignature OnDashFinished;
+	FOnDashCooldownStartedDynamicSignature OnDashCooldownStarted;
+
+	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
+	FOnDashCooldownFinishedDynamicSignature OnDashCooldownFinished;
 	
 	UFUNCTION(BlueprintCallable, Category="Character Movement: Dash")
 	void StartDashing(const FVector& Direction);
 
 	UFUNCTION(BlueprintGetter)
-	bool IsDashing() const { return bIsDashing; }
+	bool IsDashing() const;
 
 	UFUNCTION(BlueprintPure)
 	float GetDashCooldownElapsedTime() const;
@@ -67,7 +72,8 @@ public:
 	UFUNCTION(BlueprintSetter)
 	void SetCanDash(const bool Value);
 
-	void SetGravityScaleToDefault();
+	UFUNCTION(BlueprintCallable)
+	int32 GetDashCharges() const { return DashCharges; }
 
 protected:
 	UPROPERTY(EditDefaultsOnly,
@@ -82,6 +88,24 @@ protected:
 		meta=(ClampMin=0, UIMin=0, Delta=1, ForceUnits="Centimeters"))
 	float JumpHeight = 100.f;
 
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="Character Movement: Dash",
+		meta=(ClampMin=1, UIMin=1, Delta=1))
+	int32 DashMaxCharges = 2;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetDashCharges, Category="Character Movement: Dash")
+	int32 DashCharges = 2;
+
+	UPROPERTY(VisibleInstanceOnly, Category="Character Movement: Dash")
+	int32 CachedDashCharges = 0;
+	
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintGetter=GetCanDash,
+		BlueprintSetter=SetCanDash,
+		Category="Character Movement: Dash")
+	bool bCanDash = true;
+	
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement: Dash",
@@ -101,23 +125,14 @@ protected:
 		BlueprintReadOnly,
 		Category="Character Movement: Dash",
 		meta=(ClampMin=0, UIMin=0, Delta=0.1, ForceUnits="Seconds"))
-	float DashDuration = 0.35f;
+	float DashDuration = 0.2f;
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement: Dash",
 		meta=(ClampMin=0, UIMin=0, Delta=1, ForceUnits="Seconds"))
-	float DashCooldownDuration = 2.0f;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Character Movement: Dash")
-	bool bIsDashing = false;
-
-	UPROPERTY(VisibleInstanceOnly,
-		BlueprintGetter=GetCanDash,
-		BlueprintSetter=SetCanDash,
-		Category="Character Movement: Dash")
-	bool bCanDash = true;
-
+	float DashCooldownDuration = 0.4f;
+	
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Character Movement: Dash")
 	FTimerHandle DashDurationTimer;
 
@@ -144,4 +159,6 @@ private:
 	void HandleDashCooldownFinished();
 
 	float CalculateJumpZVelocity() const;
+
+	void StartDashCooldown();
 };
