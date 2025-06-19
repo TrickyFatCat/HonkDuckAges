@@ -44,13 +44,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
 	FOnDashFinishedDynamicSignature OnDashFinished;
-	
+
 	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
 	FOnDashCooldownStartedDynamicSignature OnDashCooldownStarted;
 
 	UPROPERTY(BlueprintAssignable, Category="Character Movement: Dash")
 	FOnDashCooldownFinishedDynamicSignature OnDashCooldownFinished;
-	
+
 	UFUNCTION(BlueprintCallable, Category="Character Movement: Dash")
 	void StartDashing(const FVector& Direction);
 
@@ -75,13 +75,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetDashCharges() const { return DashCharges; }
 
+	UFUNCTION(BlueprintCallable)
+	int32 GetDashMaxCharges() const { return DashMaxCharges; }
+	
+	UFUNCTION(BlueprintCallable)
+	int32 GetCachedDashCharges() const { return CachedDashCharges; }
+
 protected:
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement (General Settings)",
 		meta=(ClampMin=0, UIMin=0))
 	float FallingGravityScale = 4.0f;
-	
+
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement: Jumping / Falling",
@@ -89,7 +95,7 @@ protected:
 	float JumpHeight = 100.f;
 
 	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
+		BlueprintGetter=GetDashMaxCharges,
 		Category="Character Movement: Dash",
 		meta=(ClampMin=1, UIMin=1, Delta=1))
 	int32 DashMaxCharges = 2;
@@ -97,15 +103,17 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetDashCharges, Category="Character Movement: Dash")
 	int32 DashCharges = 2;
 
-	UPROPERTY(VisibleInstanceOnly, Category="Character Movement: Dash")
+	UPROPERTY(VisibleInstanceOnly,
+		BlueprintGetter=GetCachedDashCharges,
+		Category="Character Movement: Dash")
 	int32 CachedDashCharges = 0;
-	
+
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintGetter=GetCanDash,
 		BlueprintSetter=SetCanDash,
 		Category="Character Movement: Dash")
 	bool bCanDash = true;
-	
+
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement: Dash",
@@ -132,7 +140,7 @@ protected:
 		Category="Character Movement: Dash",
 		meta=(ClampMin=0, UIMin=0, Delta=1, ForceUnits="Seconds"))
 	float DashCooldownDuration = 0.4f;
-	
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Character Movement: Dash")
 	FTimerHandle DashDurationTimer;
 
