@@ -21,8 +21,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetRootComponent());
 	CameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, BaseEyeHeight));
-
-	bUseControllerRotationPitch = true;
+	CameraComponent->bUsePawnControlRotation = true;
 }
 
 void AHDAPlayerCharacter::BeginPlay()
