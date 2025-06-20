@@ -110,8 +110,6 @@ void UHDAPlayerMovementComponent::StartDashing(const FVector& Direction)
 	                      &UHDAPlayerMovementComponent::FinishDashing,
 	                      DashDuration,
 	                      false);
-
-	UE_LOG(LogTemp, Warning, TEXT("Dash Started"));
 	OnDashStarted.Broadcast();
 }
 
