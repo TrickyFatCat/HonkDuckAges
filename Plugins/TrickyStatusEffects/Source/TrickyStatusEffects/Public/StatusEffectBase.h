@@ -361,8 +361,7 @@ protected:
 	virtual void HandleStacksDecreased_Implementation(const int32 Amount = 1)
 	{
 	}
-
-private:
+	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual TStatId GetStatId() const override;
