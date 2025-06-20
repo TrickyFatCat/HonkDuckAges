@@ -149,8 +149,8 @@ void UHDALifeStateComponent::HandleDamageTaken(AActor* DamagedActor,
 		return;
 	}
 
-	const int32 ArmorDamage = Damage > Armor.Value ? Armor.Value : Damage;
-	const int32 HealthDamage = FMath::Max(0, Damage - ArmorDamage);
+	const int32 ArmorDamage = Damage > Armor.Value ? Armor.Value : static_cast<int32>(Damage);
+	const int32 HealthDamage = FMath::Max(0, static_cast<int32>(Damage) - ArmorDamage);
 	DecreaseArmor(ArmorDamage);
 	DecreaseHealth(HealthDamage);
 }
