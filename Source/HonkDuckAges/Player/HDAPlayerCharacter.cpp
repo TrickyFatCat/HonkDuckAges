@@ -224,8 +224,12 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	}
 
 	FString DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
-	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Speed: %.2f\n"),
-	                                                   PlayerMovementComponent->Velocity.Size()));
+	
+	FVector LateralVelocity = PlayerMovementComponent->Velocity;
+	LateralVelocity.Z = 0;
+	
+	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Lateral Speed: %.2f\n"),
+	                                                   LateralVelocity.Size()));
 	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Gravity Scale: %.2f\n"),
 	                                                   PlayerMovementComponent->GravityScale));
 	DebugMessage = DebugMessage.Append(
