@@ -1,13 +1,11 @@
 ﻿#include "HDAPlayerCharacter.h"
 
 #include "Camera/CameraComponent.h"
-#include "Components/HDAPlayerDamageManagerComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "StatusEffectsManagerComponent.h"
 #include "Components/HDAPlayerMovementComponent.h"
-#include "HonkDuckAges/Shared/Components/HDAArmorComponent.h"
-#include "HonkDuckAges/Shared/Components/HDAHealthComponent.h"
+#include "HonkDuckAges/Shared/Components/HDALifeStateComponent.h"
 
 
 AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
@@ -15,9 +13,8 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	HealthComponent = CreateDefaultSubobject<UHDAHealthComponent>(TEXT("HealthComponent"));
-	ArmorComponent = CreateDefaultSubobject<UHDAArmorComponent>(TEXT("ArmorComponent"));
-	DamageManagerComponent = CreateDefaultSubobject<UHDAPlayerDamageManagerComponent>(TEXT("DamageManagerComponent"));
+	LifeStateComponent = CreateDefaultSubobject<UHDALifeStateComponent>(TEXT("LifeStateComponent"));
+	LifeStateComponent->DefaultArmor = 25;
 	StatusEffectsManager = CreateDefaultSubobject<UStatusEffectsManagerComponent>(TEXT("StatusEffectsManager"));
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
@@ -100,16 +97,16 @@ void AHDAPlayerCharacter::Tick(float DeltaTime)
 		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, DebugMessage);
 
 		DebugMessage = FString::Printf(TEXT("===PLAYER VITALS===\n"));
-		const FString IsInvulnerable = DamageManagerComponent->GetIsInvulnerable() ? TEXT("TRUE") : TEXT("FALSE");
+		const FString IsInvulnerable = LifeStateComponent->GetIsInvulnerable() ? TEXT("TRUE") : TEXT("FALSE");
 		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Is Invulnerable: %s\n"),
 		                                                   *IsInvulnerable));
-		const FTrickyPropertyInt Health = HealthComponent->GetHealth();
-		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Health: %d/%d | %d %%\n"),
+		const FTrickyPropertyInt Health = LifeStateComponent->GetHealth();
+		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Health: %d/%d | %.0f %%\n"),
 		                                                   Health.Value,
 		                                                   Health.MaxValue,
 		                                                   Health.GetNormalizedValue() * 100));
-		const FTrickyPropertyInt Armor = ArmorComponent->GetArmor();
-		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Armor: %d/%d | %d %%\n"),
+		const FTrickyPropertyInt Armor = LifeStateComponent->GetArmor();
+		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Armor: %d/%d | %.0f %%\n"),
 		                                                   Armor.Value,
 		                                                   Armor.MaxValue,
 		                                                   Armor.GetNormalizedValue() * 100));

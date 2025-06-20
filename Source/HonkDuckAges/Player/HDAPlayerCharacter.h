@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "HDAPlayerCharacter.generated.h"
 
+class UHDALifeStateComponent;
 class UStatusEffectBase;
 class UStatusEffectsManagerComponent;
 class UHDAPlayerMovementComponent;
@@ -12,9 +13,6 @@ struct FInputActionValue;
 class UInputAction;
 class UInputMappingContext;
 class UCameraComponent;
-class UHDAPlayerDamageManagerComponent;
-class UHDAArmorComponent;
-class UHDAHealthComponent;
 
 UCLASS(Abstract)
 class HONKDUCKAGES_API AHDAPlayerCharacter : public ACharacter
@@ -47,15 +45,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* DashAction = nullptr;
-	
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
-	TObjectPtr<UHDAHealthComponent> HealthComponent = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
-	TObjectPtr<UHDAArmorComponent> ArmorComponent = nullptr;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
-	TObjectPtr<UHDAPlayerDamageManagerComponent> DamageManagerComponent = nullptr;
+	TObjectPtr<UHDALifeStateComponent> LifeStateComponent = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent = nullptr;

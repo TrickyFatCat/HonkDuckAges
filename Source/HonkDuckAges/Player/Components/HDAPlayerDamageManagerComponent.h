@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HonkDuckAges/Shared/Components/HDADamageManagerBase.h"
+#include "HonkDuckAges/Shared/Components/HDALifeStateComponent.h"
 #include "HDAPlayerDamageManagerComponent.generated.h"
 
 
 class UHDAArmorComponent;
 
 UCLASS(ClassGroup=(Player))
-class HONKDUCKAGES_API UHDAPlayerDamageManagerComponent : public UHDADamageManagerBase
+class HONKDUCKAGES_API UHDAPlayerDamageManagerComponent : public UHDALifeStateComponent
 {
 	GENERATED_BODY()
 
@@ -24,9 +24,4 @@ protected:
 	TObjectPtr<UHDAArmorComponent> ArmorComponent = nullptr;
 
 private:
-	virtual void HandleDamageTaken(AActor* DamagedActor,
-	                               float Damage,
-	                               const UDamageType* DamageType,
-	                               AController* InstigatedBy,
-	                               AActor* DamageCauser) override;
 };

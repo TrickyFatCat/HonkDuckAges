@@ -34,34 +34,3 @@ void UHDAPlayerDamageManagerComponent::InitializeComponent()
 	           TEXT("Please don't use PlayerDamageManagerComponent in non player classes like %s"),
 	           *GetOwner()->GetActorNameOrLabel());
 }
-
-void UHDAPlayerDamageManagerComponent::HandleDamageTaken(AActor* DamagedActor,
-                                                         float Damage,
-                                                         const UDamageType* DamageType,
-                                                         AController* InstigatedBy,
-                                                         AActor* DamageCauser)
-{
-	if (!IsValid(ArmorComponent) || !IsValid(HealthComponent) || GetIsInvulnerable())
-	{
-		return;
-	}
-
-	int32 RemainingDamage = Damage;
-	const FTrickyPropertyInt Armor = ArmorComponent->GetArmor();
-
-	if (!Armor.ReachedMinValue())
-	{
-		if (RemainingDamage > Armor.Value)
-		{
-			RemainingDamage -= Armor.Value;
-			ArmorComponent->DecreaseArmor(Armor.Value);
-		}
-		else
-		{
-			ArmorComponent->DecreaseArmor(RemainingDamage);
-			return;
-		}
-	}
-
-	HealthComponent->DecreaseHealth(RemainingDamage);
-}
