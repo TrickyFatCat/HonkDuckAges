@@ -41,7 +41,7 @@ void UHDAPlayerDamageManagerComponent::HandleDamageTaken(AActor* DamagedActor,
                                                          AController* InstigatedBy,
                                                          AActor* DamageCauser)
 {
-	if (!IsValid(ArmorComponent) || !IsValid(HealthComponent))
+	if (!IsValid(ArmorComponent) || !IsValid(HealthComponent) || GetIsInvulnerable())
 	{
 		return;
 	}
