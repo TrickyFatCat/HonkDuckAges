@@ -75,4 +75,10 @@ private:
 
 	UFUNCTION()
 	void Dash();
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	bool bShowDebugData = false;
+	
+	void TogglePlayerDebugData();
+#endif
 };

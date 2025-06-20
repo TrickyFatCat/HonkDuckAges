@@ -57,11 +57,57 @@ void AHDAPlayerCharacter::BeginPlay()
 	ensureMsgf(PlayerMovementComponent != nullptr,
 	           TEXT("%s movement component isn't changed to UHDAPlayerMovementComponent"),
 	           *GetActorNameOrLabel());
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.TogglePlayerDebugData"),
+	                                              TEXT("Toggles debug data for player"),
+	                                              FConsoleCommandDelegate::CreateUObject(
+		                                              this, &AHDAPlayerCharacter::TogglePlayerDebugData));
+#endif
 }
 
 void AHDAPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	if (GEngine && bShowDebugData)
+	{
+		FString DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
+		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Speed: %.2f\n"),
+		                                                   PlayerMovementComponent->Velocity.Size()));
+		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Gravity Scale: %.2f\n"),
+		                                                   PlayerMovementComponent->GravityScale));
+		DebugMessage = DebugMessage.Append(
+			FString::Printf(TEXT("Dash Charges: %d / %d\n"),
+			                PlayerMovementComponent->GetDashCharges(),
+			                PlayerMovementComponent->GetDashMaxCharges()));
+		DebugMessage = DebugMessage.Append(
+			FString::Printf(TEXT("Cached Dash Charges: %d / %d\n"),
+			                PlayerMovementComponent->GetCachedDashCharges(),
+			                PlayerMovementComponent->GetDashMaxCharges()));
+		DebugMessage = DebugMessage.
+			Append(FString::Printf(TEXT("Dash Cooldown: %.2f"),
+			                       PlayerMovementComponent->GetDashCooldownRemainingTime()));
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, DebugMessage);
+
+		DebugMessage = FString::Printf(TEXT("===PLAYER VITALS===\n"));
+		const FString IsInvulnerable = DamageManagerComponent->GetIsInvulnerable() ? TEXT("TRUE") : TEXT("FALSE");
+		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Is Invulnerable: %s\n"),
+		                                                   *IsInvulnerable));
+		const FTrickyPropertyInt Health = HealthComponent->GetHealth();
+		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Health: %d/%d | %d %%\n"),
+		                                                   Health.Value,
+		                                                   Health.MaxValue,
+		                                                   Health.GetNormalizedValue() * 100));
+		const FTrickyPropertyInt Armor = ArmorComponent->GetArmor();
+		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Armor: %d/%d | %d %%\n"),
+		                                                   Armor.Value,
+		                                                   Armor.MaxValue,
+		                                                   Armor.GetNormalizedValue() * 100));
+		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Purple, DebugMessage);
+	}
+#endif
 }
 
 void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -71,7 +117,8 @@ void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Move);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AHDAPlayerCharacter::StopMoving);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this,
+		                                   &AHDAPlayerCharacter::StopMoving);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Aim);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AHDAPlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
@@ -84,7 +131,7 @@ void AHDAPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D InputDirection = Value.Get<FVector2D>();
 	MovementDirection = FVector(InputDirection.X, InputDirection.Y, 0.f);
-	
+
 	FVector ForwardDirection = GetActorForwardVector();
 	ForwardDirection.Z = 0.f;
 	ForwardDirection.Normalize();
@@ -92,7 +139,7 @@ void AHDAPlayerCharacter::Move(const FInputActionValue& Value)
 	FVector RightDirection = GetActorRightVector();
 	RightDirection.Z = 0.f;
 	RightDirection.Normalize();
-	
+
 	AddMovementInput(ForwardDirection, MovementDirection.X);
 	AddMovementInput(RightDirection, MovementDirection.Y);
 }
@@ -114,7 +161,7 @@ void AHDAPlayerCharacter::Dash()
 	FVector ForwardDirection = GetActorForwardVector();
 	ForwardDirection.Z = 0.f;
 	ForwardDirection = ForwardDirection.GetSafeNormal();
-	
+
 	const FVector RightDirection = GetActorRightVector();
 	FVector DashDirection = ForwardDirection;
 
@@ -122,6 +169,13 @@ void AHDAPlayerCharacter::Dash()
 	{
 		DashDirection = (ForwardDirection * MovementDirection.X + RightDirection * MovementDirection.Y).GetSafeNormal();
 	}
-	
+
 	PlayerMovementComponent->StartDashing(DashDirection);
 }
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+void AHDAPlayerCharacter::TogglePlayerDebugData()
+{
+	bShowDebugData = !bShowDebugData;
+}
+#endif
