@@ -3,8 +3,6 @@
 
 #include "HDALifeStateComponent.h"
 
-#include "HDAHealthComponent.h"
-
 DEFINE_LOG_CATEGORY(LogLifeStateComponent)
 
 UHDALifeStateComponent::UHDALifeStateComponent()
