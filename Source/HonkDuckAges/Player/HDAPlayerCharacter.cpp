@@ -4,6 +4,7 @@
 #include "Components/HDAPlayerDamageManagerComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "StatusEffectsManagerComponent.h"
 #include "Components/HDAPlayerMovementComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAArmorComponent.h"
 #include "HonkDuckAges/Shared/Components/HDAHealthComponent.h"
@@ -17,6 +18,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 	HealthComponent = CreateDefaultSubobject<UHDAHealthComponent>(TEXT("HealthComponent"));
 	ArmorComponent = CreateDefaultSubobject<UHDAArmorComponent>(TEXT("ArmorComponent"));
 	DamageManagerComponent = CreateDefaultSubobject<UHDAPlayerDamageManagerComponent>(TEXT("DamageManagerComponent"));
+	StatusEffectsManager = CreateDefaultSubobject<UStatusEffectsManagerComponent>(TEXT("StatusEffectsManager"));
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetRootComponent());
@@ -57,6 +59,12 @@ void AHDAPlayerCharacter::BeginPlay()
 	ensureMsgf(PlayerMovementComponent != nullptr,
 	           TEXT("%s movement component isn't changed to UHDAPlayerMovementComponent"),
 	           *GetActorNameOrLabel());
+
+	if (IsValid(PlayerMovementComponent))
+	{
+		PlayerMovementComponent->OnDashStarted.AddDynamic(this, &AHDAPlayerCharacter::HandleDashStarted);
+		PlayerMovementComponent->OnDashFinished.AddDynamic(this, &AHDAPlayerCharacter::HandleDashFinished);
+	}
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.TogglePlayerDebugData"),
@@ -171,6 +179,24 @@ void AHDAPlayerCharacter::Dash()
 	}
 
 	PlayerMovementComponent->StartDashing(DashDirection);
+}
+
+void AHDAPlayerCharacter::HandleDashStarted()
+{
+	ensureMsgf(IsValid(DashInvulnerabilityEffect),
+	           TEXT("DashInvulnerabilityEffect wasn't set for %s"),
+	           *GetActorNameOrLabel());
+
+	StatusEffectsManager->ApplyStatusEffect(DashInvulnerabilityEffect, this);
+}
+
+void AHDAPlayerCharacter::HandleDashFinished()
+{
+	ensureMsgf(IsValid(DashInvulnerabilityEffect),
+			   TEXT("DashInvulnerabilityEffect wasn't set for %s"),
+			   *GetActorNameOrLabel());
+
+	StatusEffectsManager->RemoveStatusEffect(DashInvulnerabilityEffect, this);
 }
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING

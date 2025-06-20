@@ -5,6 +5,8 @@
 #include "GameFramework/Character.h"
 #include "HDAPlayerCharacter.generated.h"
 
+class UStatusEffectBase;
+class UStatusEffectsManagerComponent;
 class UHDAPlayerMovementComponent;
 struct FInputActionValue;
 class UInputAction;
@@ -58,8 +60,14 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UCameraComponent> CameraComponent = nullptr;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UStatusEffectsManagerComponent> StatusEffectsManager = nullptr;
+
 	UPROPERTY()
 	TObjectPtr<UHDAPlayerMovementComponent> PlayerMovementComponent = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UStatusEffectBase> DashInvulnerabilityEffect = nullptr;
 
 private:
 	FVector MovementDirection = FVector::ZeroVector;
@@ -75,6 +83,12 @@ private:
 
 	UFUNCTION()
 	void Dash();
+
+	UFUNCTION()
+	void HandleDashStarted();
+
+	UFUNCTION()
+	void HandleDashFinished();
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	bool bShowDebugData = false;
