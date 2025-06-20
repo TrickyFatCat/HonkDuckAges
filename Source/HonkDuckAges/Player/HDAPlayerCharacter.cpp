@@ -27,17 +27,6 @@ void AHDAPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ensureMsgf(DefaultMappingContext != nullptr, TEXT("DefaultMappingContext wasn't set for %s"),
-	           *GetActorNameOrLabel());
-
-	ensureMsgf(MoveAction != nullptr, TEXT("MoveAction wasn't set for %s"), *GetActorNameOrLabel());
-
-	ensureMsgf(AimAction != nullptr, TEXT("AimAction wasn't set for %s"), *GetActorNameOrLabel());
-
-	ensureMsgf(JumpAction != nullptr, TEXT("JumpAction wasn't set for %s"), *GetActorNameOrLabel());
-
-	ensureMsgf(DashAction != nullptr, TEXT("DashAction wasn't set for %s"), *GetActorNameOrLabel());
-
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
 	if (IsValid(PlayerController))
@@ -53,21 +42,40 @@ void AHDAPlayerCharacter::BeginPlay()
 
 	PlayerMovementComponent = Cast<UHDAPlayerMovementComponent>(GetMovementComponent());
 
-	ensureMsgf(PlayerMovementComponent != nullptr,
-	           TEXT("%s movement component isn't changed to UHDAPlayerMovementComponent"),
-	           *GetActorNameOrLabel());
-
 	if (IsValid(PlayerMovementComponent))
 	{
 		PlayerMovementComponent->OnDashStarted.AddDynamic(this, &AHDAPlayerCharacter::HandleDashStarted);
 		PlayerMovementComponent->OnDashFinished.AddDynamic(this, &AHDAPlayerCharacter::HandleDashFinished);
 	}
 
+	LifeStateComponent->OnHealthReachedZero.AddUniqueDynamic(this, &AHDAPlayerCharacter::HandleZeroHealth);
+
+	ensureMsgf(PlayerMovementComponent != nullptr,
+	           TEXT("%s movement component isn't changed to UHDAPlayerMovementComponent"),
+	           *GetActorNameOrLabel());
+
+	ensureMsgf(DefaultMappingContext != nullptr, TEXT("DefaultMappingContext wasn't set for %s"),
+	           *GetActorNameOrLabel());
+
+	ensureMsgf(MoveAction != nullptr, TEXT("MoveAction wasn't set for %s"), *GetActorNameOrLabel());
+
+	ensureMsgf(AimAction != nullptr, TEXT("AimAction wasn't set for %s"), *GetActorNameOrLabel());
+
+	ensureMsgf(JumpAction != nullptr, TEXT("JumpAction wasn't set for %s"), *GetActorNameOrLabel());
+
+	ensureMsgf(DashAction != nullptr, TEXT("DashAction wasn't set for %s"), *GetActorNameOrLabel());
+
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
-	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.TogglePlayerDebugData"),
-	                                              TEXT("Toggles debug data for player"),
-	                                              FConsoleCommandDelegate::CreateUObject(
-		                                              this, &AHDAPlayerCharacter::TogglePlayerDebugData));
+	RegisterConsoleCommands();
+#endif
+}
+
+void AHDAPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	UnregisterConsoleCommands();
 #endif
 }
 
@@ -76,42 +84,9 @@ void AHDAPlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
-	if (GEngine && bShowDebugData)
-	{
-		FString DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
-		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Speed: %.2f\n"),
-		                                                   PlayerMovementComponent->Velocity.Size()));
-		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Gravity Scale: %.2f\n"),
-		                                                   PlayerMovementComponent->GravityScale));
-		DebugMessage = DebugMessage.Append(
-			FString::Printf(TEXT("Dash Charges: %d / %d\n"),
-			                PlayerMovementComponent->GetDashCharges(),
-			                PlayerMovementComponent->GetDashMaxCharges()));
-		DebugMessage = DebugMessage.Append(
-			FString::Printf(TEXT("Cached Dash Charges: %d / %d\n"),
-			                PlayerMovementComponent->GetCachedDashCharges(),
-			                PlayerMovementComponent->GetDashMaxCharges()));
-		DebugMessage = DebugMessage.
-			Append(FString::Printf(TEXT("Dash Cooldown: %.2f"),
-			                       PlayerMovementComponent->GetDashCooldownRemainingTime()));
-		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, DebugMessage);
-
-		DebugMessage = FString::Printf(TEXT("===PLAYER VITALS===\n"));
-		const FString IsInvulnerable = LifeStateComponent->GetIsInvulnerable() ? TEXT("TRUE") : TEXT("FALSE");
-		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Is Invulnerable: %s\n"),
-		                                                   *IsInvulnerable));
-		const FTrickyPropertyInt Health = LifeStateComponent->GetHealth();
-		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Health: %d/%d | %.0f %%\n"),
-		                                                   Health.Value,
-		                                                   Health.MaxValue,
-		                                                   Health.GetNormalizedValue() * 100));
-		const FTrickyPropertyInt Armor = LifeStateComponent->GetArmor();
-		DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Armor: %d/%d | %.0f %%\n"),
-		                                                   Armor.Value,
-		                                                   Armor.MaxValue,
-		                                                   Armor.GetNormalizedValue() * 100));
-		GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Purple, DebugMessage);
-	}
+	PrintPlayerDebugData(DeltaTime);
+	PrintGodModeMessage(DeltaTime);
+	PrintDemiGodMessage(DeltaTime);
 #endif
 }
 
@@ -190,15 +165,136 @@ void AHDAPlayerCharacter::HandleDashStarted()
 void AHDAPlayerCharacter::HandleDashFinished()
 {
 	ensureMsgf(IsValid(DashInvulnerabilityEffect),
-			   TEXT("DashInvulnerabilityEffect wasn't set for %s"),
-			   *GetActorNameOrLabel());
+	           TEXT("DashInvulnerabilityEffect wasn't set for %s"),
+	           *GetActorNameOrLabel());
 
 	StatusEffectsManager->RemoveStatusEffect(DashInvulnerabilityEffect, this);
 }
 
+void AHDAPlayerCharacter::HandleZeroHealth(UHDALifeStateComponent* Component)
+{
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
+	if (bIsDemigod)
+	{
+		LifeStateComponent->IncreaseHealth(LifeStateComponent->GetHealth().MaxValue);
+		LifeStateComponent->IncreaseArmor(LifeStateComponent->GetArmor().MaxValue);
+		return;
+	}
+#endif
+}
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+
+void AHDAPlayerCharacter::RegisterConsoleCommands()
+{
+	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.TogglePlayerDebugData"),
+	                                              TEXT("Toggles debug data for player"),
+	                                              FConsoleCommandDelegate::CreateUObject(
+		                                              this, &AHDAPlayerCharacter::TogglePlayerDebugData));
+
+	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.God"),
+	                                              TEXT("Toggles god mode for player"),
+	                                              FConsoleCommandDelegate::CreateUObject(
+		                                              this, &AHDAPlayerCharacter::ToggleGodMode));
+
+	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.Demigod"),
+	                                              TEXT(
+		                                              "Toggles demigod mode for player. Damage will be registered as usual, but health will fully restored on death"),
+	                                              FConsoleCommandDelegate::CreateUObject(
+		                                              this, &AHDAPlayerCharacter::ToggleDemigodMode));
+}
+
+void AHDAPlayerCharacter::UnregisterConsoleCommands()
+{
+	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.TogglePlayerDebugData"), false);
+	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.God"), false);
+	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.Demigod"), false);
+}
+
 void AHDAPlayerCharacter::TogglePlayerDebugData()
 {
 	bShowDebugData = !bShowDebugData;
+}
+
+void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
+{
+	if (!GEngine || !bShowDebugData)
+	{
+		return;
+	}
+
+	FString DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
+	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Speed: %.2f\n"),
+	                                                   PlayerMovementComponent->Velocity.Size()));
+	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Gravity Scale: %.2f\n"),
+	                                                   PlayerMovementComponent->GravityScale));
+	DebugMessage = DebugMessage.Append(
+		FString::Printf(TEXT("Dash Charges: %d / %d\n"),
+		                PlayerMovementComponent->GetDashCharges(),
+		                PlayerMovementComponent->GetDashMaxCharges()));
+	DebugMessage = DebugMessage.Append(
+		FString::Printf(TEXT("Cached Dash Charges: %d / %d\n"),
+		                PlayerMovementComponent->GetCachedDashCharges(),
+		                PlayerMovementComponent->GetDashMaxCharges()));
+	DebugMessage = DebugMessage.
+		Append(FString::Printf(TEXT("Dash Cooldown: %.2f"),
+		                       PlayerMovementComponent->GetDashCooldownRemainingTime()));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Yellow, DebugMessage);
+
+	DebugMessage = FString::Printf(TEXT("===PLAYER VITALS===\n"));
+	const FString IsInvulnerable = LifeStateComponent->GetIsInvulnerable() ? TEXT("TRUE") : TEXT("FALSE");
+	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Is Invulnerable: %s\n"),
+	                                                   *IsInvulnerable));
+	const FTrickyPropertyInt Health = LifeStateComponent->GetHealth();
+	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Health: %d/%d | %.0f %%\n"),
+	                                                   Health.Value,
+	                                                   Health.MaxValue,
+	                                                   Health.GetNormalizedValue() * 100));
+	const FTrickyPropertyInt Armor = LifeStateComponent->GetArmor();
+	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Armor: %d/%d | %.0f %%\n"),
+	                                                   Armor.Value,
+	                                                   Armor.MaxValue,
+	                                                   Armor.GetNormalizedValue() * 100));
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Purple, DebugMessage);
+}
+
+void AHDAPlayerCharacter::ToggleGodMode()
+{
+	SetCanBeDamaged(!CanBeDamaged());
+
+	if (!CanBeDamaged())
+	{
+		bIsDemigod = false;
+	}
+}
+
+void AHDAPlayerCharacter::PrintGodModeMessage(const float DeltaTime) const
+{
+	if (!GEngine || CanBeDamaged())
+	{
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Red, "===GOD MODE ENABLED===", true, FVector2D(2));
+}
+
+void AHDAPlayerCharacter::ToggleDemigodMode()
+{
+	bIsDemigod = !bIsDemigod;
+
+	if (bIsDemigod)
+	{
+		SetCanBeDamaged(true);
+	}
+}
+
+void AHDAPlayerCharacter::PrintDemiGodMessage(const float DeltaTime) const
+{
+	if (!GEngine || !bIsDemigod)
+	{
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Orange, "===DEMIGOD MODE ENABLED===", true, FVector2D(2));
 }
 #endif

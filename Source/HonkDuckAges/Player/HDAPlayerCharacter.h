@@ -25,6 +25,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 public:
 	virtual void Tick(float DeltaTime) override;
 
@@ -82,9 +84,28 @@ private:
 	UFUNCTION()
 	void HandleDashFinished();
 
+	UFUNCTION()
+	void HandleZeroHealth(UHDALifeStateComponent* Component);
+
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
+	void RegisterConsoleCommands();
+
+	static void UnregisterConsoleCommands();
+	
 	bool bShowDebugData = false;
 	
 	void TogglePlayerDebugData();
+
+	void PrintPlayerDebugData(const float DeltaTime) const;
+
+	void ToggleGodMode();
+
+	void PrintGodModeMessage(const float DeltaTime) const;
+
+	bool bIsDemigod = false;
+
+	void ToggleDemigodMode();
+
+	void PrintDemiGodMessage(const float DeltaTime) const;
 #endif
 };
