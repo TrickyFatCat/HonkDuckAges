@@ -82,6 +82,9 @@ public:
 	int32 GetCachedDashCharges() const { return CachedDashCharges; }
 
 protected:
+	/**
+	 * Defines the gravity scale applied to the character during the falling state.
+	 */
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement (General Settings)",
@@ -94,25 +97,37 @@ protected:
 		meta=(ClampMin=0, UIMin=0, Delta=1, ForceUnits="Centimeters"))
 	float JumpHeight = 100.f;
 
+	/**
+	 * Defines whether the character is allowed to dash.
+	 */
+	UPROPERTY(EditDefaultsOnly,
+			BlueprintGetter=GetCanDash,
+			BlueprintSetter=SetCanDash,
+			Category="Character Movement: Dash")
+	bool bCanDash = true;
+
+	/**
+	 * Defines the maximum number of dashes the character can perform
+	 */
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintGetter=GetDashMaxCharges,
 		Category="Character Movement: Dash",
 		meta=(ClampMin=1, UIMin=1, Delta=1))
 	int32 DashMaxCharges = 2;
 
+	/**
+	 * The current number of available dash charges the character can use
+	 */
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetDashCharges, Category="Character Movement: Dash")
 	int32 DashCharges = 2;
 
+	/**
+	 * Used while the player is falling to limit dash capabilities during falling. Added to DashCharges on landing.
+	 */
 	UPROPERTY(VisibleInstanceOnly,
 		BlueprintGetter=GetCachedDashCharges,
 		Category="Character Movement: Dash")
 	int32 CachedDashCharges = 0;
-
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintGetter=GetCanDash,
-		BlueprintSetter=SetCanDash,
-		Category="Character Movement: Dash")
-	bool bCanDash = true;
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
@@ -123,12 +138,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Character Movement: Dash")
 	float DashSpeed = 200.f;
 
+	/**
+	 * Multiplier applied to the character's velocity after completing a dash. 
+	 */
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement: Dash",
 		meta=(ClampMin=0, UIMin=0, ClampMax=1, UIMax=1))
 	float PostDashVelocityFactor = 0.25;
 
+	/**
+	 * Specifies the duration, in seconds, for which the character performs a dash.
+	 */
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Character Movement: Dash",

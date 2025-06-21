@@ -150,6 +150,7 @@ void AHDAPlayerCharacter::Dash()
 		DashDirection = (ForwardDirection * MovementDirection.X + RightDirection * MovementDirection.Y).GetSafeNormal();
 	}
 
+	//It's important to call it next frame to keep consistent distance
 	FTimerDelegate TimerDelegate;
 	TimerDelegate.BindUFunction(PlayerMovementComponent, FName("StartDashing"), DashDirection);
 	GetWorld()->GetTimerManager().SetTimerForNextTick(TimerDelegate);
