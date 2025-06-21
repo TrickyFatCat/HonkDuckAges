@@ -11,9 +11,8 @@ APickupAutomaticBase::APickupAutomaticBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	ActivationTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("ActivationTrigger"));
-	ActivationTrigger->SetupAttachment(RootComponent);
+	ActivationTrigger->SetupAttachment(GetRootComponent());
 	ActivationTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	ActivationTrigger->SetCollisionResponseToAllChannels(ECR_Ignore);
 	ActivationTrigger->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
