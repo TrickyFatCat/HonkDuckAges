@@ -19,6 +19,7 @@ void UHDAPlayerMovementComponent::InitializeComponent()
 	DefaultBrakingFrictionFactor = BrakingFrictionFactor;
 	DefaultBrakingDecelerationWalking = BrakingDecelerationWalking;
 	DefaultAirControl = AirControl;
+	DefaultBrakingDecelerationFalling = BrakingDecelerationFalling;
 
 	DashSpeed = DashDistance / DashDuration;
 	JumpZVelocity = CalculateJumpZVelocity();
@@ -101,8 +102,11 @@ void UHDAPlayerMovementComponent::StartDashing(const FVector& Direction)
 	BrakingFrictionFactor = 0.f;
 	BrakingDecelerationWalking = 0.f;
 	AirControl = 0.f;
+	BrakingDecelerationFalling = 0.f;
 
-	Launch(DashSpeed * Direction);
+	StopMovementImmediately();
+	Launch(DashSpeed * Direction.GetSafeNormal());
+	SetMovementMode(MOVE_Flying);
 
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 	TimerManager.SetTimer(DashDurationTimer,
@@ -126,10 +130,15 @@ void UHDAPlayerMovementComponent::FinishDashing()
 	}
 
 	Velocity *= PostDashVelocityFactor;
+	
+	SetMovementMode(IsFalling() ? MOVE_Falling : MOVE_Walking);
 	GravityScale = IsFalling() ? FallingGravityScale : DefaultGravityScale;
+	
 	BrakingFrictionFactor = DefaultBrakingFrictionFactor;
 	BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
 	AirControl = DefaultAirControl;
+	BrakingDecelerationFalling = DefaultBrakingDecelerationFalling;
+	
 	OnDashFinished.Broadcast();
 	StartDashCooldown();
 }

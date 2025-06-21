@@ -160,6 +160,9 @@ private:
 	UPROPERTY()
 	float DefaultAirControl = 0.25f;
 
+	UPROPERTY()
+	float DefaultBrakingDecelerationFalling = 1.f;
+
 	UFUNCTION()
 	void FinishDashing();
 

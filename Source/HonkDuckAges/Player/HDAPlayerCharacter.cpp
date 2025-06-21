@@ -150,7 +150,9 @@ void AHDAPlayerCharacter::Dash()
 		DashDirection = (ForwardDirection * MovementDirection.X + RightDirection * MovementDirection.Y).GetSafeNormal();
 	}
 
-	PlayerMovementComponent->StartDashing(DashDirection);
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUFunction(PlayerMovementComponent, FName("StartDashing"), DashDirection);
+	GetWorld()->GetTimerManager().SetTimerForNextTick(TimerDelegate);
 }
 
 void AHDAPlayerCharacter::HandleDashStarted()
@@ -224,10 +226,10 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	}
 
 	FString DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
-	
+
 	FVector LateralVelocity = PlayerMovementComponent->Velocity;
 	LateralVelocity.Z = 0;
-	
+
 	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Lateral Speed: %.2f\n"),
 	                                                   LateralVelocity.Size()));
 	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Gravity Scale: %.2f\n"),
