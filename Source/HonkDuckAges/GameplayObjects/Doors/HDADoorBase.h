@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Door/DoorInterface.h"
-#include "Lock/LockInterface.h"
 #include "GameFramework/Actor.h"
 #include "HDADoorBase.generated.h"
 

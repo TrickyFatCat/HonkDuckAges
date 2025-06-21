@@ -12,9 +12,9 @@ AHDADoorBase::AHDADoorBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	DoorStateControllerComponent->CreateDefaultSubobject<UDoorStateControllerComponent>(TEXT("DoorStateController"));
-	LockStateControllerComponent->CreateDefaultSubobject<ULockStateControllerComponent>(TEXT("LockStateController"));
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	DoorStateControllerComponent = CreateDefaultSubobject<UDoorStateControllerComponent>(TEXT("DoorStateController"));
+	LockStateControllerComponent = CreateDefaultSubobject<ULockStateControllerComponent>(TEXT("LockStateController"));
 
 #if WITH_EDITOR
 	ForwardVector = CreateEditorOnlyDefaultSubobject<UArrowComponent>(TEXT("ForwardVector"));
