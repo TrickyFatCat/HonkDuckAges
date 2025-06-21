@@ -25,7 +25,7 @@ bool AHDAPickupArmorBase::CanBeActivated_Implementation(AActor* Activator)
 		return false;
 	}
 
-	return LifeStateComponent->GetArmor().ReachedMaxValue();
+	return !LifeStateComponent->GetArmor().ReachedMaxValue();
 }
 
 void AHDAPickupArmorBase::HandleActivationSuccess_Implementation(AActor* Activator)
