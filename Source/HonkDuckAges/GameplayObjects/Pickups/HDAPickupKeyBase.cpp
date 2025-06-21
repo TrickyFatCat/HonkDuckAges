@@ -25,7 +25,7 @@ bool AHDAPickupKeyBase::CanBeActivated_Implementation(AActor* Activator)
 		return false;
 	}
 
-	return !KeyringComponent->HasLockKey(KeyClass);
+	return !IKeyringInterface::Execute_HasLockKey(KeyringComponent.Get(), KeyClass);
 }
 
 void AHDAPickupKeyBase::HandleActivationSuccess_Implementation(AActor* Activator)
@@ -35,5 +35,5 @@ void AHDAPickupKeyBase::HandleActivationSuccess_Implementation(AActor* Activator
 		return;
 	}
 
-	KeyringComponent->AddLockKey(KeyClass);
+	IKeyringInterface::Execute_AddLockKey(KeyringComponent.Get(), KeyClass);
 }
