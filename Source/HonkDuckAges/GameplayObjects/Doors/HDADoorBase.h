@@ -49,6 +49,9 @@ protected:
 	TSubclassOf<ULockKeyType> RequiredKey = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<USceneComponent> Root = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UDoorStateControllerComponent> DoorStateControllerComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Components")

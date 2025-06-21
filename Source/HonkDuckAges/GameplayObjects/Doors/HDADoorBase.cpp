@@ -12,7 +12,8 @@ AHDADoorBase::AHDADoorBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	RootComponent = Root;
 	DoorStateControllerComponent = CreateDefaultSubobject<UDoorStateControllerComponent>(TEXT("DoorStateController"));
 	LockStateControllerComponent = CreateDefaultSubobject<ULockStateControllerComponent>(TEXT("LockStateController"));
 
@@ -61,32 +62,32 @@ void AHDADoorBase::PostInitializeComponents()
 
 bool AHDADoorBase::OpenDoor_Implementation(const bool bTransitImmediately)
 {
-	return DoorStateControllerComponent->OpenDoor(bTransitImmediately);
+	return IDoorInterface::Execute_OpenDoor(DoorStateControllerComponent, bTransitImmediately);
 }
 
 bool AHDADoorBase::CloseDoor_Implementation(const bool bTransitImmediately)
 {
-	return DoorStateControllerComponent->CloseDoor(bTransitImmediately);
+	return IDoorInterface::Execute_CloseDoor(DoorStateControllerComponent, bTransitImmediately);
 }
 
 bool AHDADoorBase::UnlockDoor_Implementation(const bool bTransitImmediately)
 {
-	return DoorStateControllerComponent->UnlockDoor(bTransitImmediately);
+	return IDoorInterface::Execute_UnlockDoor(DoorStateControllerComponent, bTransitImmediately);
 }
 
 bool AHDADoorBase::LockDoor_Implementation(const bool bTransitImmediately)
 {
-	return DoorStateControllerComponent->LockDoor(bTransitImmediately);
+	return IDoorInterface::Execute_LockDoor(DoorStateControllerComponent, bTransitImmediately);
 }
 
 bool AHDADoorBase::DisableDoor_Implementation(const bool bTransitImmediately)
 {
-	return DoorStateControllerComponent->DisableDoor(bTransitImmediately);
+	return IDoorInterface::Execute_DisableDoor(DoorStateControllerComponent, bTransitImmediately);
 }
 
 bool AHDADoorBase::ReverseDoorStateTransition_Implementation()
 {
-	return DoorStateControllerComponent->ReverseDoorStateTransition();
+	return IDoorInterface::Execute_ReverseDoorStateTransition(DoorStateControllerComponent);
 }
 
 void AHDADoorBase::HandleLockStateChanged(ULockStateControllerComponent* Component,
@@ -95,6 +96,6 @@ void AHDADoorBase::HandleLockStateChanged(ULockStateControllerComponent* Compone
 {
 	if (NewState == ELockState::Unlocked)
 	{
-		DoorStateControllerComponent->UnlockDoor(true);
+		Execute_UnlockDoor(DoorStateControllerComponent, true);
 	}
 }
