@@ -7,6 +7,7 @@
 #include "Components/HDAPlayerMovementComponent.h"
 #include "HonkDuckAges/Shared/Components/HDALifeStateComponent.h"
 #include "LockKey/KeyringComponent.h"
+#include "LockKey/LockKeyType.h"
 
 
 AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
@@ -227,8 +228,28 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	{
 		return;
 	}
+	
+	FString DebugMessage = "";
+	
+	DebugMessage = FString::Printf(TEXT("===KEYRING===\n"));
+	TArray<TSubclassOf<ULockKeyType>> AcquiredLockKeys;
+	IKeyringInterface::Execute_GetAcquiredLockKeys(KeyringComponent, AcquiredLockKeys);
 
-	FString DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
+	if (AcquiredLockKeys.IsEmpty())
+	{
+		DebugMessage = DebugMessage.Append(TEXT("EMPTY\n"));
+	}
+	else
+	{
+		for (const TSubclassOf<ULockKeyType>& LockKey : AcquiredLockKeys)
+		{
+			DebugMessage = DebugMessage.Append(FString::Printf(TEXT("%s\n"), *LockKey->GetName()));
+		}
+	}
+	
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Cyan, DebugMessage);
+
+	DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
 
 	FVector LateralVelocity = PlayerMovementComponent->Velocity;
 	LateralVelocity.Z = 0;
@@ -264,6 +285,7 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	                                                   Armor.Value,
 	                                                   Armor.MaxValue,
 	                                                   Armor.GetNormalizedValue() * 100));
+	
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Purple, DebugMessage);
 }
 
