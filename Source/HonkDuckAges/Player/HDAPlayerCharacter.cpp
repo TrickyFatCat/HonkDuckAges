@@ -25,8 +25,6 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 void AHDAPlayerCharacter::BeginPlay()
 {
-	Super::BeginPlay();
-
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
 	if (IsValid(PlayerController))
@@ -68,6 +66,8 @@ void AHDAPlayerCharacter::BeginPlay()
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	RegisterConsoleCommands();
 #endif
+	
+	Super::BeginPlay();
 }
 
 void AHDAPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
