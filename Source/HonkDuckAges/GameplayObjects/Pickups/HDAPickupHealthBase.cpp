@@ -23,7 +23,7 @@ bool AHDAPickupHealthBase::CanBeActivated_Implementation(AActor* Activator)
 	return !LifeStateComponent->GetHealth().ReachedMaxValue();
 }
 
-void AHDAPickupHealthBase::HandleActivationFailure_Implementation(AActor* Activator)
+void AHDAPickupHealthBase::HandleActivationSuccess_Implementation(AActor* Activator)
 {
 	LifeStateComponent->IncreaseHealth(HealPower);
 }

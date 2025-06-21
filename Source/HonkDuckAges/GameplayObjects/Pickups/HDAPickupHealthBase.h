@@ -28,5 +28,5 @@ protected:
 
 	virtual bool CanBeActivated_Implementation(AActor* Activator) override;
 
-	virtual void HandleActivationFailure_Implementation(AActor* Activator) override;
+	virtual void HandleActivationSuccess_Implementation(AActor* Activator) override;
 };
