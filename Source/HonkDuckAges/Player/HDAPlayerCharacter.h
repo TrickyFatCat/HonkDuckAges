@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "HDAPlayerCharacter.generated.h"
 
+class UKeyringComponent;
 class UHDALifeStateComponent;
 class UStatusEffectBase;
 class UStatusEffectsManagerComponent;
@@ -56,6 +57,9 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UStatusEffectsManagerComponent> StatusEffectsManager = nullptr;
+	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UKeyringComponent> KeyringComponent = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UHDAPlayerMovementComponent> PlayerMovementComponent = nullptr;

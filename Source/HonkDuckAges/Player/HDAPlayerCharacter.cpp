@@ -6,6 +6,7 @@
 #include "StatusEffectsManagerComponent.h"
 #include "Components/HDAPlayerMovementComponent.h"
 #include "HonkDuckAges/Shared/Components/HDALifeStateComponent.h"
+#include "LockKey/KeyringComponent.h"
 
 
 AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
@@ -16,6 +17,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 	LifeStateComponent = CreateDefaultSubobject<UHDALifeStateComponent>(TEXT("LifeStateComponent"));
 	LifeStateComponent->DefaultArmor = 25;
 	StatusEffectsManager = CreateDefaultSubobject<UStatusEffectsManagerComponent>(TEXT("StatusEffectsManager"));
+	KeyringComponent = CreateDefaultSubobject<UKeyringComponent>(TEXT("KeyringComponent"));
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetRootComponent());
