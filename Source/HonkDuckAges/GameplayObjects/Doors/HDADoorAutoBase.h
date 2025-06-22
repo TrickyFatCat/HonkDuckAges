@@ -26,6 +26,12 @@ protected:
 	TObjectPtr<UBoxComponent> ActivationTriggerComponent = nullptr;
 
 private:
+	FVector EnterDirection = FVector::ZeroVector;
+
+	FVector ExitDirection = FVector::ZeroVector;
+
+	bool bWantsToBeDisabled = false;
+
 	UFUNCTION()
 	void HandleTriggerEntered(UPrimitiveComponent* OverlappedComponent,
 	                          AActor* OtherActor,
@@ -39,4 +45,9 @@ private:
 	                         AActor* OtherActor,
 	                         UPrimitiveComponent* OtherComp,
 	                         int32 OtherBodyIndex);
+
+	UFUNCTION()
+	void HandleDoorStateChanged(UDoorStateControllerComponent* Component,
+	                            const EDoorState NewState,
+	                            const bool bChangedImmediately);
 };
