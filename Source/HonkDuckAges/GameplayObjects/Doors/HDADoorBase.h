@@ -44,8 +44,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
-		Category="Door",
-		meta=(EditCondition="InitialState == EDoorState::Locked"))
+		Category="Door")
 	TSubclassOf<ULockKeyType> RequiredKey = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
