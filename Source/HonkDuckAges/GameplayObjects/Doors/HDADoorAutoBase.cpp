@@ -6,6 +6,8 @@
 #include "Components/BoxComponent.h"
 #include "Door/DoorStateControllerComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Lock/LockInterface.h"
+#include "Lock/LockStateControllerComponent.h"
 
 
 AHDADoorAutoBase::AHDADoorAutoBase()
@@ -49,7 +51,10 @@ void AHDADoorAutoBase::HandleTriggerEntered(UPrimitiveComponent* OverlappedCompo
 		break;
 
 	case EDoorState::Locked:
-		Execute_UnlockDoor(this, true);
+		if (ILockInterface::Execute_Unlock(LockStateControllerComponent, OtherActor, true))
+		{
+			Execute_OpenDoor(this, false);
+		}
 		break;
 
 	case EDoorState::Transition:
