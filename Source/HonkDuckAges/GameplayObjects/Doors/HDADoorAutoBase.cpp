@@ -43,15 +43,15 @@ void AHDADoorAutoBase::HandleTriggerEntered(UPrimitiveComponent* OverlappedCompo
 	switch (CurrentState)
 	{
 	case EDoorState::Closed:
-		OpenDoor(false);
+		Execute_OpenDoor(this, false);
 		break;
 
 	case EDoorState::Locked:
-		UnlockDoor(true);
+		Execute_UnlockDoor(this, true);
 		break;
 
 	case EDoorState::Transition:
-		ReverseDoorStateTransition();
+		Execute_ReverseDoorStateTransition(this);
 		break;
 	}
 }
@@ -66,11 +66,11 @@ void AHDADoorAutoBase::HandleTriggerExited(UPrimitiveComponent* OverlappedCompon
 	switch (CurrentState)
 	{
 	case EDoorState::Opened:
-		CloseDoor(false);
+		Execute_CloseDoor(this, false);
 		break;
 
 	case EDoorState::Transition:
-		ReverseDoorStateTransition();
+		Execute_ReverseDoorStateTransition(this);
 		break;
 	}
 }
