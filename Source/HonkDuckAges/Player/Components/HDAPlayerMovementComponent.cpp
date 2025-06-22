@@ -106,7 +106,6 @@ void UHDAPlayerMovementComponent::StartDashing(const FVector& Direction)
 
 	StopMovementImmediately();
 	Launch(DashSpeed * Direction.GetSafeNormal());
-	SetMovementMode(MOVE_Flying);
 
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 	TimerManager.SetTimer(DashDurationTimer,
@@ -131,7 +130,6 @@ void UHDAPlayerMovementComponent::FinishDashing()
 
 	Velocity *= PostDashVelocityFactor;
 	
-	SetMovementMode(IsFalling() ? MOVE_Falling : MOVE_Walking);
 	GravityScale = IsFalling() ? FallingGravityScale : DefaultGravityScale;
 	
 	BrakingFrictionFactor = DefaultBrakingFrictionFactor;
