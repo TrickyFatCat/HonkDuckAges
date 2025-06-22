@@ -222,6 +222,19 @@ void UHDAPlayerMovementComponent::SetCanDash(const bool Value)
 	bCanDash = Value;
 }
 
+FVector UHDAPlayerMovementComponent::GetLateralVelocity() const
+{
+	FVector LateralVelocity = Velocity;
+	LateralVelocity.Z = 0.f;
+	return LateralVelocity;
+}
+
+float UHDAPlayerMovementComponent::GetLateralSpeed() const
+{
+	const FVector LateralVelocity = GetLateralVelocity();
+	return LateralVelocity.Size();
+}
+
 float UHDAPlayerMovementComponent::CalculateJumpZVelocity() const
 {
 	return FMath::Sqrt(-2 * GetGravityZ() * JumpHeight);

@@ -81,6 +81,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetCachedDashCharges() const { return CachedDashCharges; }
 
+	UFUNCTION(BlueprintPure)
+	FVector GetLateralVelocity() const;
+
+	UFUNCTION(BlueprintPure)
+	float GetLateralSpeed() const;
+
 protected:
 	/**
 	 * Defines the gravity scale applied to the character during the falling state.

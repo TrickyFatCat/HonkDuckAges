@@ -1,5 +1,4 @@
-﻿
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -33,13 +32,22 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	virtual void PossessedBy(AController* NewController) override;
+
+	UFUNCTION(BlueprintPure, Category="Movement")
+	FVector GetLateralVelocity() const;
+
+	UFUNCTION(BlueprintPure, Category="Movement")
+	float GetLateralSpeed() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputMappingContext* DefaultMappingContext = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* MoveAction = nullptr;
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* AimAction = nullptr;
 
@@ -57,19 +65,34 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UStatusEffectsManagerComponent> StatusEffectsManager = nullptr;
-	
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UKeyringComponent> KeyringComponent = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UHDAPlayerMovementComponent> PlayerMovementComponent = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement")
 	TSubclassOf<UStatusEffectBase> DashInvulnerabilityEffect = nullptr;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="Movement",
+		meta=(ClampMin=0, UIMin=0, ClampMax=10, UIMax=10, Delta=1, ForceUnits="Degrees"));
+	float CameraLeanAngle = 3.0f;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="Movement",
+		meta=(ClampMin=0, UIMin=0))
+	float CameraLeanSpeed = 10.0f;
 
 private:
 	FVector MovementDirection = FVector::ZeroVector;
-	
+
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController = nullptr;
+
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
 
@@ -91,13 +114,15 @@ private:
 	UFUNCTION()
 	void HandleZeroHealth(UHDALifeStateComponent* Component);
 
+	void ProcessCameraLean(const float DeltaTime) const;
+
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	void RegisterConsoleCommands();
 
 	static void UnregisterConsoleCommands();
-	
+
 	bool bShowDebugData = false;
-	
+
 	void TogglePlayerDebugData();
 
 	void PrintPlayerDebugData(const float DeltaTime) const;

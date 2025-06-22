@@ -6,6 +6,7 @@
 #include "StatusEffectsManagerComponent.h"
 #include "Components/HDAPlayerMovementComponent.h"
 #include "HonkDuckAges/Shared/Components/HDALifeStateComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "LockKey/KeyringComponent.h"
 #include "LockKey/LockKeyType.h"
 
@@ -28,7 +29,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 void AHDAPlayerCharacter::BeginPlay()
 {
-	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	// const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
 	if (IsValid(PlayerController))
 	{
@@ -69,7 +70,7 @@ void AHDAPlayerCharacter::BeginPlay()
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	RegisterConsoleCommands();
 #endif
-	
+
 	Super::BeginPlay();
 }
 
@@ -85,6 +86,8 @@ void AHDAPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AHDAPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	ProcessCameraLean(DeltaTime);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	PrintPlayerDebugData(DeltaTime);
@@ -108,6 +111,23 @@ void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		                                   &AHDAPlayerCharacter::StopJumping);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AHDAPlayerCharacter::Dash);
 	}
+}
+
+void AHDAPlayerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	PlayerController = Cast<APlayerController>(NewController);
+}
+
+FVector AHDAPlayerCharacter::GetLateralVelocity() const
+{
+	return PlayerMovementComponent->GetLateralVelocity();
+}
+
+float AHDAPlayerCharacter::GetLateralSpeed() const
+{
+	return PlayerMovementComponent->GetLateralSpeed();
 }
 
 void AHDAPlayerCharacter::Move(const FInputActionValue& Value)
@@ -189,6 +209,20 @@ void AHDAPlayerCharacter::HandleZeroHealth(UHDALifeStateComponent* Component)
 #endif
 }
 
+void AHDAPlayerCharacter::ProcessCameraLean(const float DeltaTime) const
+{
+	FRotator TargetRotation = PlayerController->GetControlRotation();
+	TargetRotation.Roll = MovementDirection.Y != 0.f && !PlayerMovementComponent->IsFalling()
+		                      ? CameraLeanAngle * MovementDirection.Y
+		                      : 0.f;
+	const FRotator CurrentRotation = PlayerController->GetControlRotation();
+	const FRotator NewRotation = UKismetMathLibrary::RInterpTo(CurrentRotation,
+	                                                           TargetRotation,
+	                                                           DeltaTime,
+	                                                           CameraLeanSpeed);
+	PlayerController->SetControlRotation(NewRotation);
+}
+
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 
 void AHDAPlayerCharacter::RegisterConsoleCommands()
@@ -228,9 +262,9 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	{
 		return;
 	}
-	
+
 	FString DebugMessage = "";
-	
+
 	DebugMessage = FString::Printf(TEXT("===KEYRING===\n"));
 	TArray<TSubclassOf<ULockKeyType>> AcquiredLockKeys;
 	IKeyringInterface::Execute_GetAcquiredLockKeys(KeyringComponent, AcquiredLockKeys);
@@ -246,16 +280,13 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 			DebugMessage = DebugMessage.Append(FString::Printf(TEXT("%s\n"), *LockKey->GetName()));
 		}
 	}
-	
+
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Cyan, DebugMessage);
 
 	DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
 
-	FVector LateralVelocity = PlayerMovementComponent->Velocity;
-	LateralVelocity.Z = 0;
-
 	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Lateral Speed: %.2f\n"),
-	                                                   LateralVelocity.Size()));
+	                                                   GetLateralSpeed()));
 	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Gravity Scale: %.2f\n"),
 	                                                   PlayerMovementComponent->GravityScale));
 	DebugMessage = DebugMessage.Append(
@@ -285,7 +316,7 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	                                                   Armor.Value,
 	                                                   Armor.MaxValue,
 	                                                   Armor.GetNormalizedValue() * 100));
-	
+
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Purple, DebugMessage);
 }
 
