@@ -50,4 +50,8 @@ private:
 	void HandleDoorStateChanged(UDoorStateControllerComponent* Component,
 	                            const EDoorState NewState,
 	                            const bool bChangedImmediately);
+protected:
+#if WITH_EDITOR
+	virtual void UpdateDebugText() override;
+#endif
 };

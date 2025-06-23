@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "HDADoorBase.generated.h"
 
+class UTextRenderComponent;
 class UArrowComponent;
 class ULockKeyType;
 class ULockStateControllerComponent;
@@ -39,7 +40,7 @@ public:
 	virtual bool ReverseDoorStateTransition_Implementation() override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Door")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Door")
 	EDoorState InitialState = EDoorState::Closed;
 
 	UPROPERTY(EditDefaultsOnly,
@@ -57,14 +58,23 @@ protected:
 	TObjectPtr<ULockStateControllerComponent> LockStateControllerComponent = nullptr;
 
 private:
-#if WITH_EDITORONLY_DATA
-	UPROPERTY(VisibleDefaultsOnly, Category="Components")
-	TObjectPtr<UArrowComponent> ForwardVector = nullptr;
-	
-#endif
 	UFUNCTION()
 	void HandleLockStateChanged(ULockStateControllerComponent* Component,
 	                            ELockState NewState,
 	                            bool bChangedImmediately);
-};
+protected:
+#if WITH_EDITORONLY_DATA
+	UPROPERTY(VisibleDefaultsOnly, Category="Components")
+	TObjectPtr<UArrowComponent> ForwardVector = nullptr;
 
+	UPROPERTY(VisibleDefaultsOnly, Category="Components")
+	TObjectPtr<UTextRenderComponent> DebugText_F = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly, Category="Components")
+	TObjectPtr<UTextRenderComponent> DebugText_B = nullptr;
+
+#if WITH_EDITOR
+	virtual void UpdateDebugText();
+#endif
+#endif
+};

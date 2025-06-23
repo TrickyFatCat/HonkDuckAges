@@ -4,6 +4,7 @@
 #include "HDADoorAutoBase.h"
 
 #include "Components/BoxComponent.h"
+#include "Components/TextRenderComponent.h"
 #include "Door/DoorStateControllerComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Lock/LockInterface.h"
@@ -92,6 +93,11 @@ void AHDADoorAutoBase::HandleTriggerExited(UPrimitiveComponent* OverlappedCompon
 		break;
 
 	case EDoorState::Transition:
+		if (bWantsToBeDisabled)
+		{
+			return;
+		}
+
 		Execute_ReverseDoorStateTransition(this);
 		break;
 	}
@@ -107,3 +113,16 @@ void AHDADoorAutoBase::HandleDoorStateChanged(UDoorStateControllerComponent* Com
 		ActivationTriggerComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
+
+#if WITH_EDITOR
+void AHDADoorAutoBase::UpdateDebugText()
+{
+	Super::UpdateDebugText();
+	
+	FString DebugText = DebugText_F->Text.ToString();
+	DebugText = DebugText.Appendf(TEXT("Is One Way: %s\n"), bIsOneWay ? TEXT("TRUE") : TEXT("FALSE"));
+
+	DebugText_F->SetText(FText::FromString(DebugText));
+	DebugText_B->SetText(FText::FromString(DebugText));
+}
+#endif

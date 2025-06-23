@@ -4,8 +4,10 @@
 #include "HDADoorBase.h"
 
 #include "Components/ArrowComponent.h"
+#include "Components/TextRenderComponent.h"
 #include "Door/DoorStateControllerComponent.h"
 #include "Lock/LockStateControllerComponent.h"
+#include "LockKey/LockKeyType.h"
 
 
 AHDADoorBase::AHDADoorBase()
@@ -23,6 +25,21 @@ AHDADoorBase::AHDADoorBase()
 	ForwardVector->SetRelativeLocation(FVector(0.0f, 0.0f, 100.0f));
 	ForwardVector->ArrowLength = 100.0f;
 	ForwardVector->ArrowSize = 2.f;
+
+	DebugText_F = CreateEditorOnlyDefaultSubobject<UTextRenderComponent>("DebugText_F");
+	DebugText_F->SetupAttachment(ForwardVector);
+	DebugText_F->SetRelativeLocation(FVector(30.0f, 0.0f, 10.f));
+	DebugText_F->SetHorizontalAlignment(EHTA_Center);
+	DebugText_F->SetWorldSize(34.f);
+	DebugText_F->SetTextRenderColor(FColor::Magenta);
+
+	DebugText_B = CreateEditorOnlyDefaultSubobject<UTextRenderComponent>("DebugText_B");
+	DebugText_B->SetupAttachment(ForwardVector);
+	DebugText_B->SetRelativeLocation(FVector(-30.0f, 0.0f, 10.f));
+	DebugText_B->SetRelativeRotation(FRotator(0.0f, 180.0f, 0.0f));
+	DebugText_B->SetHorizontalAlignment(EHTA_Center);
+	DebugText_B->SetWorldSize(34.f);
+	DebugText_B->SetTextRenderColor(FColor::Magenta);
 #endif
 }
 
@@ -46,12 +63,20 @@ void AHDADoorBase::PostEditChangeProperty(struct FPropertyChangedEvent& Property
 	{
 		LockStateControllerComponent->SetRequiredKey(RequiredKey);
 	}
+
+#if WITH_EDITOR
+	UpdateDebugText();
+#endif 
 }
 
 void AHDADoorBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+#if WITH_EDITOR
+	AHDADoorBase::UpdateDebugText();
+#endif
+	
 	UWorld* World = GetWorld();
 
 	if (IsValid(World) && World->IsGameWorld())
@@ -99,3 +124,23 @@ void AHDADoorBase::HandleLockStateChanged(ULockStateControllerComponent* Compone
 		Execute_UnlockDoor(DoorStateControllerComponent, true);
 	}
 }
+
+#if WITH_EDITOR
+void AHDADoorBase::UpdateDebugText()
+{
+	FString DebugText = FString::Printf(TEXT("%s\n"), *GetActorNameOrLabel());
+	FString KeyName = TEXT("NONE");
+
+	if (IsValid(RequiredKey))
+	{
+		KeyName = RequiredKey->GetName().RightChop(12);
+		KeyName = KeyName.LeftChop(2);
+	}
+	
+	DebugText = DebugText.Appendf(TEXT("Key: %s\n"), *KeyName);
+	const FString StateName = StaticEnum<EDoorState>()->GetNameStringByValue(static_cast<int64>(InitialState));
+	DebugText = DebugText.Appendf(TEXT("Initial State: %s\n"), *StateName);
+	DebugText_F->SetText(FText::FromString(DebugText));
+	DebugText_B->SetText(FText::FromString(DebugText));
+}
+#endif
