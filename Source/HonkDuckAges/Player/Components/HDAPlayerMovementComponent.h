@@ -87,6 +87,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	float GetLateralSpeed() const;
 
+	UFUNCTION(BlueprintCallable)
+	void ForceLaunch(const float Height, const FVector& Direction);
+
 protected:
 	/**
 	 * Defines the gravity scale applied to the character during the falling state.
@@ -196,7 +199,7 @@ private:
 	UFUNCTION()
 	void HandleDashCooldownFinished();
 
-	float CalculateJumpZVelocity() const;
+	float CalculateJumpSpeed(const float Height) const;
 
 	void StartDashCooldown();
 };

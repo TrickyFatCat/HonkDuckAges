@@ -22,7 +22,7 @@ void UHDAPlayerMovementComponent::InitializeComponent()
 	DefaultBrakingDecelerationFalling = BrakingDecelerationFalling;
 
 	DashSpeed = DashDistance / DashDuration;
-	JumpZVelocity = CalculateJumpZVelocity();
+	JumpZVelocity = CalculateJumpSpeed(JumpHeight);
 	DashCharges = DashMaxCharges;
 }
 
@@ -48,7 +48,7 @@ void UHDAPlayerMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& 
 
 	if (PropertyName == JumpHeightName || PropertyName == GravityScaleName || PropertyName == JumpZVelocityName)
 	{
-		JumpZVelocity = CalculateJumpZVelocity();
+		JumpZVelocity = CalculateJumpSpeed(JumpHeight);
 	}
 }
 
@@ -233,9 +233,20 @@ float UHDAPlayerMovementComponent::GetLateralSpeed() const
 	return LateralVelocity.Size();
 }
 
-float UHDAPlayerMovementComponent::CalculateJumpZVelocity() const
+void UHDAPlayerMovementComponent::ForceLaunch(const float Height, const FVector& Direction)
 {
-	return FMath::Sqrt(-2 * GetGravityZ() * JumpHeight);
+	if (Height <= 0.f || Direction.IsNearlyZero())
+	{
+		return;
+	}
+
+	const float LaunchSpeed = CalculateJumpSpeed(Height);
+	Launch(Direction.GetSafeNormal() * LaunchSpeed);
+}
+
+float UHDAPlayerMovementComponent::CalculateJumpSpeed(const float Height) const
+{
+	return FMath::Sqrt(-2 * GetGravityZ() * Height);
 }
 
 void UHDAPlayerMovementComponent::StartDashCooldown()
