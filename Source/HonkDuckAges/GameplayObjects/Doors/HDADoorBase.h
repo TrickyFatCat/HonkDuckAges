@@ -41,7 +41,10 @@ public:
 	virtual bool ReverseDoorStateTransition_Implementation() override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Door")
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="Door",
+		meta=(InvalidEnumValues="EDoorState::Transition"))
 	EDoorState InitialState = EDoorState::Closed;
 
 	UPROPERTY(EditDefaultsOnly,
