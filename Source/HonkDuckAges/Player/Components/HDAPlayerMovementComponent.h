@@ -88,7 +88,7 @@ public:
 	float GetLateralSpeed() const;
 
 	UFUNCTION(BlueprintCallable)
-	void ForceLaunch(const float Height, const FVector& Direction);
+	void ForceLaunch(const float Height, const FVector& Direction, const bool bOverrideLateralVelocity);
 
 protected:
 	/**

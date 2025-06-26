@@ -129,14 +129,14 @@ void UHDAPlayerMovementComponent::FinishDashing()
 	}
 
 	Velocity *= PostDashVelocityFactor;
-	
+
 	GravityScale = IsFalling() ? FallingGravityScale : DefaultGravityScale;
-	
+
 	BrakingFrictionFactor = DefaultBrakingFrictionFactor;
 	BrakingDecelerationWalking = DefaultBrakingDecelerationWalking;
 	AirControl = DefaultAirControl;
 	BrakingDecelerationFalling = DefaultBrakingDecelerationFalling;
-	
+
 	OnDashFinished.Broadcast();
 	StartDashCooldown();
 }
@@ -145,7 +145,7 @@ void UHDAPlayerMovementComponent::HandleDashCooldownFinished()
 {
 	// Need to do this to avoid a bug when the cooldown timer is still valid in the same frame
 	GetWorld()->GetTimerManager().ClearTimer(DashCooldownTimer);
-	
+
 	if (IsFalling())
 	{
 		CachedDashCharges++;
@@ -233,7 +233,9 @@ float UHDAPlayerMovementComponent::GetLateralSpeed() const
 	return LateralVelocity.Size();
 }
 
-void UHDAPlayerMovementComponent::ForceLaunch(const float Height, const FVector& Direction)
+void UHDAPlayerMovementComponent::ForceLaunch(const float Height,
+                                              const FVector& Direction,
+                                              const bool bOverrideLateralVelocity)
 {
 	if (Height <= 0.f || Direction.IsNearlyZero())
 	{
@@ -241,7 +243,14 @@ void UHDAPlayerMovementComponent::ForceLaunch(const float Height, const FVector&
 	}
 
 	const float LaunchSpeed = CalculateJumpSpeed(Height);
-	Launch(Direction.GetSafeNormal() * LaunchSpeed);
+	FVector FinalVelocity = LaunchSpeed * Direction.GetSafeNormal();
+
+	if (!bOverrideLateralVelocity)
+	{
+		FinalVelocity += GetLateralVelocity();
+	}
+
+	Launch(FinalVelocity);
 }
 
 float UHDAPlayerMovementComponent::CalculateJumpSpeed(const float Height) const
