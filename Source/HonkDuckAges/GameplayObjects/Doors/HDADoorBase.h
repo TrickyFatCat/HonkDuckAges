@@ -14,7 +14,7 @@ class ULockKeyType;
 class ULockStateControllerComponent;
 class UDoorStateControllerComponent;
 
-UCLASS()
+UCLASS(PrioritizeCategories="Door")
 class HONKDUCKAGES_API AHDADoorBase : public AActor, public IDoorInterface
 {
 	GENERATED_BODY()
