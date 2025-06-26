@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayObject/GameplayObjectInterface.h"
 #include "HDAJumpPad.generated.h"
 
+class UGameplayObjectStateControllerComponent;
 class UBoxComponent;
 class UArrowComponent;
 class UTextRenderComponent;
 
-UCLASS()
+UCLASS(PrioritizeCategories="JumpPad")
 class HONKDUCKAGES_API AHDAJumpPad : public AActor
 {
 	GENERATED_BODY()
@@ -30,6 +32,15 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UMeshComponent> MeshComponent = nullptr;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UGameplayObjectStateControllerComponent> StateControllerComponent = nullptr;
+
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="JumpPad",
+		meta=(InvalidEnumValues="EGameplayObjectState::Transition"))
+	EGameplayObjectState InitialState = EGameplayObjectState::Active;
+
 	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="JumpPad",
@@ -37,7 +48,7 @@ protected:
 	float JumpHeight = 100.0f;
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleDefaultsOnly, Category="Components")
 	TObjectPtr<UArrowComponent> UpVector = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly, Category="Components")
@@ -52,6 +63,11 @@ private:
 	                          int32 OtherBodyIndex,
 	                          bool bFromSweep,
 	                          const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void HandleStateChanged(UGameplayObjectStateControllerComponent* Component,
+	                        const EGameplayObjectState NewState,
+	                        const bool bChangedImmediately);
 #if WITH_EDITOR
 	void UpdateDebugInfo() const;
 #endif
