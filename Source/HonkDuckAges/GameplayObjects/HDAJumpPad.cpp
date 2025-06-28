@@ -6,7 +6,6 @@
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/TextRenderComponent.h"
-#include "Door/DoorInterface.h"
 #include "GameplayObject/GameplayObjectStateControllerComponent.h"
 #include "HonkDuckAges/Player/Components/HDAPlayerMovementComponent.h"
 
