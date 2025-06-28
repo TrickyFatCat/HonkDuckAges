@@ -289,6 +289,9 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	                                                   GetLateralSpeed()));
 	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Gravity Scale: %.2f\n"),
 	                                                   PlayerMovementComponent->GravityScale));
+	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("Jump Charges: %d / %d\n"),
+	                                                   JumpMaxCount - JumpCurrentCountPreJump,
+	                                                   JumpMaxCount));
 	DebugMessage = DebugMessage.Append(
 		FString::Printf(TEXT("Dash Charges: %d / %d\n"),
 		                PlayerMovementComponent->GetDashCharges(),
