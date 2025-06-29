@@ -31,8 +31,6 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 
 void AHDAPlayerCharacter::BeginPlay()
 {
-	// const APlayerController* PlayerController = Cast<APlayerController>(GetController());
-
 	if (IsValid(PlayerController))
 	{
 		UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem = ULocalPlayer::GetSubsystem<
