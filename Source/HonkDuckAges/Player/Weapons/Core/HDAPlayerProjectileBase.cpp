@@ -1,14 +1,14 @@
 ﻿// 
 
 
-#include "HDAProjectileBase.h"
+#include "HDAPlayerProjectileBase.h"
 
 #include "Components/ArrowComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 
-AHDAProjectileBase::AHDAProjectileBase()
+AHDAPlayerProjectileBase::AHDAPlayerProjectileBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 

@@ -1,12 +1,12 @@
 ﻿// 
 
 
-#include "HDAWeaponBase.h"
+#include "HDAPlayerWeaponBase.h"
 
 #include "Components/ArrowComponent.h"
 
 
-AHDAWeaponBase::AHDAWeaponBase()
+AHDAPlayerWeaponBase::AHDAPlayerWeaponBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -19,14 +19,14 @@ AHDAWeaponBase::AHDAWeaponBase()
 #endif
 }
 
-void AHDAWeaponBase::StartShooting()
+void AHDAPlayerWeaponBase::StartShooting()
 {
 }
 
-void AHDAWeaponBase::StopShooting()
+void AHDAPlayerWeaponBase::StopShooting()
 {
 }
 
-void AHDAWeaponBase::MakeShot()
+void AHDAPlayerWeaponBase::MakeShot()
 {
 }

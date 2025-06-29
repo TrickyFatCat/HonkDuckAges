@@ -3,26 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HDAWeaponInterface.h"
 #include "GameFramework/Actor.h"
-#include "HDAWeaponBase.generated.h"
+#include "HDAPlayerWeaponBase.generated.h"
 
 class UArrowComponent;
 
 UCLASS(PrioritizeCategories="Weapon")
-class HONKDUCKAGES_API AHDAWeaponBase : public AActor, public IHDAWeaponInterface
+class HONKDUCKAGES_API AHDAPlayerWeaponBase : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	AHDAWeaponBase();
+	AHDAPlayerWeaponBase();
 
 public:
-	virtual void StartShooting() override;
+	virtual void StartShooting();
 
-	virtual void StopShooting() override;
+	virtual void StopShooting();
 
-	virtual void MakeShot() override;
+	virtual void MakeShot();
 
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")

@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "HDAProjectileBase.generated.h"
+#include "HDAPlayerProjectileBase.generated.h"
 
 class UArrowComponent;
 class UProjectileMovementComponent;
 class USphereComponent;
 
 UCLASS(PrioritizeCategories="Projectile")
-class HONKDUCKAGES_API AHDAProjectileBase : public AActor
+class HONKDUCKAGES_API AHDAPlayerProjectileBase : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	AHDAProjectileBase();
+	AHDAPlayerProjectileBase();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Projectile", meta=(ExposeOnSpawn))
