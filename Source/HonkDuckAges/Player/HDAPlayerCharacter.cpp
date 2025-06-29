@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "StatusEffectsManagerComponent.h"
 #include "Components/HDAPlayerMovementComponent.h"
+#include "Components/HDAPlayerWeaponManager.h"
 #include "HonkDuckAges/Shared/Components/HDALifeStateComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "LockKey/KeyringComponent.h"
@@ -20,6 +21,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 	LifeStateComponent->DefaultArmor = 25;
 	StatusEffectsManager = CreateDefaultSubobject<UStatusEffectsManagerComponent>(TEXT("StatusEffectsManager"));
 	KeyringComponent = CreateDefaultSubobject<UKeyringComponent>(TEXT("KeyringComponent"));
+	WeaponManagerComponent = CreateDefaultSubobject<UHDAPlayerWeaponManager>(TEXT("WeaponManagerComponent"));
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetRootComponent());
