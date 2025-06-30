@@ -4,21 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "HonkDuckAges/Player/Weapons/Core/HDAPlayerWeaponData.h"
 #include "HDAPlayerWeaponManager.generated.h"
 
 class AHDAPlayerWeaponBase;
-
-UENUM(BlueprintType)
-enum class EWeaponSlot : uint8
-{
-	Shotgun,
-	SlugShot,
-	HeavyChainGun,
-	MiniRockets,
-	PlasmaBeam,
-	LaserCrossbow,
-	ShieldThrower,
-};
 
 UCLASS(ClassGroup=(Custom), PrioritizeCategories="WeaponManager")
 class HONKDUCKAGES_API UHDAPlayerWeaponManager : public UActorComponent
@@ -42,6 +31,9 @@ public:
 	void AddWeapon(const EWeaponSlot WeaponSlot);
 
 	UFUNCTION()
+	bool HasWeapon(const EWeaponSlot WeaponSlot);
+
+	UFUNCTION()
 	void ChooseWeapon(const EWeaponSlot WeaponSlot);
 
 	UFUNCTION()
@@ -54,8 +46,23 @@ public:
 	EWeaponSlot GetPreviousWeaponSlot() const { return PreviousWeaponSlot; }
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(ReadOnlyKeys, ForceInlineRow))
-	TMap<EWeaponSlot, TSubclassOf<AHDAPlayerWeaponBase>> WeaponSlots{
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager")
+	UHDAPlayerWeaponData* WeaponData = nullptr;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentWeaponSlot, Category="WeaponManager")
+	EWeaponSlot CurrentWeaponSlot = EWeaponSlot::Shotgun;
+
+	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
+	EWeaponAmmoType CurrentAmmoType = EWeaponAmmoType::Gauge;
+
+	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
+	int32 CurrentShotCost = 1;
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetPreviousWeaponSlot, Category="WeaponManager")
+	EWeaponSlot PreviousWeaponSlot = EWeaponSlot::Shotgun;
+
+	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
+	TMap<EWeaponSlot, TObjectPtr<AHDAPlayerWeaponBase>> AcquiredWeapons{
 		{EWeaponSlot::Shotgun, nullptr},
 		{EWeaponSlot::SlugShot, nullptr},
 		{EWeaponSlot::HeavyChainGun, nullptr},
@@ -64,13 +71,4 @@ protected:
 		{EWeaponSlot::LaserCrossbow, nullptr},
 		{EWeaponSlot::ShieldThrower, nullptr},
 	};
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentWeaponSlot, Category="WeaponManager")
-	EWeaponSlot CurrentWeaponSlot = EWeaponSlot::Shotgun;
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetPreviousWeaponSlot, Category="WeaponManager")
-	EWeaponSlot PreviousWeaponSlot = EWeaponSlot::Shotgun;
-
-	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
-	TMap<EWeaponSlot, TObjectPtr<AHDAPlayerWeaponBase>> AcquiredWeapons{};
 };
