@@ -6,7 +6,7 @@
 #include "HonkDuckAges/Player/Weapons/Core/HDAPlayerWeaponBase.h"
 #include "HDAPlayerWeaponCrossbow.generated.h"
 
-UCLASS()
+UCLASS(Abstract, HideDropdown)
 class HONKDUCKAGES_API AHDAPlayerWeaponCrossbow : public AHDAPlayerWeaponBase
 {
 	GENERATED_BODY()
