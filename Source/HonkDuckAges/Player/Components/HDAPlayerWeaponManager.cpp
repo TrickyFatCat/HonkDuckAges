@@ -28,7 +28,7 @@ void UHDAPlayerWeaponManager::InitializeComponent()
 			{
 				ensureMsgf(IsValid(Slot.Value.WeaponClass), TEXT("%s | Invalid weapon class for %s slot"),
 				           *WeaponData->GetName(),
-				           StaticEnum<EWeaponSlot>()->GetNameStringByValue(static_cast<int64>(Slot.Key)));
+				           *StaticEnum<EWeaponSlot>()->GetNameStringByValue(static_cast<int64>(Slot.Key)));
 			}
 		}
 	}
