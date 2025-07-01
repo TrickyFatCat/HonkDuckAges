@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "HonkDuckAges/Player/Weapons/Core/HDAPlayerWeaponData.h"
+#include "HonkDuckAges/Player/Weapons/HDAPlayerWeaponData.h"
 #include "HDAPlayerWeaponManager.generated.h"
 
 class AHDAPlayerWeaponBase;

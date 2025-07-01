@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HonkDuckAges/Player/Weapons/Core/HDAPlayerWeaponBase.h"
+#include "HonkDuckAges/Player/Weapons/HDAPlayerWeaponBase.h"
 #include "HDAPlayerWeaponBeam.generated.h"
 
 UCLASS(Abstract, HideDropdown)

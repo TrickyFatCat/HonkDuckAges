@@ -3,7 +3,7 @@
 
 #include "HDAPlayerWeaponManager.h"
 
-#include "HonkDuckAges/Player/Weapons/Core/HDAPlayerWeaponBase.h"
+#include "HonkDuckAges/Player/Weapons/HDAPlayerWeaponBase.h"
 
 
 UHDAPlayerWeaponManager::UHDAPlayerWeaponManager()
