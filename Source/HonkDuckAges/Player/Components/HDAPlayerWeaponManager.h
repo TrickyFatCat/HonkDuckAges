@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "TrickyPropertiesLibrary.h"
 #include "Components/ActorComponent.h"
 #include "HonkDuckAges/Player/Weapons/HDAPlayerWeaponData.h"
 #include "HDAPlayerWeaponManager.generated.h"
@@ -39,6 +40,9 @@ public:
 	UFUNCTION()
 	void ChoosePreviousWeapon();
 
+	UFUNCTION()
+	void AddAmmo(const EWeaponAmmoType AmmoType, const int32 Value);
+
 	UFUNCTION(BlueprintGetter)
 	EWeaponSlot GetCurrentWeaponSlot() const { return CurrentWeaponSlot; }
 
@@ -57,7 +61,7 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
 	int32 CurrentShotCost = 1;
-	
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetPreviousWeaponSlot, Category="WeaponManager")
 	EWeaponSlot PreviousWeaponSlot = EWeaponSlot::Shotgun;
 
@@ -71,4 +75,15 @@ protected:
 		{EWeaponSlot::LaserCrossbow, nullptr},
 		{EWeaponSlot::ShieldThrower, nullptr},
 	};
+
+	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
+	TMap<EWeaponAmmoType, FTrickyPropertyInt> AmmoStash{
+		{EWeaponAmmoType::Gauge, FTrickyPropertyInt{}},
+		{EWeaponAmmoType::Bullet, FTrickyPropertyInt{}},
+		{EWeaponAmmoType::Energy, FTrickyPropertyInt{}},
+		{EWeaponAmmoType::Shield, FTrickyPropertyInt{}}
+	};
+
+private:
+	void InitAmmoStash();
 };

@@ -31,15 +31,45 @@ void UHDAPlayerWeaponManager::InitializeComponent()
 				           *StaticEnum<EWeaponSlot>()->GetNameStringByValue(static_cast<int64>(Slot.Key)));
 			}
 		}
+
+		InitAmmoStash();
+		AddWeapon(EWeaponSlot::Shotgun);
+		AddAmmo(EWeaponAmmoType::Gauge, 999);
 	}
 }
 
 void UHDAPlayerWeaponManager::StartShooting()
 {
+	if (!HasWeapon(CurrentWeaponSlot))
+	{
+		return;
+	}
+
+	AHDAPlayerWeaponBase* CurrentWeapon = AcquiredWeapons[CurrentWeaponSlot];
+
+	if (!IsValid(CurrentWeapon))
+	{
+		return;
+	}
+
+	CurrentWeapon->StartShooting(FVector::ZeroVector);
 }
 
 void UHDAPlayerWeaponManager::StopShooting()
 {
+	if (!HasWeapon(CurrentWeaponSlot))
+	{
+		return;
+	}
+
+	AHDAPlayerWeaponBase* CurrentWeapon = AcquiredWeapons[CurrentWeaponSlot];
+
+	if (!IsValid(CurrentWeapon))
+	{
+		return;
+	}
+
+	CurrentWeapon->StopShooting();
 }
 
 void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
@@ -85,4 +115,32 @@ void UHDAPlayerWeaponManager::ChooseWeapon(const EWeaponSlot WeaponSlot)
 void UHDAPlayerWeaponManager::ChoosePreviousWeapon()
 {
 	ChooseWeapon(PreviousWeaponSlot);
+}
+
+void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int32 Value)
+{
+	FTrickyPropertyInt& Ammo = AmmoStash[AmmoType];
+
+	if (Ammo.ReachedMaxValue())
+	{
+		return;
+	}
+	
+	Ammo.IncreaseValue(Value);
+	Ammo.ClampToMax();
+}
+
+void UHDAPlayerWeaponManager::InitAmmoStash()
+{
+	if (!ensureMsgf(!AmmoStash.IsEmpty(), TEXT("AmmoStash in PlayerManagerComponent is empty.")))
+	{
+		return;
+	}
+
+	for (auto& AmmoType : AmmoStash)
+	{
+		FTrickyPropertyInt& Ammo = AmmoType.Value;
+		Ammo.MaxValue = WeaponData->DefaultWeaponAmmo.FindChecked(AmmoType.Key);
+		Ammo.Value = 0;
+	}
 }
