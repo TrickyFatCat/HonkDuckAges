@@ -23,6 +23,9 @@ enum class EWeaponMode : uint8
 	SemiAuto
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerWeaponShotDynamicSignature,
+                                            AHDAPlayerWeaponBase*, Weapon);
+
 UCLASS(PrioritizeCategories="Weapon")
 class HONKDUCKAGES_API AHDAPlayerWeaponBase : public AActor
 {
@@ -35,10 +38,12 @@ protected:
 	virtual void PostInitializeComponents() override;
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerWeaponShotDynamicSignature OnPlayerWeaponShot;
+	
 	virtual void StartShooting(const FVector& TargetPoint);
 
 	virtual void StopShooting();
-
 
 	UFUNCTION(BlueprintGetter)
 	EWeaponBulletType GetBulletType() const { return BulletType; }
@@ -81,7 +86,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Components")
 	TObjectPtr<UArrowComponent> ForwardVector = nullptr;
 #endif
-	
+
 	void MakeShot(const FVector& TargetPoint);
 
 	virtual void SpawnProjectile(const FVector& TargetPoint);

@@ -86,4 +86,7 @@ protected:
 
 private:
 	void InitAmmoStash();
+
+	UFUNCTION()
+	void HandleWeaponShot(AHDAPlayerWeaponBase* Weapon);
 };

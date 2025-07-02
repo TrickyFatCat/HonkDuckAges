@@ -85,8 +85,9 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 	{
 		return;
 	}
-	
-	AHDAPlayerWeaponBase* NewWeapon = GetWorld()->SpawnActorDeferred<AHDAPlayerWeaponBase>(WeaponClass, FTransform::Identity);
+
+	AHDAPlayerWeaponBase* NewWeapon = GetWorld()->SpawnActorDeferred<AHDAPlayerWeaponBase>(
+		WeaponClass, FTransform::Identity);
 	NewWeapon->SetOwner(GetOwner());
 	NewWeapon->AttachToActor(GetOwner(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 	NewWeapon->FinishSpawning(FTransform::Identity);
@@ -106,10 +107,27 @@ void UHDAPlayerWeaponManager::ChooseWeapon(const EWeaponSlot WeaponSlot)
 		return;
 	}
 
-	PreviousWeaponSlot = CurrentWeaponSlot;
+	if (PreviousWeaponSlot != CurrentWeaponSlot)
+	{
+		PreviousWeaponSlot = CurrentWeaponSlot;
+		AHDAPlayerWeaponBase* PreviousWeapon = AcquiredWeapons[PreviousWeaponSlot];
+
+		if (IsValid(PreviousWeapon))
+		{
+			PreviousWeapon->OnPlayerWeaponShot.RemoveDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
+		}
+	}
+
 	CurrentWeaponSlot = WeaponSlot;
 	CurrentAmmoType = WeaponData->WeaponSlots[WeaponSlot].AmmoType;
 	CurrentShotCost = WeaponData->WeaponSlots[WeaponSlot].ShotCost;
+
+	AHDAPlayerWeaponBase* CurrentWeapon = AcquiredWeapons[CurrentWeaponSlot];
+
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->OnPlayerWeaponShot.AddUniqueDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
+	}
 }
 
 void UHDAPlayerWeaponManager::ChoosePreviousWeapon()
@@ -125,7 +143,7 @@ void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int3
 	{
 		return;
 	}
-	
+
 	Ammo.IncreaseValue(Value);
 	Ammo.ClampToMax();
 }
@@ -142,5 +160,22 @@ void UHDAPlayerWeaponManager::InitAmmoStash()
 		FTrickyPropertyInt& Ammo = AmmoType.Value;
 		Ammo.MaxValue = WeaponData->DefaultWeaponAmmo.FindChecked(AmmoType.Key);
 		Ammo.Value = 0;
+	}
+}
+
+void UHDAPlayerWeaponManager::HandleWeaponShot(AHDAPlayerWeaponBase* Weapon)
+{
+	if (!IsValid(Weapon))
+	{
+		return;
+	}
+
+	FTrickyPropertyInt& Ammo = AmmoStash[CurrentAmmoType];
+	Ammo.DecreaseValue(CurrentShotCost);
+	Ammo.ClampToMin();
+
+	if (Ammo.ReachedMinValue())
+	{
+		//TODO: Deactivate weapon
 	}
 }

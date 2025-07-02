@@ -60,6 +60,8 @@ void AHDAPlayerWeaponBase::MakeShot(const FVector& TargetPoint)
 	case EWeaponBulletType::Trace:
 		break;
 	}
+
+	OnPlayerWeaponShot.Broadcast(this);
 }
 
 void AHDAPlayerWeaponBase::SpawnProjectile(const FVector& TargetPoint)
