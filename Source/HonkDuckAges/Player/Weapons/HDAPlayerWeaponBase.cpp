@@ -3,6 +3,7 @@
 
 #include "HDAPlayerWeaponBase.h"
 
+#include "HDAPlayerProjectileBase.h"
 #include "Components/ArrowComponent.h"
 
 
@@ -19,7 +20,20 @@ AHDAPlayerWeaponBase::AHDAPlayerWeaponBase()
 #endif
 }
 
-void AHDAPlayerWeaponBase::StartShooting()
+void AHDAPlayerWeaponBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	UWorld* World = GetWorld();
+
+	if (IsValid(World) && World->IsGameWorld())
+	{
+		ensureMsgf(IsValid(ProjectileClass) && BulletType == EWeaponBulletType::Projectile,
+		           TEXT("Invalid projectile class in %s"), *GetActorNameOrLabel());
+	}
+}
+
+void AHDAPlayerWeaponBase::StartShooting(const FVector& TargetPoint)
 {
 }
 
@@ -27,6 +41,27 @@ void AHDAPlayerWeaponBase::StopShooting()
 {
 }
 
-void AHDAPlayerWeaponBase::MakeShot()
+void AHDAPlayerWeaponBase::MakeShot(const FVector& TargetPoint)
+{
+	switch (BulletType)
+	{
+	case EWeaponBulletType::Projectile:
+		if (!IsValid(ProjectileClass))
+		{
+			return;
+		}
+
+		for (int32 i = 0; i <= BulletsPerShot; ++i)
+		{
+			SpawnProjectile(TargetPoint);
+		}
+		break;
+
+	case EWeaponBulletType::Trace:
+		break;
+	}
+}
+
+void AHDAPlayerWeaponBase::SpawnProjectile(const FVector& TargetPoint)
 {
 }
