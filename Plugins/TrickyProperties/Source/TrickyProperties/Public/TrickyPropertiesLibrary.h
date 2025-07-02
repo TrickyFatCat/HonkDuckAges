@@ -128,17 +128,17 @@ struct FTrickyPropertyInt
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=TrickyProperty)
-	int32 MinValue = 0.0f;
+	int32 MinValue = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=TrickyProperty)
-	int32 Value = 100.0f;
+	int32 Value = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=TrickyProperty)
-	int32 MaxValue = 100.0f;
+	int32 MaxValue = 100;
 
-	bool IncreaseMinValue(const int32 Amount = 1.0f)
+	bool IncreaseMinValue(const int32 Amount = 1)
 	{
-		if (Amount <= 0.f)
+		if (Amount <= 0)
 		{
 			return false;
 		}
@@ -147,9 +147,9 @@ struct FTrickyPropertyInt
 		return true;
 	}
 
-	bool DecreaseMinValue(const int32 Amount = 1.0f)
+	bool DecreaseMinValue(const int32 Amount = 1)
 	{
-		if (Amount <= 0.f)
+		if (Amount <= 0)
 		{
 			return false;
 		}
@@ -158,9 +158,9 @@ struct FTrickyPropertyInt
 		return true;
 	}
 
-	bool IncreaseValue(const int32 Amount = 1.0f)
+	bool IncreaseValue(const int32 Amount = 1)
 	{
-		if (Amount <= 0.f)
+		if (Amount <= 0)
 		{
 			return false;
 		}
@@ -169,9 +169,9 @@ struct FTrickyPropertyInt
 		return true;
 	}
 
-	bool DecreaseValue(const int32 Amount = 1.0f)
+	bool DecreaseValue(const int32 Amount = 1)
 	{
-		if (Amount <= 0.f)
+		if (Amount <= 0)
 		{
 			return false;
 		}
@@ -180,9 +180,9 @@ struct FTrickyPropertyInt
 		return true;
 	}
 
-	bool IncreaseMaxValue(const int32 Amount = 1.0f)
+	bool IncreaseMaxValue(const int32 Amount = 1)
 	{
-		if (Amount <= 0.f)
+		if (Amount <= 0)
 		{
 			return false;
 		}
@@ -192,9 +192,9 @@ struct FTrickyPropertyInt
 	}
 
 
-	bool DecreaseMaxValue(const int32 Amount = 1.0f)
+	bool DecreaseMaxValue(const int32 Amount = 1)
 	{
-		if (Amount <= 0.f)
+		if (Amount <= 0)
 		{
 			return false;
 		}
