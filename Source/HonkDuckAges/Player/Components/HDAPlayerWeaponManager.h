@@ -49,6 +49,24 @@ public:
 	UFUNCTION(BlueprintGetter)
 	EWeaponSlot GetPreviousWeaponSlot() const { return PreviousWeaponSlot; }
 
+	UFUNCTION(BlueprintGetter)
+	EWeaponAmmoType GetCurrentAmmoType() const { return CurrentAmmoType; }
+
+	UFUNCTION(BlueprintGetter)
+	int32 GetCurrentShotCost() const { return CurrentShotCost; }
+
+	UFUNCTION(BlueprintPure)
+	AHDAPlayerWeaponBase* GetCurrentWeapon() const;
+
+	UFUNCTION(BlueprintPure)
+	FTrickyPropertyInt GetCurrentAmmo() const;
+
+	UFUNCTION(BlueprintCallable)
+	void GetAcquiredWeapons(TArray<AHDAPlayerWeaponBase*>& OutWeapons) const;
+
+	UFUNCTION(BlueprintCallable)
+	void GetAmmoStash(TMap<EWeaponAmmoType, FTrickyPropertyInt>& OutAmmoStash) const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager")
 	UHDAPlayerWeaponData* WeaponData = nullptr;
@@ -56,16 +74,16 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentWeaponSlot, Category="WeaponManager")
 	EWeaponSlot CurrentWeaponSlot = EWeaponSlot::Shotgun;
 
-	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
+	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentAmmoType, Category="WeaponManager")
 	EWeaponAmmoType CurrentAmmoType = EWeaponAmmoType::Gauge;
 
-	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
+	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentShotCost, Category="WeaponManager")
 	int32 CurrentShotCost = 1;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetPreviousWeaponSlot, Category="WeaponManager")
 	EWeaponSlot PreviousWeaponSlot = EWeaponSlot::Shotgun;
 
-	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
+	UPROPERTY(VisibleInstanceOnly,Category="WeaponManager")
 	TMap<EWeaponSlot, TObjectPtr<AHDAPlayerWeaponBase>> AcquiredWeapons{
 		{EWeaponSlot::Shotgun, nullptr},
 		{EWeaponSlot::SlugShot, nullptr},

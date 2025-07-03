@@ -34,6 +34,7 @@ void UHDAPlayerWeaponManager::InitializeComponent()
 
 		InitAmmoStash();
 		AddWeapon(EWeaponSlot::Shotgun);
+		ChooseWeapon(EWeaponSlot::Shotgun);
 		AddAmmo(EWeaponAmmoType::Gauge, 999);
 	}
 }
@@ -146,6 +147,29 @@ void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int3
 
 	Ammo.IncreaseValue(Value);
 	Ammo.ClampToMax();
+}
+
+AHDAPlayerWeaponBase* UHDAPlayerWeaponManager::GetCurrentWeapon() const
+{
+	return AcquiredWeapons[CurrentWeaponSlot];
+}
+
+FTrickyPropertyInt UHDAPlayerWeaponManager::GetCurrentAmmo() const
+{
+	return AmmoStash[CurrentAmmoType];
+}
+
+void UHDAPlayerWeaponManager::GetAcquiredWeapons(TArray<AHDAPlayerWeaponBase*>& OutWeapons) const
+{
+	for (auto& WeaponSlot : AcquiredWeapons)
+	{
+		OutWeapons.AddUnique(WeaponSlot.Value);
+	}
+}
+
+void UHDAPlayerWeaponManager::GetAmmoStash(TMap<EWeaponAmmoType, FTrickyPropertyInt>& OutAmmoStash) const
+{
+	OutAmmoStash = AmmoStash;
 }
 
 void UHDAPlayerWeaponManager::InitAmmoStash()
