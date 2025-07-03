@@ -58,6 +58,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* DashAction = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputAction* ShootAction = nullptr;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDALifeStateComponent> LifeStateComponent = nullptr;
 
@@ -114,6 +117,12 @@ private:
 
 	UFUNCTION()
 	void HandleDashFinished();
+
+	UFUNCTION()
+	void StartShooting();
+
+	UFUNCTION()
+	void StopShooting();
 
 	UFUNCTION()
 	void HandleZeroHealth(UHDALifeStateComponent* Component);

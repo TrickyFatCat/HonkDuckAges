@@ -67,6 +67,8 @@ void AHDAPlayerCharacter::BeginPlay()
 
 	ensureMsgf(DashAction != nullptr, TEXT("DashAction wasn't set for %s"), *GetActorNameOrLabel());
 
+	ensureMsgf(ShootAction != nullptr, TEXT("ShootAction wasn't set for %s"), *GetActorNameOrLabel());
+
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	RegisterConsoleCommands();
 #endif
@@ -103,13 +105,25 @@ void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Move);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this,
+		EnhancedInputComponent->BindAction(MoveAction,
+		                                   ETriggerEvent::Completed,
+		                                   this,
 		                                   &AHDAPlayerCharacter::StopMoving);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Aim);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AHDAPlayerCharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
+		EnhancedInputComponent->BindAction(JumpAction,
+		                                   ETriggerEvent::Completed,
+		                                   this,
 		                                   &AHDAPlayerCharacter::StopJumping);
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Started, this, &AHDAPlayerCharacter::Dash);
+		EnhancedInputComponent->BindAction(ShootAction,
+		                                   ETriggerEvent::Started,
+		                                   this,
+		                                   &AHDAPlayerCharacter::StartShooting);
+		EnhancedInputComponent->BindAction(ShootAction,
+		                                   ETriggerEvent::Completed,
+		                                   this,
+		                                   &AHDAPlayerCharacter::StopShooting);
 	}
 }
 
@@ -195,6 +209,26 @@ void AHDAPlayerCharacter::HandleDashFinished()
 	           *GetActorNameOrLabel());
 
 	StatusEffectsManager->RemoveStatusEffect(DashInvulnerabilityEffect, this);
+}
+
+void AHDAPlayerCharacter::StartShooting()
+{
+	if (!IsValid(WeaponManagerComponent))
+	{
+		return;
+	}
+
+	WeaponManagerComponent->StartShooting();
+}
+
+void AHDAPlayerCharacter::StopShooting()
+{
+	if (!IsValid(WeaponManagerComponent))
+	{
+		return;
+	}
+
+	WeaponManagerComponent->StopShooting();
 }
 
 void AHDAPlayerCharacter::HandleZeroHealth(UHDALifeStateComponent* Component)
