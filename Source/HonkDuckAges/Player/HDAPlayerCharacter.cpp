@@ -10,6 +10,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "LockKey/KeyringComponent.h"
 #include "LockKey/LockKeyType.h"
+#include "Weapons/HDAPlayerWeaponBase.h"
 
 
 AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitializer) :
@@ -316,6 +317,55 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Cyan, DebugMessage);
+
+	DebugMessage = FString::Printf(TEXT("===CURRENT WEAPON===\n"));
+
+	AHDAPlayerWeaponBase* CurrentWeapon = WeaponManagerComponent->GetCurrentWeapon();
+	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("%s\n"), *CurrentWeapon->GetActorNameOrLabel()));
+
+	DebugMessage = DebugMessage.Append(TEXT("\n===ACQUIRED WEAPONS===\n"));
+	TArray<AHDAPlayerWeaponBase*> AcquiredWeapons;
+	WeaponManagerComponent->GetAcquiredWeapons(AcquiredWeapons);
+
+	if (!AcquiredWeapons.IsEmpty())
+	{
+		for (auto Weapon : AcquiredWeapons)
+		{
+			if (!IsValid(Weapon))
+			{
+				continue;
+			}
+
+			DebugMessage = DebugMessage.Append(FString::Printf(TEXT("%s\n"), *Weapon->GetActorNameOrLabel()));
+		}
+	}
+	else
+	{
+		DebugMessage = DebugMessage.Append(TEXT("NONE\n"));
+	}
+
+	TMap<EWeaponAmmoType, FTrickyPropertyInt> AmmoStash;
+	WeaponManagerComponent->GetAmmoStash(AmmoStash);
+	DebugMessage = DebugMessage.Append(TEXT("\n===AMMO===\n"));
+
+	if (AmmoStash.IsEmpty())
+	{
+		DebugMessage = DebugMessage.Append(TEXT("NONE\n"));
+	}
+	else
+	{
+		for (const auto& [AmmoType, AmmoCount] : AmmoStash)
+		{
+			const FString AmmoTypeName = StaticEnum<EWeaponAmmoType>()->GetNameStringByValue(
+				static_cast<int64>(AmmoType));
+			DebugMessage = DebugMessage.Append(FString::Printf(TEXT("%s : %d / %d\n"),
+			                                                   *AmmoTypeName,
+			                                                   AmmoCount.Value,
+			                                                   AmmoCount.MaxValue));
+		}
+	}
+
+	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Emerald, DebugMessage);
 
 	DebugMessage = FString::Printf(TEXT("===PLAYER MOVEMENT===\n"));
 
