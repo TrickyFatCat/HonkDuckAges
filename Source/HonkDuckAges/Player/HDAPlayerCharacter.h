@@ -149,5 +149,9 @@ private:
 	void ToggleDemigodMode();
 
 	void PrintDemiGodMessage(const float DeltaTime) const;
+
+	void GiveAllWeapons() const;
+
+	void GiveAllAmmo() const;
 #endif
 };

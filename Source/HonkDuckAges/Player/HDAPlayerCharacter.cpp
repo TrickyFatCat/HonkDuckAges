@@ -277,6 +277,14 @@ void AHDAPlayerCharacter::RegisterConsoleCommands()
 		                                              "Toggles demigod mode for player. Damage will be registered as usual, but health will fully restored on death"),
 	                                              FConsoleCommandDelegate::CreateUObject(
 		                                              this, &AHDAPlayerCharacter::ToggleDemigodMode));
+	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.AllWeapons"),
+	                                              TEXT("Gives all weapons to player"),
+	                                              FConsoleCommandDelegate::CreateUObject(
+		                                              this, &AHDAPlayerCharacter::GiveAllWeapons));
+	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.AllAmmo"),
+	                                              TEXT("Fully restores all ammo for player"),
+	                                              FConsoleCommandDelegate::CreateUObject(
+		                                              this, &AHDAPlayerCharacter::GiveAllAmmo));
 }
 
 void AHDAPlayerCharacter::UnregisterConsoleCommands()
@@ -284,6 +292,8 @@ void AHDAPlayerCharacter::UnregisterConsoleCommands()
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.TogglePlayerDebugData"), false);
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.God"), false);
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.Demigod"), false);
+	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.AllWeapons"), false);
+	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.AllAmmo"), false);
 }
 
 void AHDAPlayerCharacter::TogglePlayerDebugData()
@@ -445,5 +455,23 @@ void AHDAPlayerCharacter::PrintDemiGodMessage(const float DeltaTime) const
 	}
 
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Orange, "===DEMIGOD MODE ENABLED===", true, FVector2D(2));
+}
+
+void AHDAPlayerCharacter::GiveAllWeapons() const
+{
+	WeaponManagerComponent->AddWeapon(EWeaponSlot::SlugShot);
+	WeaponManagerComponent->AddWeapon(EWeaponSlot::HeavyChainGun);
+	WeaponManagerComponent->AddWeapon(EWeaponSlot::MiniRockets);
+	WeaponManagerComponent->AddWeapon(EWeaponSlot::PlasmaBeam);
+	WeaponManagerComponent->AddWeapon(EWeaponSlot::LaserCrossbow);
+	WeaponManagerComponent->AddWeapon(EWeaponSlot::ShieldThrower);
+}
+
+void AHDAPlayerCharacter::GiveAllAmmo() const
+{
+	WeaponManagerComponent->AddAmmo(EWeaponAmmoType::Gauge, 9999);
+	WeaponManagerComponent->AddAmmo(EWeaponAmmoType::Bullet, 9999);
+	WeaponManagerComponent->AddAmmo(EWeaponAmmoType::Energy, 9999);
+	WeaponManagerComponent->AddAmmo(EWeaponAmmoType::Shield, 9999);
 }
 #endif
