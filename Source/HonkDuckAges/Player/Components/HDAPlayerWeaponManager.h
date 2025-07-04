@@ -67,6 +67,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetAmmoStash(TMap<EWeaponAmmoType, FTrickyPropertyInt>& OutAmmoStash) const;
 
+	UFUNCTION(BlueprintCallable)
+	void GetAmmo(const EWeaponAmmoType AmmoType, FTrickyPropertyInt& OutAmmo) const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager")
 	UHDAPlayerWeaponData* WeaponData = nullptr;

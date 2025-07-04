@@ -172,6 +172,16 @@ void UHDAPlayerWeaponManager::GetAmmoStash(TMap<EWeaponAmmoType, FTrickyProperty
 	OutAmmoStash = AmmoStash;
 }
 
+void UHDAPlayerWeaponManager::GetAmmo(const EWeaponAmmoType AmmoType, FTrickyPropertyInt& OutAmmo) const
+{
+	if (!AmmoStash.Contains(AmmoType))
+	{
+		return;
+	}
+
+	OutAmmo = AmmoStash[AmmoType];
+}
+
 void UHDAPlayerWeaponManager::InitAmmoStash()
 {
 	if (!ensureMsgf(!AmmoStash.IsEmpty(), TEXT("AmmoStash in PlayerManagerComponent is empty.")))
