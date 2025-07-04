@@ -35,6 +35,7 @@ void AHDAPlayerWeaponBase::PostInitializeComponents()
 
 void AHDAPlayerWeaponBase::StartShooting(const FVector& TargetPoint)
 {
+	MakeShot(TargetPoint);
 }
 
 void AHDAPlayerWeaponBase::StopShooting()
