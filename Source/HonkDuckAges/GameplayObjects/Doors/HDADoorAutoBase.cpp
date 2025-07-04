@@ -81,9 +81,9 @@ void AHDADoorAutoBase::HandleTriggerExited(UPrimitiveComponent* OverlappedCompon
 	{
 		const FVector Location = OtherActor->GetActorLocation();
 		ExitDirection = UKismetMathLibrary::GetDirectionUnitVector(Location, GetActorLocation());
-		const int32 DotProductEnter = FMath::CeilToInt(FVector::DotProduct(EnterDirection, GetActorForwardVector()));
-		const int32 DotProductExit = FMath::CeilToInt(FVector::DotProduct(ExitDirection, GetActorForwardVector()));
-		bWantsToBeDisabled = DotProductEnter > DotProductExit;
+		const int32 DotProductEnter = FMath::Sign(FVector::DotProduct(EnterDirection, GetActorForwardVector()));
+		const int32 DotProductExit = FMath::Sign(FVector::DotProduct(ExitDirection, GetActorForwardVector()));
+		bWantsToBeDisabled = DotProductEnter != DotProductExit;
 	}
 
 	switch (CurrentState)
