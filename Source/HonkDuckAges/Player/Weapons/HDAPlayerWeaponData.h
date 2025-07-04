@@ -71,4 +71,10 @@ public:
 		{EWeaponAmmoType::Energy, 200},
 		{EWeaponAmmoType::Shield, 20}
 	};
+
+	UFUNCTION()
+	static FString GetSlotName(const EWeaponSlot WeaponSlot);
+
+	UFUNCTION()
+	static FString GetAmmoTypeName(const EWeaponAmmoType AmmoType);
 };
