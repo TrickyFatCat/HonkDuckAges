@@ -5,6 +5,7 @@
 
 #include "HonkDuckAges/Player/Weapons/HDAPlayerWeaponBase.h"
 
+DEFINE_LOG_CATEGORY(LogPlayerWeaponManager);
 
 UHDAPlayerWeaponManager::UHDAPlayerWeaponManager()
 {
@@ -77,6 +78,12 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 {
 	if (HasWeapon(WeaponSlot))
 	{
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+		const FString SlotName = UHDAPlayerWeaponData::GetSlotName(WeaponSlot);
+		const FString Message = FString::Printf(TEXT("Could NOT add weapon for %s slot. Player has it already."),
+		                                        *SlotName);
+		PrintLog(Message);
+#endif
 		return;
 	}
 
@@ -94,6 +101,14 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 	NewWeapon->FinishSpawning(FTransform::Identity);
 	AcquiredWeapons[WeaponSlot] = NewWeapon;
 	ChooseWeapon(WeaponSlot);
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	const FString SlotName = UHDAPlayerWeaponData::GetSlotName(WeaponSlot);
+	const FString Message = FString::Printf(TEXT("%s weapon was added to %s slot."),
+	                                        *NewWeapon->GetActorNameOrLabel(),
+	                                        *SlotName);
+	PrintLog(Message);
+#endif
 }
 
 bool UHDAPlayerWeaponManager::HasWeapon(const EWeaponSlot WeaponSlot)
@@ -213,3 +228,10 @@ void UHDAPlayerWeaponManager::HandleWeaponShot(AHDAPlayerWeaponBase* Weapon)
 		//TODO: Deactivate weapon
 	}
 }
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+void UHDAPlayerWeaponManager::PrintLog(const FString& Message) const
+{
+	UE_LOG(LogPlayerWeaponManager, Log, TEXT("%s"), *Message);
+}
+#endif

@@ -10,6 +10,8 @@
 
 class AHDAPlayerWeaponBase;
 
+DECLARE_LOG_CATEGORY_EXTERN(LogPlayerWeaponManager, Log, All);
+
 UCLASS(ClassGroup=(Custom), PrioritizeCategories="WeaponManager")
 class HONKDUCKAGES_API UHDAPlayerWeaponManager : public UActorComponent
 {
@@ -110,4 +112,8 @@ private:
 
 	UFUNCTION()
 	void HandleWeaponShot(AHDAPlayerWeaponBase* Weapon);
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	void PrintLog(const FString& Message) const;
+#endif
 };
