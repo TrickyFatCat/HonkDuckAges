@@ -28,8 +28,11 @@ void AHDAPlayerWeaponBase::PostInitializeComponents()
 
 	if (IsValid(World) && World->IsGameWorld())
 	{
-		ensureMsgf(IsValid(ProjectileClass) && BulletType == EWeaponBulletType::Projectile,
-		           TEXT("Invalid projectile class in %s"), *GetActorNameOrLabel());
+		if (BulletType == EWeaponBulletType::Projectile)
+		{
+			ensureMsgf(IsValid(ProjectileClass),
+			           TEXT("Invalid projectile class in %s"), *GetActorNameOrLabel());
+		}
 	}
 }
 
