@@ -36,16 +36,16 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="WeaponStateController")
 	FOnWeaponStateChangedDynamicSignature OnWeaponStateChanged;
 
-	UFUNCTION(BlueprintCallable, Category=("WeaponStateController"))
+	UFUNCTION(BlueprintCallable, Category="WeaponStateController")
 	bool TransitToIdle(const bool bTransitImmediately);
 
-	UFUNCTION(BlueprintCallable, Category=("WeaponStateController"))
+	UFUNCTION(BlueprintCallable, Category="WeaponStateController")
 	bool TransitToShooting(const bool bTransitImmediately);
 
-	UFUNCTION(BluepirntCallable, Category=("WeaponStateController"))
+	UFUNCTION(BlueprintCallable, Category="WeaponStateController")
 	bool TransitToOutOfAmmo(const bool bTransitImmediately);
 	
-	UFUNCTION(BluepirntCallable, Category=("WeaponStateController"))
+	UFUNCTION(BlueprintCallable, Category="WeaponStateController")
 	bool TransitToDisabled(const bool bTransitImmediately);
 	
 	UFUNCTION(BlueprintCallable)
