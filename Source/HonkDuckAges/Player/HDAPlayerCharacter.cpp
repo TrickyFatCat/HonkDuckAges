@@ -277,10 +277,12 @@ void AHDAPlayerCharacter::RegisterConsoleCommands()
 		                                              "Toggles demigod mode for player. Damage will be registered as usual, but health will fully restored on death"),
 	                                              FConsoleCommandDelegate::CreateUObject(
 		                                              this, &AHDAPlayerCharacter::ToggleDemigodMode));
+
 	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.AllWeapons"),
 	                                              TEXT("Gives all weapons to player"),
 	                                              FConsoleCommandDelegate::CreateUObject(
 		                                              this, &AHDAPlayerCharacter::GiveAllWeapons));
+
 	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.AllAmmo"),
 	                                              TEXT("Fully restores all ammo for player"),
 	                                              FConsoleCommandDelegate::CreateUObject(
@@ -322,7 +324,7 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	{
 		for (const TSubclassOf<ULockKeyType>& LockKey : AcquiredLockKeys)
 		{
-			DebugMessage = DebugMessage.Append(FString::Printf(TEXT("%s\n"), *LockKey->GetName()));
+			DebugMessage = DebugMessage.Appendf(TEXT("%s\n"), *LockKey->GetName());
 		}
 	}
 
@@ -331,7 +333,10 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	DebugMessage = FString::Printf(TEXT("===CURRENT WEAPON===\n"));
 
 	AHDAPlayerWeaponBase* CurrentWeapon = WeaponManagerComponent->GetCurrentWeapon();
-	DebugMessage = DebugMessage.Append(FString::Printf(TEXT("%s\n"), *CurrentWeapon->GetActorNameOrLabel()));
+	DebugMessage = DebugMessage.Appendf(TEXT("%s\n"), *CurrentWeapon->GetActorNameOrLabel());
+	const FString WeaponStateName = StaticEnum<EWeaponState>()->GetNameStringByValue(
+		static_cast<int64>(CurrentWeapon->GetCurrentState()));
+	DebugMessage = DebugMessage.Appendf(TEXT("Current State: %s\n"), *WeaponStateName);
 
 	DebugMessage = DebugMessage.Append(TEXT("\n===ACQUIRED WEAPONS===\n"));
 	TArray<AHDAPlayerWeaponBase*> AcquiredWeapons;
@@ -366,8 +371,7 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	{
 		for (const auto& [AmmoType, AmmoCount] : AmmoStash)
 		{
-			const FString AmmoTypeName = StaticEnum<EWeaponAmmoType>()->GetNameStringByValue(
-				static_cast<int64>(AmmoType));
+			const FString AmmoTypeName = UHDAPlayerWeaponData::GetAmmoTypeName(AmmoType);
 			DebugMessage = DebugMessage.Append(FString::Printf(TEXT("%s : %d / %d\n"),
 			                                                   *AmmoTypeName,
 			                                                   AmmoCount.Value,
