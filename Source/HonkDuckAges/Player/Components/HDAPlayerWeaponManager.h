@@ -114,6 +114,6 @@ private:
 	void HandleWeaponShot(AHDAPlayerWeaponBase* Weapon);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
-	void PrintLog(const FString& Message) const;
+	static void PrintLog(const FString& Message);
 #endif
 };

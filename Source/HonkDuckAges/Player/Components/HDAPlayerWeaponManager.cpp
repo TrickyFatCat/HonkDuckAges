@@ -100,7 +100,6 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 	NewWeapon->AttachToActor(GetOwner(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 	NewWeapon->FinishSpawning(FTransform::Identity);
 	AcquiredWeapons[WeaponSlot] = NewWeapon;
-	ChooseWeapon(WeaponSlot);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	const FString SlotName = UHDAPlayerWeaponData::GetSlotName(WeaponSlot);
@@ -144,6 +143,15 @@ void UHDAPlayerWeaponManager::ChooseWeapon(const EWeaponSlot WeaponSlot)
 	{
 		CurrentWeapon->OnPlayerWeaponShot.AddUniqueDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
 	}
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	const FString PreviousSlotName = UHDAPlayerWeaponData::GetSlotName(PreviousWeaponSlot);
+	const FString CurrentSlotName = UHDAPlayerWeaponData::GetSlotName(CurrentWeaponSlot);
+	const FString Message = FString::Printf(TEXT("%s weapon was switched to %s weapon."),
+	                                        *PreviousSlotName,
+	                                        *CurrentSlotName);
+	PrintLog(Message);
+#endif
 }
 
 void UHDAPlayerWeaponManager::ChoosePreviousWeapon()
@@ -162,6 +170,16 @@ void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int3
 
 	Ammo.IncreaseValue(Value);
 	Ammo.ClampToMax();
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	const FString AmmoName = UHDAPlayerWeaponData::GetAmmoTypeName(AmmoType);
+	const FString Message = FString::Printf(TEXT("%s ammo was increased by %d. Current value %d/%d."),
+	                                        *AmmoName,
+	                                        Value,
+	                                        Ammo.Value,
+	                                        Ammo.MaxValue);
+	PrintLog(Message);
+#endif
 }
 
 AHDAPlayerWeaponBase* UHDAPlayerWeaponManager::GetCurrentWeapon() const
@@ -227,10 +245,20 @@ void UHDAPlayerWeaponManager::HandleWeaponShot(AHDAPlayerWeaponBase* Weapon)
 	{
 		//TODO: Deactivate weapon
 	}
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	const FString AmmoTypeName = UHDAPlayerWeaponData::GetAmmoTypeName(CurrentAmmoType);
+	const FString Message = FString::Printf(TEXT("%s ammo was decreased by %d. Current value %d/%d."),
+	                                        *AmmoTypeName,
+	                                        CurrentShotCost,
+	                                        Ammo.Value,
+	                                        Ammo.MaxValue);
+	PrintLog(Message);
+#endif
 }
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
-void UHDAPlayerWeaponManager::PrintLog(const FString& Message) const
+void UHDAPlayerWeaponManager::PrintLog(const FString& Message)
 {
 	UE_LOG(LogPlayerWeaponManager, Log, TEXT("%s"), *Message);
 }
