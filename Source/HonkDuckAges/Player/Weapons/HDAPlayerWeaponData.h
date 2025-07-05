@@ -53,6 +53,9 @@ class HONKDUCKAGES_API UHDAPlayerWeaponData : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager")
+	EWeaponSlot DefaultWeaponSlot = EWeaponSlot::Shotgun;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(ReadOnlyKeys, ForceInlineRow))
 	TMap<EWeaponSlot, FWeaponData> WeaponSlots{
 		{EWeaponSlot::Shotgun, FWeaponData{nullptr, EWeaponAmmoType::Gauge, 2}},
