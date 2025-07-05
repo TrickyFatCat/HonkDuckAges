@@ -34,9 +34,9 @@ void UHDAPlayerWeaponManager::InitializeComponent()
 		}
 
 		InitAmmoStash();
-		AddWeapon(EWeaponSlot::Shotgun);
-		ChooseWeapon(EWeaponSlot::Shotgun);
-		AddAmmo(EWeaponAmmoType::Gauge, 999);
+		AddWeapon(WeaponData->DefaultWeaponSlot);
+		ChooseWeapon(WeaponData->DefaultWeaponSlot);
+		AddAmmo(CurrentAmmoType, 999);
 	}
 }
 
@@ -70,7 +70,7 @@ void UHDAPlayerWeaponManager::StopShooting()
 	{
 		return;
 	}
-
+	
 	CurrentWeapon->StopShooting();
 }
 
@@ -97,6 +97,7 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 	AHDAPlayerWeaponBase* NewWeapon = GetWorld()->SpawnActorDeferred<AHDAPlayerWeaponBase>(
 		WeaponClass, FTransform::Identity);
 	NewWeapon->SetOwner(GetOwner());
+	NewWeapon->SetOwningWeaponManager(this);
 	NewWeapon->AttachToActor(GetOwner(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 	NewWeapon->FinishSpawning(FTransform::Identity);
 	AcquiredWeapons[WeaponSlot] = NewWeapon;
@@ -161,6 +162,11 @@ void UHDAPlayerWeaponManager::ChoosePreviousWeapon()
 
 void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int32 Value)
 {
+	if (Value <= 0)
+	{
+		return;
+	}
+	
 	FTrickyPropertyInt& Ammo = AmmoStash[AmmoType];
 
 	if (Ammo.ReachedMaxValue())
@@ -170,6 +176,7 @@ void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int3
 
 	Ammo.IncreaseValue(Value);
 	Ammo.ClampToMax();
+	OnAmmoIncreased.Broadcast(this, AmmoType, Ammo, Value);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	const FString AmmoName = UHDAPlayerWeaponData::GetAmmoTypeName(AmmoType);
@@ -180,6 +187,40 @@ void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int3
 	                                        Ammo.MaxValue);
 	PrintLog(Message);
 #endif
+}
+
+void UHDAPlayerWeaponManager::SubtractAmmo(const EWeaponAmmoType AmmoType, const int32 Value)
+{
+	if (Value <= 0)
+	{
+		return;
+	}
+
+	FTrickyPropertyInt& Ammo = AmmoStash[AmmoType];
+
+	if (Ammo.ReachedMinValue())
+	{
+		return;
+	}
+
+	Ammo.DecreaseValue(Value);
+	Ammo.ClampToMin();
+	OnAmmoDecreased.Broadcast(this, AmmoType, Ammo, Value);
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	const FString AmmoTypeName = UHDAPlayerWeaponData::GetAmmoTypeName(CurrentAmmoType);
+	const FString Message = FString::Printf(TEXT("%s ammo was decreased by %d. Current value %d/%d."),
+											*AmmoTypeName,
+											CurrentShotCost,
+											Ammo.Value,
+											Ammo.MaxValue);
+	PrintLog(Message);
+#endif
+
+	if (CurrentAmmoType == AmmoType && Ammo.ReachedMinValue())
+	{
+		StopShooting();
+	}
 }
 
 AHDAPlayerWeaponBase* UHDAPlayerWeaponManager::GetCurrentWeapon() const
@@ -235,32 +276,9 @@ void UHDAPlayerWeaponManager::InitAmmoStash()
 	}
 }
 
-void UHDAPlayerWeaponManager::HandleWeaponShot(const AHDAPlayerWeaponBase* Weapon)
+void UHDAPlayerWeaponManager::HandleWeaponShot(AHDAPlayerWeaponBase* Weapon)
 {
-	if (!IsValid(Weapon))
-	{
-		return;
-	}
-
-	FTrickyPropertyInt& Ammo = AmmoStash[CurrentAmmoType];
-	Ammo.DecreaseValue(CurrentShotCost);
-	Ammo.ClampToMin();
-
-	if (Ammo.ReachedMinValue())
-	{
-		StopShooting();
-		//TODO: Deactivate weapon
-	}
-
-#if WITH_EDITOR || !UE_BUILD_SHIPPING
-	const FString AmmoTypeName = UHDAPlayerWeaponData::GetAmmoTypeName(CurrentAmmoType);
-	const FString Message = FString::Printf(TEXT("%s ammo was decreased by %d. Current value %d/%d."),
-	                                        *AmmoTypeName,
-	                                        CurrentShotCost,
-	                                        Ammo.Value,
-	                                        Ammo.MaxValue);
-	PrintLog(Message);
-#endif
+	SubtractAmmo(CurrentAmmoType, CurrentShotCost);
 }
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING

@@ -12,6 +12,12 @@ class AHDAPlayerWeaponBase;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerWeaponManager, Log, All);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAmmoValueChangedDynamicSignature,
+                                              UHDAPlayerWeaponManager*, Component,
+                                              EWeaponAmmoType, AmmoType,
+                                              const FTrickyPropertyInt&, Ammo,
+                                              int32, DeltaValue);
+
 UCLASS(ClassGroup=(Custom), PrioritizeCategories="WeaponManager")
 class HONKDUCKAGES_API UHDAPlayerWeaponManager : public UActorComponent
 {
@@ -24,6 +30,12 @@ protected:
 	virtual void InitializeComponent() override;
 
 public:
+	UPROPERTY(BlueprintAssignable)
+	FOnAmmoValueChangedDynamicSignature OnAmmoIncreased;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnAmmoValueChangedDynamicSignature OnAmmoDecreased;
+
 	UFUNCTION()
 	void StartShooting();
 
@@ -44,6 +56,9 @@ public:
 
 	UFUNCTION()
 	void AddAmmo(const EWeaponAmmoType AmmoType, const int32 Value);
+
+	UFUNCTION()
+	void SubtractAmmo(const EWeaponAmmoType AmmoType, const int32 Value);
 
 	UFUNCTION(BlueprintGetter)
 	EWeaponSlot GetCurrentWeaponSlot() const { return CurrentWeaponSlot; }
@@ -114,7 +129,7 @@ private:
 	void InitAmmoStash();
 
 	UFUNCTION()
-	void HandleWeaponShot(const AHDAPlayerWeaponBase* Weapon);
+	void HandleWeaponShot(AHDAPlayerWeaponBase* Weapon);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	static void PrintLog(const FString& Message);
