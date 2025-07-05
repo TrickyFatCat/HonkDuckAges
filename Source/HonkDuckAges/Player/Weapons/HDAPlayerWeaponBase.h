@@ -3,9 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HDAWeaponStateController.h"
 #include "GameFramework/Actor.h"
 #include "HDAPlayerWeaponBase.generated.h"
 
+struct FTrickyPropertyInt;
+enum class EWeaponAmmoType : uint8;
+class UHDAPlayerWeaponManager;
+enum class EWeaponState : uint8;
+class UHDAWeaponStateController;
 class AHDAPlayerProjectileBase;
 class UArrowComponent;
 
@@ -40,10 +46,15 @@ protected:
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerWeaponShotDynamicSignature OnPlayerWeaponShot;
-	
+
 	virtual void StartShooting(const FVector& TargetPoint);
 
 	virtual void StopShooting();
+
+	void TransitToIdle() const;
+
+	UFUNCTION(BlueprintPure)
+	EWeaponState GetCurrentState() const { return WeaponStateController->GetCurrentState(); }
 
 	UFUNCTION(BlueprintGetter)
 	EWeaponBulletType GetBulletType() const { return BulletType; }
@@ -51,9 +62,21 @@ public:
 	UFUNCTION(BlueprintGetter)
 	TSubclassOf<AHDAPlayerProjectileBase> GetProjectileClass() const { return ProjectileClass; }
 
+	UFUNCTION(BlueprintGetter)
+	EWeaponMode GetWeaponMode() const { return WeaponMode; }
+
+	UFUNCTION()
+	void SetOwningWeaponManager(UHDAPlayerWeaponManager* NewManager);
+
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<USceneComponent> Root = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UHDAWeaponStateController> WeaponStateController = nullptr;
+
+	UPROPERTY()
+	TWeakObjectPtr<UHDAPlayerWeaponManager> OwningWeaponManager = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintGetter=GetBulletType, Category="Weapon")
 	EWeaponBulletType BulletType = EWeaponBulletType::Projectile;
@@ -78,7 +101,7 @@ protected:
 	int32 BulletsPerShot = 1;
 
 	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
+		BlueprintGetter=GetWeaponMode,
 		Category="Weapon")
 	EWeaponMode WeaponMode = EWeaponMode::FullAuto;
 
@@ -90,4 +113,10 @@ protected:
 	void MakeShot(const FVector& TargetPoint);
 
 	virtual void SpawnProjectile(const FVector& TargetPoint);
+
+	UFUNCTION()
+	void HandleAmmoIncreased(UHDAPlayerWeaponManager* Component,
+	                         EWeaponAmmoType AmmoType,
+	                         const FTrickyPropertyInt& Ammo,
+	                         int32 DeltaValue);
 };
