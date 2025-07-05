@@ -192,6 +192,11 @@ FTrickyPropertyInt UHDAPlayerWeaponManager::GetCurrentAmmo() const
 	return AmmoStash[CurrentAmmoType];
 }
 
+bool UHDAPlayerWeaponManager::HasEnoughCurrentAmmo() const
+{
+	return !GetCurrentAmmo().ReachedMinValue();
+}
+
 void UHDAPlayerWeaponManager::GetAcquiredWeapons(TArray<AHDAPlayerWeaponBase*>& OutWeapons) const
 {
 	for (auto& WeaponSlot : AcquiredWeapons)
@@ -230,7 +235,7 @@ void UHDAPlayerWeaponManager::InitAmmoStash()
 	}
 }
 
-void UHDAPlayerWeaponManager::HandleWeaponShot(AHDAPlayerWeaponBase* Weapon)
+void UHDAPlayerWeaponManager::HandleWeaponShot(const AHDAPlayerWeaponBase* Weapon)
 {
 	if (!IsValid(Weapon))
 	{
@@ -243,6 +248,7 @@ void UHDAPlayerWeaponManager::HandleWeaponShot(AHDAPlayerWeaponBase* Weapon)
 
 	if (Ammo.ReachedMinValue())
 	{
+		StopShooting();
 		//TODO: Deactivate weapon
 	}
 

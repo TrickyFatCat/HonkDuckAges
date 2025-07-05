@@ -63,6 +63,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	FTrickyPropertyInt GetCurrentAmmo() const;
 
+	UFUNCTION(BlueprintPure)
+	bool HasEnoughCurrentAmmo() const;
+
 	UFUNCTION(BlueprintCallable)
 	void GetAcquiredWeapons(TArray<AHDAPlayerWeaponBase*>& OutWeapons) const;
 
@@ -88,7 +91,7 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetPreviousWeaponSlot, Category="WeaponManager")
 	EWeaponSlot PreviousWeaponSlot = EWeaponSlot::Shotgun;
 
-	UPROPERTY(VisibleInstanceOnly,Category="WeaponManager")
+	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
 	TMap<EWeaponSlot, TObjectPtr<AHDAPlayerWeaponBase>> AcquiredWeapons{
 		{EWeaponSlot::Shotgun, nullptr},
 		{EWeaponSlot::SlugShot, nullptr},
@@ -111,7 +114,7 @@ private:
 	void InitAmmoStash();
 
 	UFUNCTION()
-	void HandleWeaponShot(AHDAPlayerWeaponBase* Weapon);
+	void HandleWeaponShot(const AHDAPlayerWeaponBase* Weapon);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	static void PrintLog(const FString& Message);
