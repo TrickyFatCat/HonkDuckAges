@@ -124,7 +124,7 @@ private:
 
 	void DecreaseHealth(const int32 Value);
 
-#if WITH_EDITOR
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
 	static void PrintLog(const FString& Message);
 
 	static void PrintWarning(const FString& Message);

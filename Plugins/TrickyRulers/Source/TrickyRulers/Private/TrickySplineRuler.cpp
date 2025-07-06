@@ -12,6 +12,7 @@ ATrickySplineRuler::ATrickySplineRuler()
 	PrimaryActorTick.bCanEverTick = true;
 	bIsEditorOnlyActor = true;
 
+#if WITH_EDITOR
 	SplineComponent = CreateEditorOnlyDefaultSubobject<UTrickySplineComponent>(TEXT("SplineComponent"));
 	SetRootComponent(SplineComponent);
 	SplineComponent->SetUnselectedSplineSegmentColor(FColor::Purple);
@@ -20,6 +21,7 @@ ATrickySplineRuler::ATrickySplineRuler()
 
 	DebugTextComponent = CreateEditorOnlyDefaultSubobject<UTrickyDebugTextComponent>(TEXT("DebugTextComponent"));
 	DebugTextComponent->SetupAttachment(GetRootComponent());
+#endif
 }
 
 bool ATrickySplineRuler::ShouldTickIfViewportsOnly() const
