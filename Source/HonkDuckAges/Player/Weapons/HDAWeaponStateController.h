@@ -16,6 +16,8 @@ enum class EWeaponState : uint8
 	Transition
 };
 
+DECLARE_LOG_CATEGORY_EXTERN(LogWeaponStateController, Log, All);
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnWeaponStateChangedDynamicSignature,
                                                UHDAWeaponStateController*, Component,
                                                EWeaponState, NewState,
@@ -66,4 +68,9 @@ protected:
 
 	UFUNCTION()
 	bool ChangeState(const EWeaponState NewState, const bool bTransitImmediately);
+
+private:
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	void PrintLog(const FString& Message);
+#endif
 };
