@@ -8,6 +8,8 @@
 #include "TrickyRulerProperties.h"
 #include "TrickyRuler.generated.h"
 
+class UBillboardComponent;
+
 /**
  * Represents a ruler actor that can calculate and visualize different measurement shapes,
  * such as line, circle, sphere, cylinder, capsule, box, and cone.
@@ -26,13 +28,15 @@ public:
 protected:
 	virtual bool ShouldTickIfViewportsOnly() const override;
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
 	virtual void PostInitProperties() override;
 
 	virtual void PostEditMove(bool bFinished) override;
-
+	
 	virtual void PostLoad() override;
+#endif
 
 public:
 	virtual void Tick(float DeltaTime) override;

@@ -14,6 +14,7 @@ ATrickyRuler::ATrickyRuler()
 	PrimaryActorTick.bCanEverTick = true;
 	bIsEditorOnlyActor = true;
 
+#if WITH_EDITOR
 	RootComponent = CreateEditorOnlyDefaultSubobject<USceneComponent>(TEXT("Root"));
 
 	TrickyDebugTextComponent = CreateEditorOnlyDefaultSubobject<UTrickyDebugTextComponent>(TEXT("DebugText"));
@@ -25,8 +26,11 @@ ATrickyRuler::ATrickyRuler()
 		BillboardComponent->SetupAttachment(GetRootComponent());
 		UTexture2D* BillboardTexture = LoadObject<UTexture2D>(this, TEXT("/Engine/EditorResources/S_TargetPoint"));
 		BillboardComponent->SetSprite(BillboardTexture);
+#if WITH_EDITORONLY_DATA
 		SpriteScale = 0.5;
+#endif
 	}
+#endif
 }
 
 bool ATrickyRuler::ShouldTickIfViewportsOnly() const
@@ -34,6 +38,7 @@ bool ATrickyRuler::ShouldTickIfViewportsOnly() const
 	return true;
 }
 
+#if WITH_EDITOR
 void ATrickyRuler::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -60,6 +65,7 @@ void ATrickyRuler::PostLoad()
 	Super::PostLoad();
 	UpdateDimensions();
 }
+#endif
 
 void ATrickyRuler::Tick(float DeltaTime)
 {

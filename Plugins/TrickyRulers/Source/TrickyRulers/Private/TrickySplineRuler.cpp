@@ -34,10 +34,11 @@ void ATrickySplineRuler::OnConstruction(const FTransform& Transform)
 	UpdateDebugText();
 }
 
-inline void ATrickySplineRuler::Tick(float DeltaSeconds)
+void ATrickySplineRuler::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+#if WITH_EDITOR
 	for (int32 i = 0; i < GetLastSplinePoint(); ++i)
 	{
 		const float InputKey = static_cast<float>(i) + 0.5;
@@ -61,6 +62,7 @@ inline void ATrickySplineRuler::Tick(float DeltaSeconds)
 		              0,
 		              2.f);
 	}
+#endif
 }
 
 void ATrickySplineRuler::SetTypeToLinear() const

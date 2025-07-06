@@ -23,7 +23,9 @@ public:
 	AHDADoorBase();
 
 protected:
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 	virtual void PostInitializeComponents() override;
 

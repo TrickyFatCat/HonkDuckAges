@@ -58,6 +58,7 @@ void AHDAJumpPad::PostInitializeComponents()
 	}
 }
 
+#if WITH_EDITOR
 void AHDAJumpPad::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -83,6 +84,7 @@ void AHDAJumpPad::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyC
 		HandleStateChanged(nullptr, InitialState, true);
 	}
 }
+#endif
 
 void AHDAJumpPad::HandleTriggerEntered(UPrimitiveComponent* OverlappedComponent,
                                        AActor* OtherActor,

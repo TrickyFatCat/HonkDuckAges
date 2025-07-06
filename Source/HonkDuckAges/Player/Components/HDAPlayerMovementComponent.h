@@ -30,7 +30,9 @@ public:
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 	virtual bool CanEverJump() const override;
 

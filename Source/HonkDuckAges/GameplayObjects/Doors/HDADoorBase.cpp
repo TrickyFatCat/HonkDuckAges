@@ -49,6 +49,7 @@ AHDADoorBase::AHDADoorBase()
 #endif
 }
 
+#if WITH_EDITOR
 void AHDADoorBase::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -70,10 +71,9 @@ void AHDADoorBase::PostEditChangeProperty(struct FPropertyChangedEvent& Property
 		LockStateControllerComponent->SetRequiredKey(RequiredKey);
 	}
 
-#if WITH_EDITOR
 	UpdateDebugText();
-#endif
 }
+#endif
 
 void AHDADoorBase::PostInitializeComponents()
 {

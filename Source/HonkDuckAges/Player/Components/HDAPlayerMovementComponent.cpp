@@ -37,6 +37,7 @@ void UHDAPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	}
 }
 
+#if WITH_EDITOR
 void UHDAPlayerMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -51,6 +52,7 @@ void UHDAPlayerMovementComponent::PostEditChangeProperty(FPropertyChangedEvent& 
 		JumpZVelocity = CalculateJumpSpeed(JumpHeight);
 	}
 }
+#endif
 
 bool UHDAPlayerMovementComponent::CanEverJump() const
 {
