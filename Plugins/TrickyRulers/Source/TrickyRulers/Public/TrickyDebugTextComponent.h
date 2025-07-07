@@ -95,7 +95,7 @@ protected:
 	 * Current debug text data.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DebugText",
-		meta=(EditCondition = "!bDrawOneLabel && bDrawDebug", EditConditionHides))
+		meta=(EditCondition = "bDrawDebug", EditConditionHides))
 	TArray<FTrickyDebugTextData> DebugLabels;
 
 	/**
