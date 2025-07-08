@@ -3,6 +3,7 @@
 
 #include "HDAPlayerWeaponManager.h"
 
+#include "Camera/CameraComponent.h"
 #include "HonkDuckAges/Player/Weapons/HDAPlayerWeaponBase.h"
 
 DEFINE_LOG_CATEGORY(LogPlayerWeaponManager);
@@ -33,6 +34,7 @@ void UHDAPlayerWeaponManager::InitializeComponent()
 			}
 		}
 
+		CameraComponent = GetOwner()->GetComponentByClass<UCameraComponent>();
 		InitAmmoStash();
 		AddWeapon(WeaponData->DefaultWeaponSlot);
 		ChooseWeapon(WeaponData->DefaultWeaponSlot);
@@ -70,7 +72,7 @@ void UHDAPlayerWeaponManager::StopShooting()
 	{
 		return;
 	}
-	
+
 	CurrentWeapon->StopShooting();
 }
 
@@ -98,7 +100,16 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 		WeaponClass, FTransform::Identity);
 	NewWeapon->SetOwner(GetOwner());
 	NewWeapon->SetOwningWeaponManager(this);
-	NewWeapon->AttachToActor(GetOwner(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+
+	if (CameraComponent.IsValid())
+	{
+		NewWeapon->AttachToComponent(CameraComponent.Get(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+	}
+	else
+	{
+		NewWeapon->AttachToActor(GetOwner(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+	}
+	
 	NewWeapon->FinishSpawning(FTransform::Identity);
 	AcquiredWeapons[WeaponSlot] = NewWeapon;
 
@@ -166,7 +177,7 @@ void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int3
 	{
 		return;
 	}
-	
+
 	FTrickyPropertyInt& Ammo = AmmoStash[AmmoType];
 
 	if (Ammo.ReachedMaxValue())
@@ -210,10 +221,10 @@ void UHDAPlayerWeaponManager::SubtractAmmo(const EWeaponAmmoType AmmoType, const
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	const FString AmmoTypeName = UHDAPlayerWeaponData::GetAmmoTypeName(CurrentAmmoType);
 	const FString Message = FString::Printf(TEXT("%s ammo was decreased by %d. Current value %d/%d."),
-											*AmmoTypeName,
-											CurrentShotCost,
-											Ammo.Value,
-											Ammo.MaxValue);
+	                                        *AmmoTypeName,
+	                                        CurrentShotCost,
+	                                        Ammo.Value,
+	                                        Ammo.MaxValue);
 	PrintLog(Message);
 #endif
 

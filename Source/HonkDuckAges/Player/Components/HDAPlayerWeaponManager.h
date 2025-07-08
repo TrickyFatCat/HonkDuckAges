@@ -8,6 +8,7 @@
 #include "HonkDuckAges/Player/Weapons/HDAPlayerWeaponData.h"
 #include "HDAPlayerWeaponManager.generated.h"
 
+class UCameraComponent;
 class AHDAPlayerWeaponBase;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogPlayerWeaponManager, Log, All);
@@ -91,6 +92,9 @@ public:
 	void GetAmmo(const EWeaponAmmoType AmmoType, FTrickyPropertyInt& OutAmmo) const;
 
 protected:
+	UPROPERTY()
+	TWeakObjectPtr<UCameraComponent> CameraComponent = nullptr;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager")
 	UHDAPlayerWeaponData* WeaponData = nullptr;
 
