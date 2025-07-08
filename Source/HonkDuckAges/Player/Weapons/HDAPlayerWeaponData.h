@@ -42,6 +42,9 @@ struct FWeaponData
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="WeaponData", meta=(ClampMin=1, UIMin=1, Delta=1))
 	int32 ShotCost = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="WeaponData")
+	FVector PositionOffset = FVector(0, 24.f, -24.f);
 };
 
 /**

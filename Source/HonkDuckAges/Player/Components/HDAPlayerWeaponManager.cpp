@@ -89,28 +89,32 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 		return;
 	}
 
-	TSubclassOf<AHDAPlayerWeaponBase> WeaponClass = WeaponData->WeaponSlots[WeaponSlot].WeaponClass;
+	const FWeaponData& NewWeaponData = WeaponData->WeaponSlots[WeaponSlot];
+	TSubclassOf<AHDAPlayerWeaponBase> WeaponClass = NewWeaponData.WeaponClass;
 
 	if (!IsValid(WeaponClass))
 	{
 		return;
 	}
 
+	FTransform AttachmentTransform = FTransform::Identity;
+	AttachmentTransform.SetLocation(NewWeaponData.PositionOffset);
+	
 	AHDAPlayerWeaponBase* NewWeapon = GetWorld()->SpawnActorDeferred<AHDAPlayerWeaponBase>(
-		WeaponClass, FTransform::Identity);
+		WeaponClass, AttachmentTransform);
 	NewWeapon->SetOwner(GetOwner());
 	NewWeapon->SetOwningWeaponManager(this);
+	NewWeapon->FinishSpawning(AttachmentTransform);
 
 	if (CameraComponent.IsValid())
 	{
-		NewWeapon->AttachToComponent(CameraComponent.Get(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+		NewWeapon->AttachToComponent(CameraComponent.Get(), FAttachmentTransformRules::KeepRelativeTransform);
 	}
 	else
 	{
 		NewWeapon->AttachToActor(GetOwner(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 	}
 	
-	NewWeapon->FinishSpawning(FTransform::Identity);
 	AcquiredWeapons[WeaponSlot] = NewWeapon;
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
