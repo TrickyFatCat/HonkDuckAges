@@ -73,6 +73,9 @@ protected:
 	TObjectPtr<USceneComponent> Root = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UMeshComponent> MeshComponent = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDAWeaponStateController> WeaponStateController = nullptr;
 
 	UPROPERTY()
