@@ -18,6 +18,7 @@ AHDAPlayerWeaponBase::AHDAPlayerWeaponBase()
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetupAttachment(GetRootComponent());
+	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
 
 	WeaponStateController = CreateDefaultSubobject<UHDAWeaponStateController>(TEXT("WeaponStateController"));
 
