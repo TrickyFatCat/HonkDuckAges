@@ -170,7 +170,25 @@ void UHDAPlayerWeaponManager::ChooseWeapon(const EWeaponSlot WeaponSlot)
 #endif
 }
 
-void UHDAPlayerWeaponManager::ChoosePreviousWeapon()
+void UHDAPlayerWeaponManager::ChooseWeaponByIndex(const int32 Index)
+{
+	TArray<EWeaponSlot> Slots;
+	AcquiredWeapons.GetKeys(Slots);
+	
+	if (Slots.IsEmpty() || !Slots.IsValidIndex(Index))
+	{
+		return;
+	}
+	
+	if (!IsValid(AcquiredWeapons[Slots[Index]]))
+	{
+		return;
+	}
+
+	ChooseWeapon(Slots[Index]);
+}
+
+void UHDAPlayerWeaponManager::ChooseLastWeapon()
 {
 	ChooseWeapon(PreviousWeaponSlot);
 }
@@ -255,9 +273,14 @@ bool UHDAPlayerWeaponManager::HasEnoughCurrentAmmo() const
 
 void UHDAPlayerWeaponManager::GetAcquiredWeapons(TArray<AHDAPlayerWeaponBase*>& OutWeapons) const
 {
-	for (auto& WeaponSlot : AcquiredWeapons)
+	for (auto& [WeaponSlot, Weapon] : AcquiredWeapons)
 	{
-		OutWeapons.AddUnique(WeaponSlot.Value);
+		if (!IsValid(Weapon))
+		{
+			continue;
+		}
+		
+		OutWeapons.AddUnique(Weapon);
 	}
 }
 

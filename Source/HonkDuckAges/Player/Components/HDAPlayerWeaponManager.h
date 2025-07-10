@@ -53,7 +53,10 @@ public:
 	void ChooseWeapon(const EWeaponSlot WeaponSlot);
 
 	UFUNCTION()
-	void ChoosePreviousWeapon();
+	void ChooseWeaponByIndex(const int32 Index);
+
+	UFUNCTION()
+	void ChooseLastWeapon();
 
 	UFUNCTION()
 	void AddAmmo(const EWeaponAmmoType AmmoType, const int32 Value);

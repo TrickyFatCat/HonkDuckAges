@@ -70,6 +70,10 @@ void AHDAPlayerCharacter::BeginPlay()
 
 	ensureMsgf(ShootAction != nullptr, TEXT("ShootAction wasn't set for %s"), *GetActorNameOrLabel());
 
+	ensureMsgf(ChooseWeaponAction != nullptr, TEXT("ChooseWeaponAction wasn't set for %s"), *GetActorNameOrLabel());
+
+	ensureMsgf(LastWeaponAction != nullptr, TEXT("LastWeaponAction wasn't set for %s"), *GetActorNameOrLabel());
+
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	RegisterConsoleCommands();
 #endif
@@ -125,6 +129,14 @@ void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		                                   ETriggerEvent::Completed,
 		                                   this,
 		                                   &AHDAPlayerCharacter::StopShooting);
+		EnhancedInputComponent->BindAction(ChooseWeaponAction,
+		                                   ETriggerEvent::Started,
+		                                   this,
+		                                   &AHDAPlayerCharacter::ChooseWeapon);
+		EnhancedInputComponent->BindAction(LastWeaponAction,
+		                                   ETriggerEvent::Started,
+		                                   this,
+		                                   &AHDAPlayerCharacter::ChooseLastWeapon);
 	}
 }
 
@@ -230,6 +242,17 @@ void AHDAPlayerCharacter::StopShooting()
 	}
 
 	WeaponManagerComponent->StopShooting();
+}
+
+void AHDAPlayerCharacter::ChooseWeapon(const FInputActionValue& Value)
+{
+	const int32 Index = static_cast<int32>(Value.Get<float>()) - 1;
+	WeaponManagerComponent->ChooseWeaponByIndex(Index);
+}
+
+void AHDAPlayerCharacter::ChooseLastWeapon()
+{
+	WeaponManagerComponent->ChooseLastWeapon();
 }
 
 void AHDAPlayerCharacter::HandleZeroHealth(UHDALifeStateComponent* Component)

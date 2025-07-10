@@ -61,6 +61,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* ShootAction = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputAction* ChooseWeaponAction = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputAction* LastWeaponAction = nullptr;
+
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDALifeStateComponent> LifeStateComponent = nullptr;
 
@@ -123,6 +129,12 @@ private:
 
 	UFUNCTION()
 	void StopShooting();
+
+	UFUNCTION()
+	void ChooseWeapon(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void ChooseLastWeapon();
 
 	UFUNCTION()
 	void HandleZeroHealth(UHDALifeStateComponent* Component);
