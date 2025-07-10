@@ -146,6 +146,7 @@ void UHDAPlayerWeaponManager::ChooseWeapon(const EWeaponSlot WeaponSlot)
 		if (IsValid(PreviousWeapon))
 		{
 			PreviousWeapon->OnPlayerWeaponShot.RemoveDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
+			PreviousWeapon->DeactivateWeapon();
 		}
 	}
 
@@ -158,6 +159,7 @@ void UHDAPlayerWeaponManager::ChooseWeapon(const EWeaponSlot WeaponSlot)
 	if (IsValid(CurrentWeapon))
 	{
 		CurrentWeapon->OnPlayerWeaponShot.AddUniqueDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
+		CurrentWeapon->ActivateWeapon();
 	}
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING

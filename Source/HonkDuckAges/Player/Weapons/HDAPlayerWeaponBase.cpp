@@ -15,7 +15,7 @@ AHDAPlayerWeaponBase::AHDAPlayerWeaponBase()
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
-	
+
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetupAttachment(GetRootComponent());
 	MeshComponent->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
@@ -45,6 +45,14 @@ void AHDAPlayerWeaponBase::PostInitializeComponents()
 
 		ensureMsgf(OwningWeaponManager.IsValid(),
 		           TEXT("Invalid owning weapon manager for %s"), *GetActorNameOrLabel());
+
+		if (WeaponStateController->GetCurrentState() == EWeaponState::Disabled)
+		{
+			SetWeaponEnabled(false);
+		}
+
+		WeaponStateController->OnWeaponStateChanged.AddUniqueDynamic(this,
+		                                                             &AHDAPlayerWeaponBase::HandleWeaponStateChanged);
 	}
 }
 
@@ -75,9 +83,23 @@ void AHDAPlayerWeaponBase::StopShooting()
 	bIsOutOfAmmo ? WeaponStateController->TransitToOutOfAmmo(true) : WeaponStateController->TransitToIdle(true);
 }
 
-void AHDAPlayerWeaponBase::TransitToIdle() const
+void AHDAPlayerWeaponBase::ActivateWeapon()
 {
-	WeaponStateController->TransitToIdle(true);
+	if (OwningWeaponManager->GetCurrentAmmo().ReachedMinValue())
+	{
+		WeaponStateController->TransitToOutOfAmmo(true);
+	}
+	else
+	{
+		WeaponStateController->TransitToIdle(true);
+	}
+
+	SetWeaponEnabled(true);
+}
+
+void AHDAPlayerWeaponBase::DeactivateWeapon()
+{
+	WeaponStateController->TransitToDisabled(true);
 }
 
 void AHDAPlayerWeaponBase::SetOwningWeaponManager(UHDAPlayerWeaponManager* NewManager)
@@ -126,5 +148,27 @@ void AHDAPlayerWeaponBase::HandleAmmoIncreased(UHDAPlayerWeaponManager* Componen
 	if (!Ammo.ReachedMinValue() && GetCurrentState() == EWeaponState::OutOfAmmo)
 	{
 		WeaponStateController->TransitToIdle(true);
+	}
+}
+
+void AHDAPlayerWeaponBase::SetWeaponEnabled(const bool bIsEnabled)
+{
+	MeshComponent->SetHiddenInGame(!bIsEnabled);
+	SetActorTickEnabled(bIsEnabled);
+}
+
+void AHDAPlayerWeaponBase::HandleWeaponStateChanged(UHDAWeaponStateController* Component,
+                                                    EWeaponState NewState,
+                                                    bool bTransitImmediately)
+{
+	switch (NewState)
+	{
+	case EWeaponState::Idle:
+		break;
+	case EWeaponState::OutOfAmmo:
+		break;
+	case EWeaponState::Disabled:
+		SetWeaponEnabled(false);
+		break;
 	}
 }

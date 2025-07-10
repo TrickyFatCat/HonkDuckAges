@@ -51,7 +51,9 @@ public:
 
 	virtual void StopShooting();
 
-	void TransitToIdle() const;
+	void ActivateWeapon();
+
+	void DeactivateWeapon();
 
 	UFUNCTION(BlueprintPure)
 	EWeaponState GetCurrentState() const { return WeaponStateController->GetCurrentState(); }
@@ -122,4 +124,11 @@ protected:
 	                         EWeaponAmmoType AmmoType,
 	                         const FTrickyPropertyInt& Ammo,
 	                         int32 DeltaValue);
+
+	void SetWeaponEnabled(const bool bIsEnabled);
+
+	UFUNCTION()
+	void HandleWeaponStateChanged(UHDAWeaponStateController* Component,
+	                              EWeaponState NewState,
+	                              bool bTransitImmediately);
 };

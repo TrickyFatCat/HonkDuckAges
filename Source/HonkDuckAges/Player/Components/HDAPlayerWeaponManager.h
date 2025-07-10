@@ -102,7 +102,7 @@ protected:
 	UHDAPlayerWeaponData* WeaponData = nullptr;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentWeaponSlot, Category="WeaponManager")
-	EWeaponSlot CurrentWeaponSlot = EWeaponSlot::Shotgun;
+	EWeaponSlot CurrentWeaponSlot = EWeaponSlot::None;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentAmmoType, Category="WeaponManager")
 	EWeaponAmmoType CurrentAmmoType = EWeaponAmmoType::Gauge;
@@ -111,7 +111,7 @@ protected:
 	int32 CurrentShotCost = 1;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetPreviousWeaponSlot, Category="WeaponManager")
-	EWeaponSlot PreviousWeaponSlot = EWeaponSlot::Shotgun;
+	EWeaponSlot PreviousWeaponSlot = EWeaponSlot::None;
 
 	UPROPERTY(VisibleInstanceOnly, Category="WeaponManager")
 	TMap<EWeaponSlot, TObjectPtr<AHDAPlayerWeaponBase>> AcquiredWeapons{

@@ -18,6 +18,7 @@ enum class EWeaponSlot : uint8
 	PlasmaBeam,
 	LaserCrossbow,
 	ShieldThrower,
+	None
 };
 
 UENUM(BlueprintType)
@@ -56,7 +57,7 @@ class HONKDUCKAGES_API UHDAPlayerWeaponData : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(InvalidEnumValues="None"))
 	EWeaponSlot DefaultWeaponSlot = EWeaponSlot::Shotgun;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(ReadOnlyKeys, ForceInlineRow))
