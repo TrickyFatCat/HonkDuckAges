@@ -133,7 +133,7 @@ bool UHDAPlayerWeaponManager::HasWeapon(const EWeaponSlot WeaponSlot)
 
 void UHDAPlayerWeaponManager::ChooseWeapon(const EWeaponSlot WeaponSlot)
 {
-	if (!IsValid(AcquiredWeapons[WeaponSlot]))
+	if (!IsValid(AcquiredWeapons[WeaponSlot]) || CurrentWeaponSlot == WeaponSlot)
 	{
 		return;
 	}
