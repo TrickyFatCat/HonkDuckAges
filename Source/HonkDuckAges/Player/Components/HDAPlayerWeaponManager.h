@@ -56,6 +56,12 @@ public:
 	void ChooseWeaponByIndex(const int32 Index);
 
 	UFUNCTION()
+	void ChooseNextWeapon();
+
+	UFUNCTION()
+	void ChoosePreviousWeapon();
+
+	UFUNCTION()
 	void ChooseLastWeapon();
 
 	UFUNCTION()

@@ -99,7 +99,7 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 
 	FTransform AttachmentTransform = FTransform::Identity;
 	AttachmentTransform.SetLocation(NewWeaponData.PositionOffset);
-	
+
 	AHDAPlayerWeaponBase* NewWeapon = GetWorld()->SpawnActorDeferred<AHDAPlayerWeaponBase>(
 		WeaponClass, AttachmentTransform);
 	NewWeapon->SetOwner(GetOwner());
@@ -114,7 +114,7 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 	{
 		NewWeapon->AttachToActor(GetOwner(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 	}
-	
+
 	AcquiredWeapons[WeaponSlot] = NewWeapon;
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
@@ -176,13 +176,55 @@ void UHDAPlayerWeaponManager::ChooseWeaponByIndex(const int32 Index)
 {
 	TArray<EWeaponSlot> Slots;
 	AcquiredWeapons.GetKeys(Slots);
-	
+
 	if (Slots.IsEmpty() || !Slots.IsValidIndex(Index))
 	{
 		return;
 	}
-	
+
 	if (!IsValid(AcquiredWeapons[Slots[Index]]))
+	{
+		return;
+	}
+
+	ChooseWeapon(Slots[Index]);
+}
+
+void UHDAPlayerWeaponManager::ChooseNextWeapon()
+{
+	TArray<EWeaponSlot> Slots;
+	AcquiredWeapons.GetKeys(Slots);
+
+	if (Slots.IsEmpty() || !Slots.Contains(CurrentWeaponSlot))
+	{
+		return;
+	}
+
+	int32 Index = Slots.IndexOfByKey(CurrentWeaponSlot);
+	Index += 1;
+
+	if (!Slots.IsValidIndex(Index))
+	{
+		return;
+	}
+
+	ChooseWeapon(Slots[Index]);
+}
+
+void UHDAPlayerWeaponManager::ChoosePreviousWeapon()
+{
+	TArray<EWeaponSlot> Slots;
+	AcquiredWeapons.GetKeys(Slots);
+
+	if (Slots.IsEmpty() || !Slots.Contains(CurrentWeaponSlot))
+	{
+		return;
+	}
+
+	int32 Index = Slots.IndexOfByKey(CurrentWeaponSlot);
+	Index -= 1;
+
+	if (!Slots.IsValidIndex(Index))
 	{
 		return;
 	}
@@ -281,7 +323,7 @@ void UHDAPlayerWeaponManager::GetAcquiredWeapons(TArray<AHDAPlayerWeaponBase*>& 
 		{
 			continue;
 		}
-		
+
 		OutWeapons.AddUnique(Weapon);
 	}
 }
