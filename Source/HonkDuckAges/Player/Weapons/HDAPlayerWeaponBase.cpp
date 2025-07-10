@@ -58,7 +58,7 @@ void AHDAPlayerWeaponBase::PostInitializeComponents()
 
 void AHDAPlayerWeaponBase::StartShooting(const FVector& TargetPoint)
 {
-	if (GetCurrentState() == EWeaponState::OutOfAmmo)
+	if (GetCurrentState() != EWeaponState::Idle)
 	{
 		return;
 	}
