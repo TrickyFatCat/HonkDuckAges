@@ -100,6 +100,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetAmmo(const EWeaponAmmoType AmmoType, FTrickyPropertyInt& OutAmmo) const;
 
+	TWeakObjectPtr<UCameraComponent> GetCameraComponent() const { return CameraComponent; }
+
 protected:
 	UPROPERTY()
 	TWeakObjectPtr<UCameraComponent> CameraComponent = nullptr;

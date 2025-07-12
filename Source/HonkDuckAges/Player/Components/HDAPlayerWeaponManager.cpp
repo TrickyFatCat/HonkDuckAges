@@ -56,7 +56,7 @@ void UHDAPlayerWeaponManager::StartShooting()
 		return;
 	}
 
-	CurrentWeapon->StartShooting(FVector::ZeroVector);
+	CurrentWeapon->StartShooting();
 }
 
 void UHDAPlayerWeaponManager::StopShooting()

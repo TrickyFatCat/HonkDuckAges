@@ -47,7 +47,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerWeaponShotDynamicSignature OnPlayerWeaponShot;
 
-	virtual void StartShooting(const FVector& TargetPoint);
+	virtual void StartShooting();
 
 	virtual void StopShooting();
 
@@ -69,6 +69,12 @@ public:
 
 	UFUNCTION()
 	void SetOwningWeaponManager(UHDAPlayerWeaponManager* NewManager);
+
+	UFUNCTION(BlueprintGetter)
+	float GetSpreadAngle() const { return SpreadAngleDeg; }
+
+	UFUNCTION(BlueprintGetter)
+	float GetSpreadRadius() const { return SpreadRadius; }
 
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
@@ -106,18 +112,42 @@ protected:
 	int32 BulletsPerShot = 1;
 
 	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="Weapon",
+		meta=(ClampMin=1, UIMin=1))
+	int32 Damage = 10;
+
+	UPROPERTY(EditDefaultsOnly,
 		BlueprintGetter=GetWeaponMode,
 		Category="Weapon")
 	EWeaponMode WeaponMode = EWeaponMode::FullAuto;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintGetter=GetSpreadAngle,
+		Category="Weapon",
+		meta=(ClampMin=0, UIMin=0, ClampMax=30, UIMax=30, Delta=1, ForceUnits="Degrees"))
+	float SpreadAngleDeg = 5.f;
+
+	UPROPERTY(VisibleInstanceOnly,
+		BlueprintGetter=GetSpreadRadius,
+		Category="Weapon")
+	float SpreadRadius = 0.f;
+
+	UPROPERTY(EditDefaultsOnly,
+		Category="Weapon")
+	UCurveFloat* SpreadDistribution = nullptr;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(BlueprintReadOnly, Category="Components")
 	TObjectPtr<UArrowComponent> ForwardVector = nullptr;
 #endif
 
-	void MakeShot(const FVector& TargetPoint);
+private:
+	void CalculateBulletDisplacement(FVector2D& Displacement) const;
 
-	virtual void SpawnProjectile(const FVector& TargetPoint);
+	void MakeShot();
+
+	virtual void SpawnProjectile(const FVector& Direction);
 
 	UFUNCTION()
 	void HandleAmmoIncreased(UHDAPlayerWeaponManager* Component,
