@@ -146,9 +146,9 @@ void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		                                   this,
 		                                   &AHDAPlayerCharacter::ChooseNextWeapon);
 		EnhancedInputComponent->BindAction(PreviousWeaponAction,
-										   ETriggerEvent::Started,
-										   this,
-										   &AHDAPlayerCharacter::ChoosePreviousWeapon);
+		                                   ETriggerEvent::Started,
+		                                   this,
+		                                   &AHDAPlayerCharacter::ChoosePreviousWeapon);
 	}
 }
 
