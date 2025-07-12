@@ -97,12 +97,16 @@ protected:
 		Category="Weapon",
 		meta=(EditCondition="BulletType == EWeaponBulletType::Projectile", EditConditionHides))
 	TSubclassOf<AHDAPlayerProjectileBase> ProjectileClass = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly,
+		Category="Weapon",
+		meta=(EditCondition="BulletType == EWeaponBulletType::Projectile", EditConditionHides))
+	FName SpawnSocketName = TEXT("ProjectileSpawn");
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="Weapon",
-		meta=(EditCondition="BulletType == EWeaponBulletType::Trace", EditConditionHides,
-			ClampMin=1, UIMin=1, Delta=100, ForceUnits="Centimeters"))
+		meta=(ClampMin=1, UIMin=1, Delta=100, ForceUnits="Centimeters"))
 	float TraceLength = 10000.f;
 
 	UPROPERTY(EditDefaultsOnly,
@@ -147,7 +151,7 @@ private:
 
 	void MakeShot();
 
-	virtual void SpawnProjectile(const FVector& Direction);
+	AHDAPlayerProjectileBase* SpawnProjectile(const FVector& Direction);
 
 	UFUNCTION()
 	void HandleAmmoIncreased(UHDAPlayerWeaponManager* Component,

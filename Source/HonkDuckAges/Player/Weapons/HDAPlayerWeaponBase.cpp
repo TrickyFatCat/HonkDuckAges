@@ -51,6 +51,14 @@ void AHDAPlayerWeaponBase::PostInitializeComponents()
 		ensureMsgf(OwningWeaponManager.IsValid(),
 		           TEXT("Invalid owning weapon manager for %s"), *GetActorNameOrLabel());
 
+		if (IsValid(MeshComponent))
+		{
+			ensureMsgf(MeshComponent->DoesSocketExist(SpawnSocketName),
+			           TEXT("%s static mesh doesn't have socket %s"),
+			           *GetActorNameOrLabel(),
+			           *SpawnSocketName.ToString());
+		}
+
 		if (WeaponStateController->GetCurrentState() == EWeaponState::Disabled)
 		{
 			SetWeaponEnabled(false);
@@ -159,7 +167,7 @@ void AHDAPlayerWeaponBase::MakeShot()
 	const FVector CameraFwdVec = UKismetMathLibrary::GetForwardVector(ViewInfo.Rotation);
 	const FVector CameraRightVec = UKismetMathLibrary::GetRightVector(ViewInfo.Rotation);
 	const FVector CameraUpVec = UKismetMathLibrary::GetUpVector(ViewInfo.Rotation);
-	
+
 	const TArray<AActor*> ActorsToIgnore{this, GetOwner()};
 	FVector2D Displacement = FVector2D::ZeroVector;
 	FHitResult HitResult;
@@ -174,15 +182,15 @@ void AHDAPlayerWeaponBase::MakeShot()
 		UKismetSystemLibrary::LineTraceSingle(this,
 		                                      StartLocation,
 		                                      EndLocation,
-		                                      static_cast<ETraceTypeQuery>(ECC_Visibility),
+		                                      TraceTypeQuery1,
 		                                      false,
 		                                      ActorsToIgnore,
-		                                      EDrawDebugTrace::ForDuration,
+		                                      EDrawDebugTrace::None,
 		                                      HitResult,
 		                                      true,
 		                                      FLinearColor::Red,
 		                                      FLinearColor::Green,
-		                                      0.5);
+		                                      0.25);
 
 		switch (BulletType)
 		{
@@ -198,8 +206,15 @@ void AHDAPlayerWeaponBase::MakeShot()
 			break;
 
 		case EWeaponBulletType::Projectile:
+			FVector StartPoint = HitResult.TraceStart;
+
+			if (IsValid(MeshComponent) && MeshComponent->DoesSocketExist(SpawnSocketName))
+			{
+				StartPoint = MeshComponent->GetSocketLocation(SpawnSocketName);
+			}
+
 			const FVector TargetPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : HitResult.TraceEnd;
-			FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(HitResult.TraceStart, TargetPoint);
+			FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(StartPoint, TargetPoint);
 			SpawnProjectile(Direction);
 			break;
 		}
@@ -208,8 +223,31 @@ void AHDAPlayerWeaponBase::MakeShot()
 	OnPlayerWeaponShot.Broadcast(this);
 }
 
-void AHDAPlayerWeaponBase::SpawnProjectile(const FVector& Direction)
+AHDAPlayerProjectileBase* AHDAPlayerWeaponBase::SpawnProjectile(const FVector& Direction)
 {
+	if (!IsValid(ProjectileClass))
+	{
+		return nullptr;
+	}
+
+	FTransform SpawnTransform = FTransform::Identity;
+	SpawnTransform.SetLocation(GetActorLocation());
+	SpawnTransform.SetRotation(Direction.Rotation().Quaternion());
+
+	if (IsValid(MeshComponent) && MeshComponent->DoesSocketExist(SpawnSocketName))
+	{
+		SpawnTransform.SetLocation(MeshComponent->GetSocketLocation(SpawnSocketName));
+	}
+
+	AHDAPlayerProjectileBase* NewProjectile = GetWorld()->SpawnActorDeferred<AHDAPlayerProjectileBase>(ProjectileClass,
+		SpawnTransform,
+		this,
+		Cast<APawn>(GetOwner()),
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn,
+		ESpawnActorScaleMethod::SelectDefaultAtRuntime);
+	NewProjectile->InitProjectile(Direction, Damage);
+	NewProjectile->FinishSpawning(SpawnTransform);
+	return NewProjectile;
 }
 
 void AHDAPlayerWeaponBase::HandleAmmoIncreased(UHDAPlayerWeaponManager* Component,
