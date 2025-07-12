@@ -184,7 +184,7 @@ void AHDAPlayerWeaponBase::MakeShot()
 		                                      FLinearColor::Green,
 		                                      0.5);
 
-		switch (EWeaponBulletType)
+		switch (BulletType)
 		{
 		case EWeaponBulletType::Trace:
 			if (HitResult.bBlockingHit && IsValid(HitResult.GetActor()))
