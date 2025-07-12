@@ -19,7 +19,16 @@ public:
 	AHDAPlayerProjectileBase();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Projectile", meta=(ExposeOnSpawn))
+	virtual void PostInitializeComponents() override;
+
+public:
+	void InitProjectile(const FVector& Direction, const int32 NewDamage);
+
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Projectile")
+	bool bDestroyOnHit = true;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Projectile")
 	int32 Damage = 10;
 	
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
@@ -28,8 +37,16 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent = nullptr;
 
+private:
+	UFUNCTION()
+	void HandleHit(UPrimitiveComponent* HitComponent,
+	               AActor* OtherActor,
+	               UPrimitiveComponent* OtherComp,
+	               FVector NormalImpulse,
+	               const FHitResult& Hit);
+
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleDefaultsOnly, Category="Components")
 	TObjectPtr<UArrowComponent> ForwardVector = nullptr;
 #endif
 };
