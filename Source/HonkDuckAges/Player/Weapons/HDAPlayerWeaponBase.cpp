@@ -69,6 +69,38 @@ void AHDAPlayerWeaponBase::PostInitializeComponents()
 	}
 }
 
+#if WITH_EDITOR
+void AHDAPlayerWeaponBase::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	const FName PropertyName = PropertyChangedEvent.GetPropertyName();
+	const FName RateOfFireName = GET_MEMBER_NAME_CHECKED(AHDAPlayerWeaponBase, RateOfFire);
+
+	if (PropertyName == RateOfFireName)
+	{
+		if (RateOfFire <= 0.f)
+		{
+			RateOfFire = 1.f;
+		}
+
+		ShotDelay = 1.f / RateOfFire;
+	}
+
+	const FName ShotDelayName = GET_MEMBER_NAME_CHECKED(AHDAPlayerWeaponBase, ShotDelay);
+
+	if (PropertyName == ShotDelayName)
+	{
+		if (ShotDelay <= 0.f)
+		{
+			ShotDelay = 1.f;
+		}
+
+		RateOfFire = 1.f / ShotDelay;
+	}
+}
+#endif
+
 void AHDAPlayerWeaponBase::StartShooting()
 {
 	if (GetCurrentState() != EWeaponState::Idle)
@@ -76,13 +108,16 @@ void AHDAPlayerWeaponBase::StartShooting()
 		return;
 	}
 
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	if (TimerManager.IsTimerActive(ShotTimerHandle))
+	{
+		return;
+	}
+
 	WeaponStateController->TransitToShooting(true);
 	MakeShot();
-
-	if (WeaponMode == EWeaponMode::SemiAuto)
-	{
-		StopShooting();
-	}
+	TimerManager.SetTimer(ShotTimerHandle, this, &AHDAPlayerWeaponBase::HandleShotTimerFinished, ShotDelay, false);
 }
 
 void AHDAPlayerWeaponBase::StopShooting()
@@ -148,7 +183,7 @@ void AHDAPlayerWeaponBase::CalculateBulletDisplacement(FVector2D& Displacement) 
 
 void AHDAPlayerWeaponBase::MakeShot()
 {
-	if (BulletsPerShot <= 0)
+	if (BulletsPerShot <= 0 || GetCurrentState() != EWeaponState::Shooting)
 	{
 		return;
 	}
@@ -279,6 +314,32 @@ void AHDAPlayerWeaponBase::HandleWeaponStateChanged(UHDAWeaponStateController* C
 		break;
 	case EWeaponState::Disabled:
 		SetWeaponEnabled(false);
+		break;
+	}
+}
+
+void AHDAPlayerWeaponBase::HandleShotTimerFinished()
+{
+	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	TimerManager.ClearTimer(ShotTimerHandle);
+
+	switch (WeaponMode)
+	{
+	case EWeaponMode::SemiAuto:
+		StopShooting();
+		break;
+
+	case EWeaponMode::FullAuto:
+		MakeShot();
+
+		if (GetCurrentState() == EWeaponState::Shooting)
+		{
+			TimerManager.SetTimer(ShotTimerHandle,
+			                      this,
+			                      &AHDAPlayerWeaponBase::HandleShotTimerFinished,
+			                      ShotDelay,
+			                      false);
+		}
 		break;
 	}
 }

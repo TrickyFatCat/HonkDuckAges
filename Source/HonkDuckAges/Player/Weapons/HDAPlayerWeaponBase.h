@@ -43,6 +43,10 @@ public:
 protected:
 	virtual void PostInitializeComponents() override;
 
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerWeaponShotDynamicSignature OnPlayerWeaponShot;
@@ -69,6 +73,12 @@ public:
 
 	UFUNCTION()
 	void SetOwningWeaponManager(UHDAPlayerWeaponManager* NewManager);
+
+	UFUNCTION(BlueprintGetter)
+	float GetRateOfFire() const { return RateOfFire; }
+
+	UFUNCTION(BlueprintGetter)
+	float GetShotDelay() const { return ShotDelay; }
 
 	UFUNCTION(BlueprintGetter)
 	float GetSpreadAngle() const { return SpreadAngleDeg; }
@@ -127,6 +137,21 @@ protected:
 	EWeaponMode WeaponMode = EWeaponMode::FullAuto;
 
 	UPROPERTY(EditDefaultsOnly,
+		BlueprintGetter=GetRateOfFire,
+		Category="Weapon",
+		meta=(ClampMin=0, UIMin=0, Delta=1))
+	float RateOfFire = 2.0f;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintGetter=GetShotDelay,
+		Category="Weapon",
+		meta=(ClampMin=0, UIMin=0, Delta=0.1, ForceUnits="Seconds"))
+	float ShotDelay = 0.5f;
+
+	UPROPERTY(BlueprintReadOnly, Category="Weapon")
+	FTimerHandle ShotTimerHandle;
+
+	UPROPERTY(EditDefaultsOnly,
 		BlueprintGetter=GetSpreadAngle,
 		Category="Weapon",
 		meta=(ClampMin=0, UIMin=0, ClampMax=30, UIMax=30, Delta=1, ForceUnits="Degrees"))
@@ -165,4 +190,7 @@ private:
 	void HandleWeaponStateChanged(UHDAWeaponStateController* Component,
 	                              EWeaponState NewState,
 	                              bool bTransitImmediately);
+
+	UFUNCTION()
+	void HandleShotTimerFinished();
 };
