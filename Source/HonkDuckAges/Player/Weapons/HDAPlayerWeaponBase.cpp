@@ -159,15 +159,15 @@ void AHDAPlayerWeaponBase::MakeShot()
 	const FVector CameraFwdVec = UKismetMathLibrary::GetForwardVector(ViewInfo.Rotation);
 	const FVector CameraRightVec = UKismetMathLibrary::GetRightVector(ViewInfo.Rotation);
 	const FVector CameraUpVec = UKismetMathLibrary::GetUpVector(ViewInfo.Rotation);
-	FVector EndLocation = StartLocation + CameraFwdVec * TraceLength;
-
+	
 	const TArray<AActor*> ActorsToIgnore{this, GetOwner()};
 	FVector2D Displacement = FVector2D::ZeroVector;
 	FHitResult HitResult;
 
-	for (int32 i = 0; i <= BulletsPerShot; ++i)
+	for (int32 i = 0; i < BulletsPerShot; ++i)
 	{
 		CalculateBulletDisplacement(Displacement);
+		FVector EndLocation = StartLocation + CameraFwdVec * TraceLength;
 		EndLocation += CameraRightVec * Displacement.X;
 		EndLocation += CameraUpVec * Displacement.Y;
 
