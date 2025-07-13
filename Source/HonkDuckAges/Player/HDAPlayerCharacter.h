@@ -106,6 +106,24 @@ protected:
 		meta=(ClampMin=0, UIMin=0))
 	float CameraLeanSpeed = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway")
+	FVector SwayPower = FVector::OneVector * 10;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeponSway")
+	float SwaySpeed = 10.f;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway")
+	FRotator SwayThreshold = FRotator(10.f);
+
+	FRotator SwayDisplacement = FRotator::ZeroRotator;
+
+
 private:
 	FVector MovementDirection = FVector::ZeroVector;
 
@@ -152,6 +170,10 @@ private:
 	void HandleZeroHealth(UHDALifeStateComponent* Component);
 
 	void ProcessCameraLean(const float DeltaTime) const;
+	
+	void CalculateSwayDisplacement(const FVector2D& Value);
+
+	void ProcessSway(const float DeltaTime) const;
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	void RegisterConsoleCommands();

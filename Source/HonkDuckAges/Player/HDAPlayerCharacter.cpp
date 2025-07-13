@@ -99,6 +99,7 @@ void AHDAPlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	ProcessCameraLean(DeltaTime);
+	ProcessSway(DeltaTime);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	PrintPlayerDebugData(DeltaTime);
@@ -196,6 +197,7 @@ void AHDAPlayerCharacter::Aim(const FInputActionValue& Value)
 	const FVector2D AimDirection = Value.Get<FVector2D>();
 	AddControllerYawInput(AimDirection.X);
 	AddControllerPitchInput(AimDirection.Y);
+	CalculateSwayDisplacement(AimDirection);
 }
 
 void AHDAPlayerCharacter::Dash()
@@ -303,6 +305,29 @@ void AHDAPlayerCharacter::ProcessCameraLean(const float DeltaTime) const
 	PlayerController->SetControlRotation(NewRotation);
 }
 
+void AHDAPlayerCharacter::CalculateSwayDisplacement(const FVector2D& Value)
+{
+	SwayDisplacement.Roll = Value.X * SwayPower.X;
+	SwayDisplacement.Pitch = -Value.Y * SwayPower.Y;
+	SwayDisplacement.Yaw = Value.X * SwayPower.Z;
+}
+
+void AHDAPlayerCharacter::ProcessSway(const float DeltaTime) const
+{
+	AHDAPlayerWeaponBase* CurrentWeapon = WeaponManagerComponent->GetCurrentWeapon();
+
+	if (!IsValid(CurrentWeapon))
+	{
+		return;
+	}
+
+	const FRotator CurrentRotation = CurrentWeapon->GetRootComponent()->GetRelativeRotation();
+	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, SwayDisplacement, DeltaTime, SwaySpeed);
+	NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -SwayThreshold.Roll, SwayThreshold.Roll);
+	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -SwayThreshold.Pitch, SwayThreshold.Pitch);
+	NewRotation.Yaw = FMath::Clamp(NewRotation.Yaw, -SwayThreshold.Yaw, SwayThreshold.Yaw);
+	CurrentWeapon->SetActorRelativeRotation(NewRotation);
+}
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 
 void AHDAPlayerCharacter::RegisterConsoleCommands()
