@@ -71,6 +71,9 @@ public:
 	void SubtractAmmo(const EWeaponAmmoType AmmoType, const int32 Value);
 
 	UFUNCTION(BlueprintGetter)
+	UHDAPlayerWeaponData* GetWeaponData() const { return WeaponData; }
+
+	UFUNCTION(BlueprintGetter)
 	EWeaponSlot GetCurrentWeaponSlot() const { return CurrentWeaponSlot; }
 
 	UFUNCTION(BlueprintGetter)
@@ -105,8 +108,8 @@ public:
 protected:
 	UPROPERTY()
 	TWeakObjectPtr<UCameraComponent> CameraComponent = nullptr;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager")
+
+	UPROPERTY(EditDefaultsOnly, BlueprintGetter=GetWeaponData, Category="WeaponManager")
 	UHDAPlayerWeaponData* WeaponData = nullptr;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentWeaponSlot, Category="WeaponManager")
