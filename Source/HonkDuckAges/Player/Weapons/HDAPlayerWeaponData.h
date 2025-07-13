@@ -43,9 +43,6 @@ struct FWeaponData
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="WeaponData", meta=(ClampMin=1, UIMin=1, Delta=1))
 	int32 ShotCost = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="WeaponData")
-	FVector PositionOffset = FVector(0, 24.f, -24.f);
 };
 
 /**
@@ -57,6 +54,9 @@ class HONKDUCKAGES_API UHDAPlayerWeaponData : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="WeaponData")
+	FVector SpawnPositionOffset = FVector(0, 24.f, -24.f);
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(InvalidEnumValues="None"))
 	EWeaponSlot DefaultWeaponSlot = EWeaponSlot::Shotgun;
 	

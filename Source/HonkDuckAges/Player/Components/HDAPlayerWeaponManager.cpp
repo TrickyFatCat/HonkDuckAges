@@ -98,7 +98,7 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 	}
 
 	FTransform AttachmentTransform = FTransform::Identity;
-	AttachmentTransform.SetLocation(NewWeaponData.PositionOffset);
+	AttachmentTransform.SetLocation(WeaponData->SpawnPositionOffset);
 
 	AHDAPlayerWeaponBase* NewWeapon = GetWorld()->SpawnActorDeferred<AHDAPlayerWeaponBase>(
 		WeaponClass, AttachmentTransform);
