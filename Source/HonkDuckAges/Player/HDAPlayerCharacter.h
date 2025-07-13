@@ -113,7 +113,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
-		Category="WeponSway")
+		Category="WeponSway",
+		meta=(ClampMin=0, UIMin=0, Delta=1))
 	float SwaySpeed = 10.f;
 
 	UPROPERTY(EditDefaultsOnly,
