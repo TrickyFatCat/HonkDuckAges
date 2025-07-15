@@ -103,6 +103,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GetAmmo(const EWeaponAmmoType AmmoType, FTrickyPropertyInt& OutAmmo) const;
 
+	UFUNCTION(BlueprintCallable)
+	EWeaponAmmoType GetAmmoTypeForSlot(const EWeaponSlot WeaponSlot) const;
+
 	TWeakObjectPtr<UCameraComponent> GetCameraComponent() const { return CameraComponent; }
 
 protected:

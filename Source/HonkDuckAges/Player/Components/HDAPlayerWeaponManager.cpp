@@ -343,6 +343,11 @@ void UHDAPlayerWeaponManager::GetAmmo(const EWeaponAmmoType AmmoType, FTrickyPro
 	OutAmmo = AmmoStash[AmmoType];
 }
 
+EWeaponAmmoType UHDAPlayerWeaponManager::GetAmmoTypeForSlot(const EWeaponSlot WeaponSlot) const
+{
+	return WeaponData->WeaponSlots[WeaponSlot].AmmoType;
+}
+
 void UHDAPlayerWeaponManager::InitAmmoStash()
 {
 	if (!ensureMsgf(!AmmoStash.IsEmpty(), TEXT("AmmoStash in PlayerManagerComponent is empty.")))
