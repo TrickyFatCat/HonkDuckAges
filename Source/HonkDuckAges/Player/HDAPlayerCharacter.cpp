@@ -43,6 +43,7 @@ void AHDAPlayerCharacter::BeginPlay()
 		}
 	}
 
+	WeaponInitialLocation = WeaponManagerComponent->GetWeaponData()->SpawnPositionOffset;
 	PlayerMovementComponent = Cast<UHDAPlayerMovementComponent>(GetMovementComponent());
 
 	if (IsValid(PlayerMovementComponent))
@@ -99,7 +100,8 @@ void AHDAPlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	ProcessCameraLean(DeltaTime);
-	ProcessSway(DeltaTime);
+	AnimateRotationSway(DeltaTime);
+	AnimateLocationSway(DeltaTime);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	PrintPlayerDebugData(DeltaTime);
@@ -197,7 +199,7 @@ void AHDAPlayerCharacter::Aim(const FInputActionValue& Value)
 	const FVector2D AimDirection = Value.Get<FVector2D>();
 	AddControllerYawInput(AimDirection.X);
 	AddControllerPitchInput(AimDirection.Y);
-	CalculateSwayDisplacement(AimDirection);
+	CalculateTargetSwayRotation(AimDirection);
 }
 
 void AHDAPlayerCharacter::Dash()
@@ -305,14 +307,14 @@ void AHDAPlayerCharacter::ProcessCameraLean(const float DeltaTime) const
 	PlayerController->SetControlRotation(NewRotation);
 }
 
-void AHDAPlayerCharacter::CalculateSwayDisplacement(const FVector2D& Value)
+void AHDAPlayerCharacter::CalculateTargetSwayRotation(const FVector2D& Value)
 {
-	SwayDisplacement.Roll = Value.X * SwayPower.X;
-	SwayDisplacement.Pitch = -Value.Y * SwayPower.Y;
-	SwayDisplacement.Yaw = Value.X * SwayPower.Z;
+	TargetSwayRotation.Roll = Value.X * RotationSwayPower.X;
+	TargetSwayRotation.Pitch = -Value.Y * RotationSwayPower.Y;
+	TargetSwayRotation.Yaw = Value.X * RotationSwayPower.Z;
 }
 
-void AHDAPlayerCharacter::ProcessSway(const float DeltaTime) const
+void AHDAPlayerCharacter::AnimateRotationSway(const float DeltaTime) const
 {
 	AHDAPlayerWeaponBase* CurrentWeapon = WeaponManagerComponent->GetCurrentWeapon();
 
@@ -321,13 +323,61 @@ void AHDAPlayerCharacter::ProcessSway(const float DeltaTime) const
 		return;
 	}
 
-	const FRotator CurrentRotation = CurrentWeapon->GetRootComponent()->GetRelativeRotation();
-	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, SwayDisplacement, DeltaTime, SwaySpeed);
-	NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -SwayThreshold.Roll, SwayThreshold.Roll);
-	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -SwayThreshold.Pitch, SwayThreshold.Pitch);
-	NewRotation.Yaw = FMath::Clamp(NewRotation.Yaw, -SwayThreshold.Yaw, SwayThreshold.Yaw);
+	const FRotator CurrentSwayRotation = CurrentWeapon->GetRootComponent()->GetRelativeRotation();
+	FRotator NewRotation = FMath::RInterpTo(CurrentSwayRotation, TargetSwayRotation, DeltaTime, RotationSwaySpeed);
+	NewRotation.Roll = FMath::Clamp(NewRotation.Roll, -RotationSwayThreshold.Roll, RotationSwayThreshold.Roll);
+	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, -RotationSwayThreshold.Pitch, RotationSwayThreshold.Pitch);
+	NewRotation.Yaw = FMath::Clamp(NewRotation.Yaw, -RotationSwayThreshold.Yaw, RotationSwayThreshold.Yaw);
 	CurrentWeapon->SetActorRelativeRotation(NewRotation);
 }
+
+void AHDAPlayerCharacter::AnimateLocationSway(const float DeltaTime)
+{
+	FVector TargetLateralOffset = UKismetMathLibrary::Quat_UnrotateVector(GetActorRotation().Quaternion(),
+	                                                                      GetLateralVelocity());
+	TargetLateralOffset = TargetLateralOffset / PlayerMovementComponent->MaxWalkSpeed;
+	TargetLateralOffset.X = FMath::Clamp(TargetLateralOffset.X, -1.f, 1.f);
+	TargetLateralOffset.Y = FMath::Clamp(TargetLateralOffset.Y, -1.f, 1.f);
+	CurrentLateralOffset = FMath::VInterpTo(CurrentLateralOffset, TargetLateralOffset, DeltaTime, LocationSwaySpeed);
+
+	CurrentLateralOffset.X = FMath::Abs(CurrentLateralOffset.X) >= 0.1f ? CurrentLateralOffset.X : 0.f;
+	CurrentLateralOffset.Y = FMath::Abs(CurrentLateralOffset.Y) >= 0.1f ? CurrentLateralOffset.Y : 0.f;
+
+	FVector WeaponOffset = CurrentLateralOffset * LocationSwayThreshold;
+
+	float TargetVerticalOffset = GetVelocity().Z / PlayerMovementComponent->GetJumpVelocity();
+	TargetVerticalOffset = FMath::Clamp(TargetVerticalOffset, -1.0f, 1.0f);
+	CurrentVerticalOffset = FMath::FInterpTo(CurrentVerticalOffset, TargetVerticalOffset, DeltaTime, LocationSwaySpeed);
+	CurrentVerticalOffset = FMath::Abs(CurrentVerticalOffset) >= 0.1f ? CurrentVerticalOffset : 0.f;
+	WeaponOffset.Z += CurrentVerticalOffset * LocationSwayThreshold.Z;
+
+	const float NormalizedLateralSpeed = PlayerMovementComponent->GetNormalizedLateralSpeed();
+
+	if (!PlayerMovementComponent->IsFalling() && NormalizedLateralSpeed >= 1.f)
+	{
+		const float Time = GetWorld()->GetTimeSeconds();
+		const float MovementSin = FMath::Sin(NormalizedLateralSpeed * LocationSwayFrequency * Time);
+		const float MovementSinSquared = MovementSin * MovementSin;
+
+		WeaponOffset.X += LocationSwayAmplitude.X * MovementSinSquared;
+		WeaponOffset.Y += LocationSwayAmplitude.Y * MovementSin;
+		WeaponOffset.Z += LocationSwayAmplitude.Z * MovementSinSquared;
+	}
+
+	AHDAPlayerWeaponBase* CurrentWeapon = WeaponManagerComponent->GetCurrentWeapon();
+
+	if (!IsValid(CurrentWeapon))
+	{
+		return;
+	}
+
+	const FVector CurrentLocation = CurrentWeapon->GetRootComponent()->GetRelativeLocation();
+	const FVector TargetLocation = WeaponInitialLocation + WeaponOffset;
+	const FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, LocationSwaySpeed);
+
+	WeaponManagerComponent->GetCurrentWeapon()->SetActorRelativeLocation(NewLocation);
+}
+
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 
 void AHDAPlayerCharacter::RegisterConsoleCommands()

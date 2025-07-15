@@ -235,6 +235,16 @@ float UHDAPlayerMovementComponent::GetLateralSpeed() const
 	return LateralVelocity.Size();
 }
 
+float UHDAPlayerMovementComponent::GetNormalizedLateralSpeed() const
+{
+	if (GetLateralSpeed() <= 0.f || MaxWalkSpeed <= 0.f)
+	{
+		return 0.f;
+	}
+
+	return FMath::Clamp(GetLateralSpeed() / MaxWalkSpeed, 0.f, 1.f);
+}
+
 void UHDAPlayerMovementComponent::ForceLaunch(const float Height,
                                               const FVector& Direction,
                                               const bool bOverrideLateralVelocity)

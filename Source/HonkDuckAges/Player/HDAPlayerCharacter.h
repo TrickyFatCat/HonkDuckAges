@@ -66,7 +66,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* LastWeaponAction = nullptr;
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* NextWeaponAction = nullptr;
 
@@ -109,21 +109,50 @@ protected:
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="WeaponSway")
-	FVector SwayPower = FVector::OneVector * 10;
+	FVector RotationSwayPower = FVector::OneVector * 2;
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
-		Category="WeponSway",
+		Category="WeaponSway",
 		meta=(ClampMin=0, UIMin=0, Delta=1))
-	float SwaySpeed = 10.f;
+	float RotationSwaySpeed = 10.f;
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
 		Category="WeaponSway")
-	FRotator SwayThreshold = FRotator(10.f);
+	FRotator RotationSwayThreshold = FRotator(10.f);
 
-	FRotator SwayDisplacement = FRotator::ZeroRotator;
+	FRotator TargetSwayRotation = FRotator::ZeroRotator;
 
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ForceUnits="Centimeters"))
+	FVector LocationSwayThreshold = FVector(3.f, 3.f, 5.f);
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ClampMin=1, UIMin=1, ClampMax=100, UIMax=100, Delta=1))
+	float LocationSwaySpeed = 10.f;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ClampMin=0, UIMin=0))
+	float LocationSwayFrequency = 8.f;
+	
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ForceUnits="Centimeters"))
+	FVector LocationSwayAmplitude = FVector(0.f, 1.f, 0.5f);
+
+	FVector WeaponInitialLocation = FVector::ZeroVector;
+
+	FVector CurrentLateralOffset = FVector::ZeroVector;
+
+	float CurrentVerticalOffset = 0.f;
 
 private:
 	FVector MovementDirection = FVector::ZeroVector;
@@ -171,10 +200,12 @@ private:
 	void HandleZeroHealth(UHDALifeStateComponent* Component);
 
 	void ProcessCameraLean(const float DeltaTime) const;
-	
-	void CalculateSwayDisplacement(const FVector2D& Value);
 
-	void ProcessSway(const float DeltaTime) const;
+	void CalculateTargetSwayRotation(const FVector2D& Value);
+
+	void AnimateRotationSway(const float DeltaTime) const;
+
+	void AnimateLocationSway(const float DeltaTime);
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	void RegisterConsoleCommands();

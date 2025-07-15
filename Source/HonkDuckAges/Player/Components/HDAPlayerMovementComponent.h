@@ -79,7 +79,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetDashMaxCharges() const { return DashMaxCharges; }
-	
+
 	UFUNCTION(BlueprintCallable)
 	int32 GetCachedDashCharges() const { return CachedDashCharges; }
 
@@ -88,6 +88,12 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	float GetLateralSpeed() const;
+
+	UFUNCTION(BlueprintPure)
+	float GetNormalizedLateralSpeed() const;
+
+	UFUNCTION(BlueprintPure)
+	float GetJumpVelocity() const { return JumpZVelocity; }
 
 	UFUNCTION(BlueprintCallable)
 	void ForceLaunch(const float Height, const FVector& Direction, const bool bOverrideLateralVelocity);
@@ -112,9 +118,9 @@ protected:
 	 * Defines whether the character is allowed to dash.
 	 */
 	UPROPERTY(EditDefaultsOnly,
-			BlueprintGetter=GetCanDash,
-			BlueprintSetter=SetCanDash,
-			Category="Character Movement: Dash")
+		BlueprintGetter=GetCanDash,
+		BlueprintSetter=SetCanDash,
+		Category="Character Movement: Dash")
 	bool bCanDash = true;
 
 	/**
