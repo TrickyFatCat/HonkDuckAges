@@ -148,6 +148,12 @@ protected:
 		meta=(ForceUnits="Centimeters"))
 	FVector LocationSwayAmplitude = FVector(0.f, 1.f, 0.5f);
 
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ClampMin=0, UIMin=0, ClampMax=1, UIMax=1))
+	float LocationSwayDeadZone = 0.1f;
+
 	FVector WeaponInitialLocation = FVector::ZeroVector;
 
 	FVector CurrentLateralOffset = FVector::ZeroVector;
@@ -206,6 +212,8 @@ private:
 	void AnimateRotationSway(const float DeltaTime) const;
 
 	void AnimateLocationSway(const float DeltaTime);
+
+	float CheckLocationSwayDeadZone(const float Value) const;
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	void RegisterConsoleCommands();

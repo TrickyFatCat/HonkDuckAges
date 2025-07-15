@@ -339,16 +339,15 @@ void AHDAPlayerCharacter::AnimateLocationSway(const float DeltaTime)
 	TargetLateralOffset.X = FMath::Clamp(TargetLateralOffset.X, -1.f, 1.f);
 	TargetLateralOffset.Y = FMath::Clamp(TargetLateralOffset.Y, -1.f, 1.f);
 	CurrentLateralOffset = FMath::VInterpTo(CurrentLateralOffset, TargetLateralOffset, DeltaTime, LocationSwaySpeed);
-
-	CurrentLateralOffset.X = FMath::Abs(CurrentLateralOffset.X) >= 0.1f ? CurrentLateralOffset.X : 0.f;
-	CurrentLateralOffset.Y = FMath::Abs(CurrentLateralOffset.Y) >= 0.1f ? CurrentLateralOffset.Y : 0.f;
+	CurrentLateralOffset.X = CheckLocationSwayDeadZone(CurrentLateralOffset.X);
+	CurrentLateralOffset.Y = CheckLocationSwayDeadZone(CurrentLateralOffset.Y);
 
 	FVector WeaponOffset = CurrentLateralOffset * LocationSwayThreshold;
 
 	float TargetVerticalOffset = GetVelocity().Z / PlayerMovementComponent->GetJumpVelocity();
 	TargetVerticalOffset = FMath::Clamp(TargetVerticalOffset, -1.0f, 1.0f);
 	CurrentVerticalOffset = FMath::FInterpTo(CurrentVerticalOffset, TargetVerticalOffset, DeltaTime, LocationSwaySpeed);
-	CurrentVerticalOffset = FMath::Abs(CurrentVerticalOffset) >= 0.1f ? CurrentVerticalOffset : 0.f;
+	CurrentVerticalOffset = CheckLocationSwayDeadZone(CurrentVerticalOffset);	
 	WeaponOffset.Z += CurrentVerticalOffset * LocationSwayThreshold.Z;
 
 	const float NormalizedLateralSpeed = PlayerMovementComponent->GetNormalizedLateralSpeed();
@@ -376,6 +375,11 @@ void AHDAPlayerCharacter::AnimateLocationSway(const float DeltaTime)
 	const FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, LocationSwaySpeed);
 
 	WeaponManagerComponent->GetCurrentWeapon()->SetActorRelativeLocation(NewLocation);
+}
+
+float AHDAPlayerCharacter::CheckLocationSwayDeadZone(const float Value) const
+{
+	return FMath::Abs(Value) >= LocationSwayDeadZone ? Value : 0.f;
 }
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
