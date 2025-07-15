@@ -31,5 +31,7 @@ bool AHDAWeaponPickupBase::CanBeActivated_Implementation(AActor* Activator)
 void AHDAWeaponPickupBase::HandleActivationSuccess_Implementation(AActor* Activator)
 {
 	WeaponManager->AddWeapon(WeaponToGive);
+	WeaponManager->ChooseWeapon(WeaponToGive);
+	WeaponManager->AddAmmo(WeaponManager->GetAmmoTypeForSlot(WeaponToGive), 9999);
 }
 
