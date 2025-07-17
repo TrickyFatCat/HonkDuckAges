@@ -85,6 +85,12 @@ public:
 	UFUNCTION(BlueprintGetter)
 	int32 GetCurrentShotCost() const { return CurrentShotCost; }
 
+	UFUNCTION(BlueprintGetter)
+	bool GetHasInfiniteAmmo() const { return bHasInfiniteAmmo; }
+
+	UFUNCTION()
+	void SetHasInfiniteAmmo(const bool Value);
+
 	UFUNCTION(BlueprintPure)
 	AHDAPlayerWeaponBase* GetCurrentWeapon() const;
 
@@ -123,6 +129,9 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetCurrentShotCost, Category="WeaponManager")
 	int32 CurrentShotCost = 1;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetHasInfiniteAmmo, Category="WeaponManager")
+	bool bHasInfiniteAmmo = false;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintGetter=GetPreviousWeaponSlot, Category="WeaponManager")
 	EWeaponSlot PreviousWeaponSlot = EWeaponSlot::None;

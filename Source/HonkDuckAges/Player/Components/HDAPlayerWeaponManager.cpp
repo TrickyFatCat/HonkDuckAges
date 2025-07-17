@@ -268,7 +268,7 @@ void UHDAPlayerWeaponManager::AddAmmo(const EWeaponAmmoType AmmoType, const int3
 
 void UHDAPlayerWeaponManager::SubtractAmmo(const EWeaponAmmoType AmmoType, const int32 Value)
 {
-	if (Value <= 0)
+	if (Value <= 0 || bHasInfiniteAmmo)
 	{
 		return;
 	}
@@ -298,6 +298,22 @@ void UHDAPlayerWeaponManager::SubtractAmmo(const EWeaponAmmoType AmmoType, const
 	{
 		StopShooting();
 	}
+}
+
+void UHDAPlayerWeaponManager::SetHasInfiniteAmmo(const bool Value)
+{
+	if (bHasInfiniteAmmo == Value)
+	{
+		return;
+	}
+
+	bHasInfiniteAmmo = Value;
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	const FString BoolValue = bHasInfiniteAmmo ? TEXT("TRUE") : TEXT("FALSE");
+	const FString Message = FString::Printf(TEXT("Infinite ammo was set to %s."), *BoolValue);
+	PrintLog(Message);
+#endif
 }
 
 AHDAPlayerWeaponBase* UHDAPlayerWeaponManager::GetCurrentWeapon() const
