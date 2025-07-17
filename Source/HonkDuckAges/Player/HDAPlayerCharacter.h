@@ -239,5 +239,7 @@ private:
 	void GiveAllWeapons() const;
 
 	void GiveAllAmmo() const;
+
+	void ToggleInfiniteAmmo();
 #endif
 };

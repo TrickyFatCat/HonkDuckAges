@@ -347,7 +347,7 @@ void AHDAPlayerCharacter::AnimateLocationSway(const float DeltaTime)
 	float TargetVerticalOffset = GetVelocity().Z / PlayerMovementComponent->GetJumpVelocity();
 	TargetVerticalOffset = FMath::Clamp(TargetVerticalOffset, -1.0f, 1.0f);
 	CurrentVerticalOffset = FMath::FInterpTo(CurrentVerticalOffset, TargetVerticalOffset, DeltaTime, LocationSwaySpeed);
-	CurrentVerticalOffset = CheckLocationSwayDeadZone(CurrentVerticalOffset);	
+	CurrentVerticalOffset = CheckLocationSwayDeadZone(CurrentVerticalOffset);
 	WeaponOffset.Z += CurrentVerticalOffset * LocationSwayThreshold.Z;
 
 	const float NormalizedLateralSpeed = PlayerMovementComponent->GetNormalizedLateralSpeed();
@@ -389,28 +389,39 @@ void AHDAPlayerCharacter::RegisterConsoleCommands()
 	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.TogglePlayerDebugData"),
 	                                              TEXT("Toggles debug data for player"),
 	                                              FConsoleCommandDelegate::CreateUObject(
-		                                              this, &AHDAPlayerCharacter::TogglePlayerDebugData));
+		                                              this, &AHDAPlayerCharacter::TogglePlayerDebugData),
+	                                              ECVF_Cheat);
 
 	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.God"),
 	                                              TEXT("Toggles god mode for player"),
 	                                              FConsoleCommandDelegate::CreateUObject(
-		                                              this, &AHDAPlayerCharacter::ToggleGodMode));
+		                                              this, &AHDAPlayerCharacter::ToggleGodMode),
+	                                              ECVF_Cheat);
 
 	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.Demigod"),
 	                                              TEXT(
 		                                              "Toggles demigod mode for player. Damage will be registered as usual, but health will fully restored on death"),
 	                                              FConsoleCommandDelegate::CreateUObject(
-		                                              this, &AHDAPlayerCharacter::ToggleDemigodMode));
+		                                              this, &AHDAPlayerCharacter::ToggleDemigodMode),
+	                                              ECVF_Cheat);
 
 	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.AllWeapons"),
 	                                              TEXT("Gives all weapons to player"),
 	                                              FConsoleCommandDelegate::CreateUObject(
-		                                              this, &AHDAPlayerCharacter::GiveAllWeapons));
+		                                              this, &AHDAPlayerCharacter::GiveAllWeapons),
+	                                              ECVF_Cheat);
 
 	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.AllAmmo"),
 	                                              TEXT("Fully restores all ammo for player"),
 	                                              FConsoleCommandDelegate::CreateUObject(
-		                                              this, &AHDAPlayerCharacter::GiveAllAmmo));
+		                                              this, &AHDAPlayerCharacter::GiveAllAmmo),
+	                                              ECVF_Cheat);
+
+	IConsoleManager::Get().RegisterConsoleCommand(TEXT("HDA.ToggleInfiniteAmmo"),
+	                                              TEXT("Toggles infinite ammo for player"),
+	                                              FConsoleCommandDelegate::CreateUObject(
+		                                              this, &AHDAPlayerCharacter::ToggleInfiniteAmmo),
+	                                              ECVF_Cheat);
 }
 
 void AHDAPlayerCharacter::UnregisterConsoleCommands()
@@ -420,6 +431,7 @@ void AHDAPlayerCharacter::UnregisterConsoleCommands()
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.Demigod"), false);
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.AllWeapons"), false);
 	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.AllAmmo"), false);
+	IConsoleManager::Get().UnregisterConsoleObject(TEXT("HDA.ToggleInfiniteAmmo"), false);
 }
 
 void AHDAPlayerCharacter::TogglePlayerDebugData()
@@ -486,6 +498,11 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	TMap<EWeaponAmmoType, FTrickyPropertyInt> AmmoStash;
 	WeaponManagerComponent->GetAmmoStash(AmmoStash);
 	DebugMessage = DebugMessage.Append(TEXT("\n===AMMO===\n"));
+
+	if (WeaponManagerComponent->GetHasInfiniteAmmo())
+	{
+		DebugMessage = DebugMessage.Append(TEXT("INFINITE AMMO ENABLED\n"));
+	}
 
 	if (AmmoStash.IsEmpty())
 	{
@@ -593,6 +610,7 @@ void AHDAPlayerCharacter::GiveAllWeapons() const
 	WeaponManagerComponent->AddWeapon(EWeaponSlot::PlasmaBeam);
 	WeaponManagerComponent->AddWeapon(EWeaponSlot::LaserCrossbow);
 	WeaponManagerComponent->AddWeapon(EWeaponSlot::ShieldThrower);
+	GiveAllAmmo();
 }
 
 void AHDAPlayerCharacter::GiveAllAmmo() const
@@ -601,5 +619,10 @@ void AHDAPlayerCharacter::GiveAllAmmo() const
 	WeaponManagerComponent->AddAmmo(EWeaponAmmoType::Bullet, 9999);
 	WeaponManagerComponent->AddAmmo(EWeaponAmmoType::Energy, 9999);
 	WeaponManagerComponent->AddAmmo(EWeaponAmmoType::Shield, 9999);
+}
+
+void AHDAPlayerCharacter::ToggleInfiniteAmmo()
+{
+	WeaponManagerComponent->SetHasInfiniteAmmo(!WeaponManagerComponent->GetHasInfiniteAmmo());
 }
 #endif
