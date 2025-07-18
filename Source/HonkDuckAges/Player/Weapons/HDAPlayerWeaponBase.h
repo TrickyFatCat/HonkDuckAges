@@ -86,6 +86,12 @@ public:
 	UFUNCTION(BlueprintGetter)
 	float GetSpreadRadius() const { return SpreadRadius; }
 
+	UFUNCTION(BlueprintPure)
+	float GetNormalizedRemainingShotTime() const;
+
+	UFUNCTION(BlueprintPure)
+	float GetNormalizedElapsedShotTime() const;
+
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<USceneComponent> Root = nullptr;
@@ -107,7 +113,7 @@ protected:
 		Category="Weapon",
 		meta=(EditCondition="BulletType == EWeaponBulletType::Projectile", EditConditionHides))
 	TSubclassOf<AHDAPlayerProjectileBase> ProjectileClass = nullptr;
-	
+
 	UPROPERTY(EditDefaultsOnly,
 		Category="Weapon",
 		meta=(EditCondition="BulletType == EWeaponBulletType::Projectile", EditConditionHides))
@@ -170,6 +176,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Components")
 	TObjectPtr<UArrowComponent> ForwardVector = nullptr;
 #endif
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void WeaponShot(const TArray<FHitResult>& HitResults);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShotTimerStarted();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShotTimerFinished();
 
 private:
 	void CalculateBulletDisplacement(FVector2D& Displacement) const;

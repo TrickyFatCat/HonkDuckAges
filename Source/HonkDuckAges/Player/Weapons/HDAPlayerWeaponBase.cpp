@@ -22,6 +22,7 @@ AHDAPlayerWeaponBase::AHDAPlayerWeaponBase()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	MeshComponent->SetupAttachment(GetRootComponent());
 	MeshComponent->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	MeshComponent->SetRelativeLocation(FVector(30.f, 0.f, 5.f));
 	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
 
 	WeaponStateController = CreateDefaultSubobject<UHDAWeaponStateController>(TEXT("WeaponStateController"));
@@ -118,6 +119,7 @@ void AHDAPlayerWeaponBase::StartShooting()
 	WeaponStateController->TransitToShooting(true);
 	MakeShot();
 	TimerManager.SetTimer(ShotTimerHandle, this, &AHDAPlayerWeaponBase::HandleShotTimerFinished, ShotDelay, false);
+	ShotTimerStarted();
 }
 
 void AHDAPlayerWeaponBase::StopShooting()
@@ -159,6 +161,30 @@ void AHDAPlayerWeaponBase::SetOwningWeaponManager(UHDAPlayerWeaponManager* NewMa
 
 	OwningWeaponManager = NewManager;
 	OwningWeaponManager->OnAmmoIncreased.AddUniqueDynamic(this, &AHDAPlayerWeaponBase::HandleAmmoIncreased);
+}
+
+float AHDAPlayerWeaponBase::GetNormalizedRemainingShotTime() const
+{
+	const FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+
+	if (ShotDelay <= 0.f || !TimerManager.IsTimerActive(ShotTimerHandle))
+	{
+		return -1.f;
+	}
+
+	return TimerManager.GetTimerRemaining(ShotTimerHandle) / ShotDelay;
+}
+
+float AHDAPlayerWeaponBase::GetNormalizedElapsedShotTime() const
+{
+	const FTimerManager& TimerManager = GetWorld()->GetTimerManager();
+	
+	if (ShotDelay <= 0.f || !TimerManager.IsTimerActive(ShotTimerHandle))
+	{
+		return -1.f;
+	}
+	
+	return TimerManager.GetTimerElapsed(ShotTimerHandle) / ShotDelay;
 }
 
 void AHDAPlayerWeaponBase::CalculateBulletDisplacement(FVector2D& Displacement) const
@@ -206,6 +232,7 @@ void AHDAPlayerWeaponBase::MakeShot()
 	const TArray<AActor*> ActorsToIgnore{this, GetOwner()};
 	FVector2D Displacement = FVector2D::ZeroVector;
 	FHitResult HitResult;
+	TArray<FHitResult> HitResults;
 
 	for (int32 i = 0; i < BulletsPerShot; ++i)
 	{
@@ -226,6 +253,7 @@ void AHDAPlayerWeaponBase::MakeShot()
 		                                      FLinearColor::Red,
 		                                      FLinearColor::Green,
 		                                      0.25);
+		HitResults.Add(HitResult);
 
 		switch (BulletType)
 		{
@@ -256,6 +284,7 @@ void AHDAPlayerWeaponBase::MakeShot()
 	}
 
 	OnPlayerWeaponShot.Broadcast(this);
+	WeaponShot(HitResults);
 }
 
 AHDAPlayerProjectileBase* AHDAPlayerWeaponBase::SpawnProjectile(const FVector& Direction)
@@ -322,6 +351,7 @@ void AHDAPlayerWeaponBase::HandleShotTimerFinished()
 {
 	FTimerManager& TimerManager = GetWorld()->GetTimerManager();
 	TimerManager.ClearTimer(ShotTimerHandle);
+	ShotTimerFinished();
 
 	switch (WeaponMode)
 	{
@@ -339,6 +369,7 @@ void AHDAPlayerWeaponBase::HandleShotTimerFinished()
 			                      &AHDAPlayerWeaponBase::HandleShotTimerFinished,
 			                      ShotDelay,
 			                      false);
+			ShotTimerStarted();
 		}
 		break;
 	}
