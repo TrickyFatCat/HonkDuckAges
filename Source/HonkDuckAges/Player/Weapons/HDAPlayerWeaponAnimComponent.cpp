@@ -78,7 +78,10 @@ void UHDAPlayerWeaponAnimComponent::CalculateShakeOffset(const float DeltaTime,
 		return;
 	}
 
-	ShakeStrength = FMath::FInterpTo(ShakeStrength, 0.f, DeltaTime, ShakeFadeSpeed);
+	const float CurrentShakeFadeSpeed = OwningWeapon->GetCurrentState() == EWeaponState::Shooting
+		                                    ? ShakeFadeSpeed
+		                                    : ShakeFadeSpeedOnStopShooting;
+	ShakeStrength = FMath::FInterpTo(ShakeStrength, 0.f, DeltaTime, CurrentShakeFadeSpeed);
 	const float ShakeProgress = IsValid(ShakeStrengthCurve)
 		                            ? ShakeStrengthCurve->GetFloatValue(1 - ShakeStrength)
 		                            : ShakeStrength;
@@ -144,7 +147,7 @@ void UHDAPlayerWeaponAnimComponent::CalculateRecoilOffset(const float DeltaTime,
 	const float RecoilFadeFactor = IsValid(RecoilFadeCurve)
 		                               ? RecoilFadeCurve->GetFloatValue(1 - ShotTimerProgress)
 		                               : 1.f;
-	
+
 	RecoilStrength = FMath::FInterpTo(RecoilStrength,
 	                                  RecoilTargetStrength,
 	                                  DeltaTime,

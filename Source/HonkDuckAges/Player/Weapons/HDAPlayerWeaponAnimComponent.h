@@ -44,6 +44,12 @@ protected:
 		meta=(ClampMin=0, UIMin=0, Delta=1))
 	float ShakeFadeSpeed = 5.f;
 
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="Shake",
+		meta=(ClampMin=0, UIMin=0, Delta=1))
+	float ShakeFadeSpeedOnStopShooting = 5.f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Shake")
 	UCurveFloat* ShakeStrengthCurve = nullptr;
 
@@ -59,7 +65,7 @@ protected:
 	FVector RecoilLocationThreshold = FVector(5.f, 0.f, 0.f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Recoil")
-	FRotator RecoilRotationThreshold = FRotator(0.f, 15.f, 0.f);
+	FRotator RecoilRotationThreshold = FRotator(15.f, 0.f, 0.f);
 
 	UPROPERTY(EditDefaultsOnly,
 		BlueprintReadOnly,
