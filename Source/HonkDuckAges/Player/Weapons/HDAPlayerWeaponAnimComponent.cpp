@@ -48,6 +48,11 @@ void UHDAPlayerWeaponAnimComponent::InitializeComponent()
 		InitialLocation = GetRelativeLocation();
 		InitialRotation = GetRelativeRotation();
 		OwningWeapon = Cast<AHDAPlayerWeaponBase>(GetOwner());
+
+		if (OwningWeapon.IsValid())
+		{
+			OwningWeapon->OnPlayerWeaponShot.AddUniqueDynamic(this, &UHDAPlayerWeaponAnimComponent::HandleWeaponShot);
+		}
 	}
 }
 
@@ -151,4 +156,9 @@ void UHDAPlayerWeaponAnimComponent::CalculateRecoilOffset(const float DeltaTime,
 
 	OutLocation = RecoilLocationThreshold * RecoilProgress;
 	OutRotation = RecoilRotationThreshold * RecoilProgress;
+}
+
+void UHDAPlayerWeaponAnimComponent::HandleWeaponShot(AHDAPlayerWeaponBase* Weapon)
+{
+	AddShake(ShakePerShot);
 }

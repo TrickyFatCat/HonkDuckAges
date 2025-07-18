@@ -25,9 +25,6 @@ protected:
 	virtual void InitializeComponent() override;
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void AddShake(const float Value);
-
 	UFUNCTION(BlueprintPure)
 	AHDAPlayerWeaponBase* GetOwningWeapon() const { return OwningWeapon.Get(); }
 
@@ -49,6 +46,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Shake")
 	UCurveFloat* ShakeStrengthCurve = nullptr;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="Shake",
+		meta=(ClampMin=0, UIMin=0, ClampMax=1, UIMax=1, Delta=0.1))
+	float ShakePerShot = 1.0;
 
 	float ShakeStrength = 0.f;
 
@@ -87,7 +90,9 @@ private:
 	FVector InitialLocation = FVector::ZeroVector;
 
 	FRotator InitialRotation = FRotator::ZeroRotator;
-
+	
+	void AddShake(const float Value);
+	
 	void CalculateShakeOffset(const float DeltaTime, FVector& OutLocation, FRotator& OutRotation);
 
 	float GetNormalizedRemainingTime() const;
@@ -95,4 +100,7 @@ private:
 	float GetNormalizedElapsedTime() const;
 
 	void CalculateRecoilOffset(const float DeltaTime, FVector& OutLocation, FRotator& OutRotation);
+
+	UFUNCTION()
+	void HandleWeaponShot(AHDAPlayerWeaponBase* Weapon);
 };
