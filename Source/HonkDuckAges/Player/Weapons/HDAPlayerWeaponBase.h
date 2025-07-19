@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "HDAPlayerWeaponBase.generated.h"
 
+class UHDAPlayerWeaponAnimComponent;
 struct FTrickyPropertyInt;
 enum class EWeaponAmmoType : uint8;
 class UHDAPlayerWeaponManager;
@@ -103,6 +104,9 @@ public:
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<USceneComponent> Root = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UHDAPlayerWeaponAnimComponent> AnimComponent = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UMeshComponent> MeshComponent = nullptr;

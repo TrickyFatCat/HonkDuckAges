@@ -4,6 +4,7 @@
 #include "HDAPlayerWeaponBase.h"
 
 #include "HDAPlayerProjectileBase.h"
+#include "HDAPlayerWeaponAnimComponent.h"
 #include "HDAWeaponStateController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
@@ -19,8 +20,11 @@ AHDAPlayerWeaponBase::AHDAPlayerWeaponBase()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
 
+	AnimComponent = CreateDefaultSubobject<UHDAPlayerWeaponAnimComponent>(TEXT("AnimComponent"));
+	AnimComponent->SetupAttachment(Root);
+
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
-	MeshComponent->SetupAttachment(GetRootComponent());
+	MeshComponent->SetupAttachment(AnimComponent);
 	MeshComponent->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	MeshComponent->SetRelativeLocation(FVector(30.f, 0.f, 5.f));
 	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
