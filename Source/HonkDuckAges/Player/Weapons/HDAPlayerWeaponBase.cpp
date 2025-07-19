@@ -273,6 +273,37 @@ void AHDAPlayerWeaponBase::MakeShot()
 			SpawnProjectile(HitResult);
 			break;
 		}
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+		if (CVarShowWeaponHits.GetValueOnGameThread() == 1)
+		{
+			FVector LineStart = StartLocation;
+
+			if (IsValid(MeshComponent) && MeshComponent->DoesSocketExist(SpawnSocketName))
+			{
+				LineStart = MeshComponent->GetSocketLocation(SpawnSocketName);
+			}
+
+			const FVector LineEnd = HitResult.bBlockingHit ? HitResult.ImpactPoint : EndLocation;
+
+			DrawDebugLine(GetWorld(),
+			              LineStart,
+			              LineEnd,
+			              FColor::Purple,
+			              false,
+			              0.25f,
+			              0,
+			              2.f);
+
+			DrawDebugPoint(GetWorld(),
+			               LineEnd,
+			               10.f,
+			               FColor::Magenta,
+			               false,
+			               0.5f,
+			               0);
+		}
+#endif
 	}
 
 	OnPlayerWeaponShot.Broadcast(this);

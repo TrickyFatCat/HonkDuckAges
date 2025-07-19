@@ -15,6 +15,14 @@ class UHDAWeaponStateController;
 class AHDAPlayerProjectileBase;
 class UArrowComponent;
 
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+static TAutoConsoleVariable<int32> CVarShowWeaponHits(
+	TEXT("HDA.ShowWeaponHits"),
+	0,
+	TEXT("Enables debug draw for weapon hits. 0: Disabled | 1: Enabled"),
+	ECVF_Cheat);
+#endif // WITH_EDITOR
+
 UENUM(BlueprintType)
 enum class EWeaponBulletType : uint8
 {
