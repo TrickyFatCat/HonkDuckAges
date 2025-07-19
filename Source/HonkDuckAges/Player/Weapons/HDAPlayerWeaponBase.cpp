@@ -207,7 +207,9 @@ void AHDAPlayerWeaponBase::CalculateBulletDisplacement(FVector2D& Displacement) 
 	}
 
 	const float AngleRad = FMath::RandRange(0.f, TWO_PI);
-	const float Distance = FMath::RandRange(0.f, SpreadRadius * DistributionCoefficient);
+	const float RandValue = FMath::RandRange(0.f, 1.f);
+	const float Distance = FMath::Sqrt(RandValue) * SpreadRadius * DistributionCoefficient;
+	// const float Distance = FMath::RandRange(0.f, SpreadRadius * DistributionCoefficient);
 	Displacement = FVector2D(FMath::Cos(AngleRad) * Distance, FMath::Sin(AngleRad) * Distance);
 }
 
