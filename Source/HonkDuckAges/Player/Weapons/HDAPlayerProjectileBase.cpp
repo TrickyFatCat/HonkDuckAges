@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 AHDAPlayerProjectileBase::AHDAPlayerProjectileBase()
@@ -44,13 +45,14 @@ void AHDAPlayerProjectileBase::PostInitializeComponents()
 	}
 }
 
-void AHDAPlayerProjectileBase::InitProjectile(const FVector& Direction, const int32 NewDamage)
+void AHDAPlayerProjectileBase::InitProjectile(const FHitResult& HitResult, const int32 NewDamage)
 {
 	if (NewDamage > 0)
 	{
 		Damage = NewDamage;
 	}
-
+	const FVector TargetPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : HitResult.TraceEnd;
+	const FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(GetActorLocation(), TargetPoint);
 	ProjectileMovementComponent->Velocity = Direction * ProjectileMovementComponent->InitialSpeed;
 	ProjectileMovementComponent->UpdateComponentVelocity();
 	ProjectileMovementComponent->Activate();

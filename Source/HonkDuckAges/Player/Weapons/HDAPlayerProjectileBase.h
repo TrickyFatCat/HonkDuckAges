@@ -22,7 +22,7 @@ protected:
 	virtual void PostInitializeComponents() override;
 
 public:
-	void InitProjectile(const FVector& Direction, const int32 NewDamage);
+	void InitProjectile(const FHitResult& HitResult, const int32 NewDamage);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Projectile")

@@ -191,7 +191,7 @@ private:
 
 	void MakeShot();
 
-	AHDAPlayerProjectileBase* SpawnProjectile(const FVector& Direction);
+	AHDAPlayerProjectileBase* SpawnProjectile(const FHitResult& HitResult);
 
 	UFUNCTION()
 	void HandleAmmoIncreased(UHDAPlayerWeaponManager* Component,

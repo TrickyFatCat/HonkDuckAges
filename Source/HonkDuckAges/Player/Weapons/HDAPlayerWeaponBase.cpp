@@ -178,12 +178,12 @@ float AHDAPlayerWeaponBase::GetNormalizedRemainingShotTime() const
 float AHDAPlayerWeaponBase::GetNormalizedElapsedShotTime() const
 {
 	const FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-	
+
 	if (ShotDelay <= 0.f || !TimerManager.IsTimerActive(ShotTimerHandle))
 	{
 		return -1.f;
 	}
-	
+
 	return TimerManager.GetTimerElapsed(ShotTimerHandle) / ShotDelay;
 }
 
@@ -269,16 +269,8 @@ void AHDAPlayerWeaponBase::MakeShot()
 			break;
 
 		case EWeaponBulletType::Projectile:
-			FVector StartPoint = HitResult.TraceStart;
 
-			if (IsValid(MeshComponent) && MeshComponent->DoesSocketExist(SpawnSocketName))
-			{
-				StartPoint = MeshComponent->GetSocketLocation(SpawnSocketName);
-			}
-
-			const FVector TargetPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : HitResult.TraceEnd;
-			FVector Direction = UKismetMathLibrary::GetDirectionUnitVector(StartPoint, TargetPoint);
-			SpawnProjectile(Direction);
+			SpawnProjectile(HitResult);
 			break;
 		}
 	}
@@ -296,7 +288,6 @@ AHDAPlayerProjectileBase* AHDAPlayerWeaponBase::SpawnProjectile(const FVector& D
 
 	FTransform SpawnTransform = FTransform::Identity;
 	SpawnTransform.SetLocation(GetActorLocation());
-	SpawnTransform.SetRotation(Direction.Rotation().Quaternion());
 
 	if (IsValid(MeshComponent) && MeshComponent->DoesSocketExist(SpawnSocketName))
 	{
@@ -309,7 +300,7 @@ AHDAPlayerProjectileBase* AHDAPlayerWeaponBase::SpawnProjectile(const FVector& D
 		Cast<APawn>(GetOwner()),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn,
 		ESpawnActorScaleMethod::SelectDefaultAtRuntime);
-	NewProjectile->InitProjectile(Direction, Damage);
+	NewProjectile->InitProjectile(HitResult, Damage);
 	NewProjectile->FinishSpawning(SpawnTransform);
 	return NewProjectile;
 }
