@@ -68,6 +68,9 @@ public:
 
 	void DeactivateWeapon();
 
+	UFUNCTION(BlueprintGetter)
+	UHDAWeaponStateController* GetWeaponStateController() const { return WeaponStateController; }
+
 	UFUNCTION(BlueprintPure)
 	EWeaponState GetCurrentState() const { return WeaponStateController->GetCurrentState(); }
 
@@ -111,7 +114,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UMeshComponent> MeshComponent = nullptr;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleDefaultsOnly, BlueprintGetter=GetWeaponStateController, Category="Components")
 	TObjectPtr<UHDAWeaponStateController> WeaponStateController = nullptr;
 
 	UPROPERTY()
