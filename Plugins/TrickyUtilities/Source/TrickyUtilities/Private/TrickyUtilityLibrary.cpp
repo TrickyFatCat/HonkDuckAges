@@ -426,7 +426,7 @@ void UTrickyUtilityLibrary::CalculateSphereTransforms(const FTransform& Origin,
 		return;
 	}
 
-	constexpr float Phi = PI * (3.f - FMath::Sqrt(5.f));
+	const float Phi = PI * (3.f - FMath::Sqrt(5.f));
 	constexpr float Tau = PI * 2;
 
 	const float MinLongitudeAngle = MinLongitude * 360.f;
@@ -477,7 +477,7 @@ void UTrickyUtilityLibrary::CalculateSunFlowerTransforms(const FTransform& Origi
 		return;
 	}
 
-	constexpr float GoldenAngle = PI * (3.0f - FMath::Sqrt(5.0f));
+	const float GoldenAngle = PI * (3.0f - FMath::Sqrt(5.0f));
 	FTransform NewTransform = FTransform::Identity;
 
 	for (int32 i = 0; i < PointsAmount; ++i)
