@@ -45,7 +45,7 @@ void AHDAPlayerWeaponBase::PostInitializeComponents()
 
 	if (IsValid(World) && World->IsGameWorld())
 	{
-		SpreadRadius = FMath::Tan(FMath::DegreesToRadians(SpreadAngleDeg)) * TraceLength;
+		SpreadRadius = FMath::Tan(FMath::DegreesToRadians(SpreadAngleDeg * 0.5f)) * TraceLength;
 
 		if (BulletType == EWeaponBulletType::Projectile)
 		{
