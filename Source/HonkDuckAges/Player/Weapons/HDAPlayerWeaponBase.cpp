@@ -310,7 +310,7 @@ void AHDAPlayerWeaponBase::MakeShot()
 	WeaponShot(HitResults);
 }
 
-AHDAPlayerProjectileBase* AHDAPlayerWeaponBase::SpawnProjectile(const FVector& Direction)
+AHDAPlayerProjectileBase* AHDAPlayerWeaponBase::SpawnProjectile(const FHitResult& HitResult)
 {
 	if (!IsValid(ProjectileClass))
 	{
