@@ -469,9 +469,12 @@ void AHDAPlayerCharacter::PrintPlayerDebugData(const float DeltaTime) const
 	DebugMessage = FString::Printf(TEXT("===CURRENT WEAPON===\n"));
 
 	AHDAPlayerWeaponBase* CurrentWeapon = WeaponManagerComponent->GetCurrentWeapon();
-	DebugMessage = DebugMessage.Appendf(TEXT("%s\n"), *CurrentWeapon->GetActorNameOrLabel());
-	const FString WeaponStateName = StaticEnum<EWeaponState>()->GetNameStringByValue(
-		static_cast<int64>(CurrentWeapon->GetCurrentState()));
+	FString CurrentWeaponName = IsValid(CurrentWeapon) ? CurrentWeapon->GetActorNameOrLabel() : TEXT("NULL");
+	DebugMessage = DebugMessage.Appendf(TEXT("%s\n"), *CurrentWeaponName);
+	const FString WeaponStateName = IsValid(CurrentWeapon)
+		                                ? StaticEnum<EWeaponState>()->GetNameStringByValue(
+			                                static_cast<int64>(CurrentWeapon->GetCurrentState()))
+		                                : TEXT("NULL");
 	DebugMessage = DebugMessage.Appendf(TEXT("Current State: %s\n"), *WeaponStateName);
 
 	DebugMessage = DebugMessage.Append(TEXT("\n===ACQUIRED WEAPONS===\n"));
