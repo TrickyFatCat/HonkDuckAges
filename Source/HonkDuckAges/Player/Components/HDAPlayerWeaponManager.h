@@ -31,6 +31,11 @@ protected:
 	virtual void InitializeComponent() override;
 
 public:
+	virtual void TickComponent(float DeltaTime,
+	                           ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
+
+public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAmmoValueChangedDynamicSignature OnAmmoIncreased;
 
@@ -155,7 +160,32 @@ protected:
 		{EWeaponAmmoType::Shield, FTrickyPropertyInt{}}
 	};
 
+	UPROPERTY(EditDefaultsOnly, Category="SwitchingAnimation")
+	float SwitchAnimationDuration = 0.25f;
+
+	UPROPERTY(EditDefaultsOnly, Category="SwitchingAnimation")
+	FVector HideLocation = FVector(0.f, 24.f, -100.f);
+
+	UPROPERTY(EditDefaultsOnly, Category="SwitchingAnimation")
+	FRotator HideRotation = FRotator(-45.f, 0.f, 0.f);
+
 private:
+	float CurrentSwitchAnimationDuration = 0.f;
+
+	void HideCurrentWeapon();
+
+	void ShowCurrentWeapon();
+
+	bool bIsHiding = false;
+
+	void PlaySwitchAnimation(const float DeltaTime);
+
+	void StartSwitchingWeapon(const EWeaponSlot WeaponSlot);
+
+	void FinishSwitchingWeapon();
+
+	EWeaponSlot TargetWeaponSlot = EWeaponSlot::None;
+
 	void InitAmmoStash();
 
 	UFUNCTION()

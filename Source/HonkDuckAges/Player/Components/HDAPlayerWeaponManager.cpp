@@ -42,6 +42,15 @@ void UHDAPlayerWeaponManager::InitializeComponent()
 	}
 }
 
+void UHDAPlayerWeaponManager::TickComponent(float DeltaTime,
+                                            ELevelTick TickType,
+                                            FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	PlaySwitchAnimation(DeltaTime);
+}
+
 void UHDAPlayerWeaponManager::StartShooting()
 {
 	if (!HasWeapon(CurrentWeaponSlot))
@@ -98,7 +107,8 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 	}
 
 	FTransform AttachmentTransform = FTransform::Identity;
-	AttachmentTransform.SetLocation(WeaponData->SpawnPositionOffset);
+	AttachmentTransform.SetLocation(HideLocation);
+	AttachmentTransform.SetRotation(HideRotation.Quaternion());
 
 	AHDAPlayerWeaponBase* NewWeapon = GetWorld()->SpawnActorDeferred<AHDAPlayerWeaponBase>(
 		WeaponClass, AttachmentTransform);
@@ -128,48 +138,17 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 
 bool UHDAPlayerWeaponManager::HasWeapon(const EWeaponSlot WeaponSlot)
 {
+	if (CurrentWeaponSlot == EWeaponSlot::None)
+	{
+		return false;
+	}
+	
 	return IsValid(AcquiredWeapons[WeaponSlot]);
 }
 
 void UHDAPlayerWeaponManager::ChooseWeapon(const EWeaponSlot WeaponSlot)
 {
-	if (!IsValid(AcquiredWeapons[WeaponSlot]) || CurrentWeaponSlot == WeaponSlot)
-	{
-		return;
-	}
-
-	if (PreviousWeaponSlot != CurrentWeaponSlot)
-	{
-		PreviousWeaponSlot = CurrentWeaponSlot;
-		AHDAPlayerWeaponBase* PreviousWeapon = AcquiredWeapons[PreviousWeaponSlot];
-
-		if (IsValid(PreviousWeapon))
-		{
-			PreviousWeapon->OnPlayerWeaponShot.RemoveDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
-			PreviousWeapon->DeactivateWeapon();
-		}
-	}
-
-	CurrentWeaponSlot = WeaponSlot;
-	CurrentAmmoType = WeaponData->WeaponSlots[WeaponSlot].AmmoType;
-	CurrentShotCost = WeaponData->WeaponSlots[WeaponSlot].ShotCost;
-
-	AHDAPlayerWeaponBase* CurrentWeapon = AcquiredWeapons[CurrentWeaponSlot];
-
-	if (IsValid(CurrentWeapon))
-	{
-		CurrentWeapon->OnPlayerWeaponShot.AddUniqueDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
-		CurrentWeapon->ActivateWeapon();
-	}
-
-#if WITH_EDITOR || !UE_BUILD_SHIPPING
-	const FString PreviousSlotName = UHDAPlayerWeaponData::GetSlotName(PreviousWeaponSlot);
-	const FString CurrentSlotName = UHDAPlayerWeaponData::GetSlotName(CurrentWeaponSlot);
-	const FString Message = FString::Printf(TEXT("%s weapon was switched to %s weapon."),
-	                                        *PreviousSlotName,
-	                                        *CurrentSlotName);
-	PrintLog(Message);
-#endif
+	StartSwitchingWeapon(WeaponSlot);
 }
 
 void UHDAPlayerWeaponManager::ChooseWeaponByIndex(const int32 Index)
@@ -318,6 +297,11 @@ void UHDAPlayerWeaponManager::SetHasInfiniteAmmo(const bool Value)
 
 AHDAPlayerWeaponBase* UHDAPlayerWeaponManager::GetCurrentWeapon() const
 {
+	if (CurrentWeaponSlot == EWeaponSlot::None)
+	{
+		return nullptr;
+	}
+	
 	return AcquiredWeapons[CurrentWeaponSlot];
 }
 
@@ -362,6 +346,108 @@ void UHDAPlayerWeaponManager::GetAmmo(const EWeaponAmmoType AmmoType, FTrickyPro
 EWeaponAmmoType UHDAPlayerWeaponManager::GetAmmoTypeForSlot(const EWeaponSlot WeaponSlot) const
 {
 	return WeaponData->WeaponSlots[WeaponSlot].AmmoType;
+}
+
+void UHDAPlayerWeaponManager::HideCurrentWeapon()
+{
+	bIsHiding = true;
+	CurrentSwitchAnimationDuration = SwitchAnimationDuration;
+}
+
+void UHDAPlayerWeaponManager::ShowCurrentWeapon()
+{
+	bIsHiding = false;
+	CurrentSwitchAnimationDuration = SwitchAnimationDuration;
+}
+
+void UHDAPlayerWeaponManager::PlaySwitchAnimation(const float DeltaTime)
+{
+	if (!IsValid(GetCurrentWeapon()) || CurrentSwitchAnimationDuration <= 0.f)
+	{
+		return;
+	}
+
+	CurrentSwitchAnimationDuration -= DeltaTime;
+	const float NormalizedDuration = CurrentSwitchAnimationDuration / SwitchAnimationDuration;
+	const float Progress = FMath::Abs(1.f * static_cast<int32>(!bIsHiding) - NormalizedDuration);
+	const FVector NewLocation = FMath::InterpEaseInOut(HideLocation, WeaponData->SpawnPositionOffset, Progress, 2.f);
+	const FRotator NewRotator = FMath::InterpEaseInOut(HideRotation, FRotator::ZeroRotator, Progress, 2.f);
+	GetCurrentWeapon()->SetActorRelativeLocation(NewLocation);
+	GetCurrentWeapon()->SetActorRelativeRotation(NewRotator);
+
+	if (CurrentSwitchAnimationDuration > 0.f)
+	{
+		return;
+	}
+
+	if (bIsHiding)
+	{
+		GetCurrentWeapon()->SetActorHiddenInGame(true);
+		FinishSwitchingWeapon();
+	}
+	else
+	{
+		GetCurrentWeapon()->ActivateWeapon();
+	}
+}
+
+void UHDAPlayerWeaponManager::StartSwitchingWeapon(const EWeaponSlot WeaponSlot)
+{
+	if (!IsValid(AcquiredWeapons[WeaponSlot]) || CurrentWeaponSlot == WeaponSlot)
+	{
+		return;
+	}
+
+	TargetWeaponSlot = WeaponSlot;
+
+	if (CurrentSwitchAnimationDuration > 0.f)
+	{
+		return;
+	}
+	
+	if (PreviousWeaponSlot == CurrentWeaponSlot)
+	{
+		FinishSwitchingWeapon();
+	}
+	else
+	{
+		PreviousWeaponSlot = CurrentWeaponSlot;
+		AHDAPlayerWeaponBase* PreviousWeapon = AcquiredWeapons[PreviousWeaponSlot];
+
+		if (IsValid(PreviousWeapon))
+		{
+			PreviousWeapon->OnPlayerWeaponShot.RemoveDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
+			PreviousWeapon->DeactivateWeapon();
+		}
+
+		HideCurrentWeapon();
+	}
+}
+
+void UHDAPlayerWeaponManager::FinishSwitchingWeapon()
+{
+	CurrentWeaponSlot = TargetWeaponSlot;
+	CurrentAmmoType = WeaponData->WeaponSlots[TargetWeaponSlot].AmmoType;
+	CurrentShotCost = WeaponData->WeaponSlots[TargetWeaponSlot].ShotCost;
+
+	AHDAPlayerWeaponBase* CurrentWeapon = AcquiredWeapons[CurrentWeaponSlot];
+
+	if (IsValid(CurrentWeapon))
+	{
+		CurrentWeapon->OnPlayerWeaponShot.AddUniqueDynamic(this, &UHDAPlayerWeaponManager::HandleWeaponShot);
+		CurrentWeapon->SetActorHiddenInGame(false);
+	}
+
+	ShowCurrentWeapon();
+
+#if WITH_EDITOR || !UE_BUILD_SHIPPING
+	const FString PreviousSlotName = UHDAPlayerWeaponData::GetSlotName(PreviousWeaponSlot);
+	const FString CurrentSlotName = UHDAPlayerWeaponData::GetSlotName(CurrentWeaponSlot);
+	const FString Message = FString::Printf(TEXT("%s weapon was switched to %s weapon."),
+	                                        *PreviousSlotName,
+	                                        *CurrentSlotName);
+	PrintLog(Message);
+#endif
 }
 
 void UHDAPlayerWeaponManager::InitAmmoStash()

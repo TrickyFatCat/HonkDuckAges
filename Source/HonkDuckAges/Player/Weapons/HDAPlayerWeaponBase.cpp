@@ -66,6 +66,7 @@ void AHDAPlayerWeaponBase::PostInitializeComponents()
 
 		if (WeaponStateController->GetCurrentState() == EWeaponState::Disabled)
 		{
+			SetActorHiddenInGame(true);
 			SetWeaponEnabled(false);
 		}
 
@@ -355,7 +356,7 @@ void AHDAPlayerWeaponBase::HandleAmmoIncreased(UHDAPlayerWeaponManager* Componen
 
 void AHDAPlayerWeaponBase::SetWeaponEnabled(const bool bIsEnabled)
 {
-	MeshComponent->SetHiddenInGame(!bIsEnabled);
+	// MeshComponent->SetHiddenInGame(!bIsEnabled);
 	SetActorTickEnabled(bIsEnabled);
 }
 
