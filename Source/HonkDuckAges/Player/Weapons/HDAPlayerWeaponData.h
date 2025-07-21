@@ -45,6 +45,30 @@ struct FWeaponData
 	int32 ShotCost = 1;
 };
 
+USTRUCT(BlueprintType)
+struct FSwitchingAnimationData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="SwitchingAnimation",
+		meta=(ClampMin=0, UIMin=0, Delta=0.1, ForceUnits="Seconds"))
+	float AnimationDuration = 0.25f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="SwitchingAnimation")
+	FVector HideLocation = FVector(0.f, 24.f, -100.f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="SwitchingAnimation")
+	FRotator HideRotation = FRotator(-45.f, 0.f, 0.f);
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="SwitchingAnimation",
+		meta=(ClampMin=0, UIMin=0, Delta=1))
+	float AnimationExponent = 2.f;
+};
+
 /**
  * 
  */
@@ -55,11 +79,14 @@ class HONKDUCKAGES_API UHDAPlayerWeaponData : public UDataAsset
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="WeaponData")
-	FVector SpawnPositionOffset = FVector(0, 24.f, -24.f);
-	
+	FVector WeaponSpawnPosition = FVector(0, 24.f, -24.f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Animation")
+	FSwitchingAnimationData SwitchingAnimationData;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(InvalidEnumValues="None"))
 	EWeaponSlot DefaultWeaponSlot = EWeaponSlot::Shotgun;
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(ReadOnlyKeys, ForceInlineRow))
 	TMap<EWeaponSlot, FWeaponData> WeaponSlots{
 		{EWeaponSlot::Shotgun, FWeaponData{nullptr, EWeaponAmmoType::Gauge, 2}},

@@ -43,7 +43,7 @@ void AHDAPlayerCharacter::BeginPlay()
 		}
 	}
 
-	WeaponInitialLocation = WeaponManagerComponent->GetWeaponData()->SpawnPositionOffset;
+	WeaponInitialLocation = WeaponManagerComponent->GetWeaponData()->WeaponSpawnPosition;
 	PlayerMovementComponent = Cast<UHDAPlayerMovementComponent>(GetMovementComponent());
 
 	if (IsValid(PlayerMovementComponent))

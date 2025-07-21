@@ -32,12 +32,19 @@ void UHDAPlayerWeaponManager::InitializeComponent()
 				           *WeaponData->GetName(),
 				           *StaticEnum<EWeaponSlot>()->GetNameStringByValue(static_cast<int64>(Slot.Key)));
 			}
+
+			WeaponSpawnLocation = WeaponData->WeaponSpawnPosition;
 		}
 
 		CameraComponent = GetOwner()->GetComponentByClass<UCameraComponent>();
+		SwitchingAnimationData = WeaponData->SwitchingAnimationData;
 		InitAmmoStash();
-		AddWeapon(WeaponData->DefaultWeaponSlot);
-		ChooseWeapon(WeaponData->DefaultWeaponSlot);
+
+		const EWeaponSlot DefaultWeaponSlot = IsValid(WeaponData)
+			                                      ? WeaponData->DefaultWeaponSlot
+			                                      : EWeaponSlot::Shotgun;
+		AddWeapon(DefaultWeaponSlot);
+		ChooseWeapon(DefaultWeaponSlot);
 		AddAmmo(CurrentAmmoType, 999);
 	}
 }
@@ -107,8 +114,8 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 	}
 
 	FTransform AttachmentTransform = FTransform::Identity;
-	AttachmentTransform.SetLocation(HideLocation);
-	AttachmentTransform.SetRotation(HideRotation.Quaternion());
+	AttachmentTransform.SetLocation(SwitchingAnimationData.HideLocation);
+	AttachmentTransform.SetRotation(SwitchingAnimationData.HideRotation.Quaternion());
 
 	AHDAPlayerWeaponBase* NewWeapon = GetWorld()->SpawnActorDeferred<AHDAPlayerWeaponBase>(
 		WeaponClass, AttachmentTransform);
@@ -142,7 +149,7 @@ bool UHDAPlayerWeaponManager::HasWeapon(const EWeaponSlot WeaponSlot)
 	{
 		return false;
 	}
-	
+
 	return IsValid(AcquiredWeapons[WeaponSlot]);
 }
 
@@ -301,7 +308,7 @@ AHDAPlayerWeaponBase* UHDAPlayerWeaponManager::GetCurrentWeapon() const
 	{
 		return nullptr;
 	}
-	
+
 	return AcquiredWeapons[CurrentWeaponSlot];
 }
 
@@ -351,13 +358,13 @@ EWeaponAmmoType UHDAPlayerWeaponManager::GetAmmoTypeForSlot(const EWeaponSlot We
 void UHDAPlayerWeaponManager::HideCurrentWeapon()
 {
 	bIsHiding = true;
-	CurrentSwitchAnimationDuration = SwitchAnimationDuration;
+	CurrentSwitchAnimationDuration = SwitchingAnimationData.AnimationDuration;
 }
 
 void UHDAPlayerWeaponManager::ShowCurrentWeapon()
 {
 	bIsHiding = false;
-	CurrentSwitchAnimationDuration = SwitchAnimationDuration;
+	CurrentSwitchAnimationDuration = SwitchingAnimationData.AnimationDuration;
 }
 
 void UHDAPlayerWeaponManager::PlaySwitchAnimation(const float DeltaTime)
@@ -368,10 +375,16 @@ void UHDAPlayerWeaponManager::PlaySwitchAnimation(const float DeltaTime)
 	}
 
 	CurrentSwitchAnimationDuration -= DeltaTime;
-	const float NormalizedDuration = CurrentSwitchAnimationDuration / SwitchAnimationDuration;
+	const float NormalizedDuration = CurrentSwitchAnimationDuration / SwitchingAnimationData.AnimationDuration;
 	const float Progress = FMath::Abs(1.f * static_cast<int32>(!bIsHiding) - NormalizedDuration);
-	const FVector NewLocation = FMath::InterpEaseInOut(HideLocation, WeaponData->SpawnPositionOffset, Progress, 2.f);
-	const FRotator NewRotator = FMath::InterpEaseInOut(HideRotation, FRotator::ZeroRotator, Progress, 2.f);
+	const FVector NewLocation = FMath::InterpEaseInOut(SwitchingAnimationData.HideLocation,
+	                                                   WeaponSpawnLocation,
+	                                                   Progress,
+	                                                   SwitchingAnimationData.AnimationExponent);
+	const FRotator NewRotator = FMath::InterpEaseInOut(SwitchingAnimationData.HideRotation,
+	                                                   FRotator::ZeroRotator,
+	                                                   Progress,
+	                                                   SwitchingAnimationData.AnimationExponent);
 	GetCurrentWeapon()->SetActorRelativeLocation(NewLocation);
 	GetCurrentWeapon()->SetActorRelativeRotation(NewRotator);
 
@@ -404,7 +417,7 @@ void UHDAPlayerWeaponManager::StartSwitchingWeapon(const EWeaponSlot WeaponSlot)
 	{
 		return;
 	}
-	
+
 	if (PreviousWeaponSlot == CurrentWeaponSlot)
 	{
 		FinishSwitchingWeapon();
@@ -460,7 +473,9 @@ void UHDAPlayerWeaponManager::InitAmmoStash()
 	for (auto& AmmoType : AmmoStash)
 	{
 		FTrickyPropertyInt& Ammo = AmmoType.Value;
-		Ammo.MaxValue = WeaponData->DefaultWeaponAmmo.FindChecked(AmmoType.Key);
+		Ammo.MaxValue = IsValid(WeaponData)
+			                ? WeaponData->DefaultWeaponAmmo.FindChecked(AmmoType.Key)
+			                : 0;
 		Ammo.Value = 0;
 	}
 }

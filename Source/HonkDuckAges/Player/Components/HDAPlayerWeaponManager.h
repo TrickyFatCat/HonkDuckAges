@@ -19,7 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAmmoValueChangedDynamicSignatur
                                               const FTrickyPropertyInt&, Ammo,
                                               int32, DeltaValue);
 
-UCLASS(ClassGroup=(Custom), PrioritizeCategories="WeaponManager")
+UCLASS(ClassGroup=(Custom), PrioritizeCategories="WeaponManager, Animation")
 class HONKDUCKAGES_API UHDAPlayerWeaponManager : public UActorComponent
 {
 	GENERATED_BODY()
@@ -160,15 +160,12 @@ protected:
 		{EWeaponAmmoType::Shield, FTrickyPropertyInt{}}
 	};
 
-	UPROPERTY(EditDefaultsOnly, Category="SwitchingAnimation")
-	float SwitchAnimationDuration = 0.25f;
-
-	UPROPERTY(EditDefaultsOnly, Category="SwitchingAnimation")
-	FVector HideLocation = FVector(0.f, 24.f, -100.f);
-
-	UPROPERTY(EditDefaultsOnly, Category="SwitchingAnimation")
-	FRotator HideRotation = FRotator(-45.f, 0.f, 0.f);
-
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation")
+	FVector WeaponSpawnLocation = FVector(0.f, 0.f, -24.f);
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation")
+	FSwitchingAnimationData SwitchingAnimationData;
+	
 private:
 	float CurrentSwitchAnimationDuration = 0.f;
 
