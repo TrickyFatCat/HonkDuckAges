@@ -8,6 +8,7 @@
 #include "HonkDuckAges/Player/Weapons/HDAPlayerWeaponData.h"
 #include "HDAPlayerWeaponManager.generated.h"
 
+class UHDAPlayerMovementComponent;
 class UCameraComponent;
 class AHDAPlayerWeaponBase;
 
@@ -118,6 +119,8 @@ public:
 	EWeaponAmmoType GetAmmoTypeForSlot(const EWeaponSlot WeaponSlot) const;
 
 	TWeakObjectPtr<UCameraComponent> GetCameraComponent() const { return CameraComponent; }
+	
+	void CalculateTargetSwayRotation(const FVector2D& Value);
 
 protected:
 	UPROPERTY()
@@ -165,10 +168,18 @@ protected:
 	
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation")
 	FSwitchingAnimationData SwitchingAnimationData;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation")
+	FRotationSwayData RotationSwayData;
+	
+	void AnimateRotationSway(const float DeltaTime) const;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation")
+	FLocationSwayData LocationSwayData;
+
+	void AnimateLocationSway(const float DeltaTime);
 	
 private:
-	float CurrentSwitchAnimationDuration = 0.f;
-
 	void HideCurrentWeapon();
 
 	void ShowCurrentWeapon();

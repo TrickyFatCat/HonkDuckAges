@@ -6,6 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "HDAPlayerWeaponData.generated.h"
 
+class UHDAPlayerMovementComponent;
 class AHDAPlayerWeaponBase;
 
 UENUM(BlueprintType)
@@ -67,6 +68,115 @@ struct FSwitchingAnimationData
 		Category="SwitchingAnimation",
 		meta=(ClampMin=0, UIMin=0, Delta=1))
 	float AnimationExponent = 2.f;
+
+	float CurrentAnimationDuration = 0.f;
+
+	float GetNormalizedDuration() const
+	{
+		return CurrentAnimationDuration / AnimationDuration;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FRotationSwayData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ClampMin=0, UIMin=0, Delta=1, ForceUnits="Degrees"))
+	FRotator Threshold = FRotator(10.f, 10.f, 1.f);
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway")
+	FVector Power = FVector(2.f, 3.f, 2.f);
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ClampMin=0, UIMin=0, Delta=1))
+	float Speed = 5.f;
+
+	FRotator TargetRotation = FRotator::ZeroRotator;
+
+	void CalculateTargetRotation(const FVector2D& Value)
+	{
+		TargetRotation.Roll = Value.X * Power.X;
+		TargetRotation.Pitch = -Value.Y * Power.Y;
+		TargetRotation.Yaw = Value.X * Power.Z;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FLocationSwayData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ForceUnits="Centimeters"))
+	FVector Threshold = FVector(3.f, 4.f, 5.f);
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ClampMin=1, UIMin=1, ClampMax=100, UIMax=100, Delta=1))
+	float Speed = 10.f;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ClampMin=0, UIMin=0))
+	float Frequency = 8.f;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ForceUnits="Centimeters"))
+	FVector Amplitude = FVector(0.f, 1.f, 0.5f);
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ClampMin=0, UIMin=0, ClampMax=1, UIMax=1, Delta=0.1))
+	float DeadZone = 0.1f;
+
+	FVector CurrentLateralOffset = FVector::ZeroVector;
+
+	float CurrentVerticalOffset = 0.f;
+
+	UPROPERTY()
+	TWeakObjectPtr<UHDAPlayerMovementComponent> PlayerMovementComponent = nullptr;
+
+	void InterpolateLateralOffset(const FVector& TargetLateralOffset, const float DeltaTime)
+	{
+		CurrentLateralOffset = FMath::VInterpTo(CurrentLateralOffset,
+		                                        TargetLateralOffset,
+		                                        DeltaTime,
+		                                        Speed);
+
+		CurrentLateralOffset.X = CheckDeadZone(CurrentLateralOffset.X);
+		CurrentLateralOffset.Y = CheckDeadZone(CurrentLateralOffset.Y);
+	}
+
+	void InterpolateVerticalOffset(const float TargetVerticalOffset, const float DeltaTime)
+	{
+		CurrentVerticalOffset = FMath::FInterpTo(CurrentVerticalOffset,
+		                                         TargetVerticalOffset,
+		                                         DeltaTime,
+		                                         Speed);
+		
+		CurrentVerticalOffset = CheckDeadZone(CurrentVerticalOffset);
+	}
+
+private:
+	float CheckDeadZone(const float Value) const
+	{
+		return FMath::Abs(Value) >= DeadZone ? Value : 0.f;
+	}
 };
 
 /**
@@ -83,6 +193,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Animation")
 	FSwitchingAnimationData SwitchingAnimationData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Animation")
+	FRotationSwayData RotationSwayData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Animation")
+	FLocationSwayData LocationSwayData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(InvalidEnumValues="None"))
 	EWeaponSlot DefaultWeaponSlot = EWeaponSlot::Shotgun;

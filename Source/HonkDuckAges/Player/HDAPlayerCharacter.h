@@ -106,60 +106,6 @@ protected:
 		meta=(ClampMin=0, UIMin=0))
 	float CameraLeanSpeed = 10.0f;
 
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="WeaponSway")
-	FVector RotationSwayPower = FVector::OneVector * 2;
-
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="WeaponSway",
-		meta=(ClampMin=0, UIMin=0, Delta=1))
-	float RotationSwaySpeed = 10.f;
-
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="WeaponSway")
-	FRotator RotationSwayThreshold = FRotator(10.f);
-
-	FRotator TargetSwayRotation = FRotator::ZeroRotator;
-
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="WeaponSway",
-		meta=(ForceUnits="Centimeters"))
-	FVector LocationSwayThreshold = FVector(3.f, 3.f, 5.f);
-
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="WeaponSway",
-		meta=(ClampMin=1, UIMin=1, ClampMax=100, UIMax=100, Delta=1))
-	float LocationSwaySpeed = 10.f;
-
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="WeaponSway",
-		meta=(ClampMin=0, UIMin=0))
-	float LocationSwayFrequency = 8.f;
-	
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="WeaponSway",
-		meta=(ForceUnits="Centimeters"))
-	FVector LocationSwayAmplitude = FVector(0.f, 1.f, 0.5f);
-
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="WeaponSway",
-		meta=(ClampMin=0, UIMin=0, ClampMax=1, UIMax=1))
-	float LocationSwayDeadZone = 0.1f;
-
-	FVector WeaponInitialLocation = FVector::ZeroVector;
-
-	FVector CurrentLateralOffset = FVector::ZeroVector;
-
-	float CurrentVerticalOffset = 0.f;
-
 private:
 	FVector MovementDirection = FVector::ZeroVector;
 
@@ -206,14 +152,6 @@ private:
 	void HandleZeroHealth(UHDALifeStateComponent* Component);
 
 	void ProcessCameraLean(const float DeltaTime) const;
-
-	void CalculateTargetSwayRotation(const FVector2D& Value);
-
-	void AnimateRotationSway(const float DeltaTime) const;
-
-	void AnimateLocationSway(const float DeltaTime);
-
-	float CheckLocationSwayDeadZone(const float Value) const;
 
 #if WITH_EDITOR || !UE_BUILD_SHIPPING
 	void RegisterConsoleCommands();

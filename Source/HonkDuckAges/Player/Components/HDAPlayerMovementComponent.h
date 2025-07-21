@@ -93,6 +93,9 @@ public:
 	float GetNormalizedLateralSpeed() const;
 
 	UFUNCTION(BlueprintPure)
+	float GetNormalizedVerticalSpeed() const;
+
+	UFUNCTION(BlueprintPure)
 	float GetJumpVelocity() const { return JumpZVelocity; }
 
 	UFUNCTION(BlueprintCallable)
