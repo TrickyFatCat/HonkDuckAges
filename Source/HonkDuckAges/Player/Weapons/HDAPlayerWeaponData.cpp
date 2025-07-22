@@ -3,6 +3,31 @@
 
 #include "HDAPlayerWeaponData.h"
 
+void FRotationSwayData::CalculateTargetRotation(const FVector2D& Value)
+{
+	TargetRotation.Roll = Value.X * Power.X;
+	TargetRotation.Pitch = -Value.Y * Power.Y;
+	TargetRotation.Yaw = Value.X * Power.Z;
+}
+
+void FRotationSwayData::InterpolateCurrentRotation(const float DeltaTime, FRotator& CurrentRotation) const
+{
+	CurrentRotation = FMath::RInterpTo(CurrentRotation,
+	                                   TargetRotation,
+	                                   DeltaTime,
+	                                   Speed);
+
+	CurrentRotation.Roll = FMath::Clamp(CurrentRotation.Roll,
+	                                    -Threshold.Roll,
+	                                    Threshold.Roll);
+	CurrentRotation.Pitch = FMath::Clamp(CurrentRotation.Pitch,
+	                                     -Threshold.Pitch,
+	                                     Threshold.Pitch);
+	CurrentRotation.Yaw = FMath::Clamp(CurrentRotation.Yaw,
+	                                   -Threshold.Yaw,
+	                                   Threshold.Yaw);
+}
+
 void FLocationSwayData::InterpolateLateralOffset(const FVector& TargetLateralOffset, const float DeltaTime)
 {
 	CurrentLateralOffset = FMath::VInterpTo(CurrentLateralOffset,

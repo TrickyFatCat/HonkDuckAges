@@ -103,12 +103,9 @@ struct FRotationSwayData
 
 	FRotator TargetRotation = FRotator::ZeroRotator;
 
-	void CalculateTargetRotation(const FVector2D& Value)
-	{
-		TargetRotation.Roll = Value.X * Power.X;
-		TargetRotation.Pitch = -Value.Y * Power.Y;
-		TargetRotation.Yaw = Value.X * Power.Z;
-	}
+	void CalculateTargetRotation(const FVector2D& Value);
+
+	void InterpolateCurrentRotation(const float DeltaTime, FRotator& CurrentRotation) const;
 };
 
 USTRUCT(BlueprintType)
