@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "HonkDuckAges/Player/Components/HDAPlayerMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "HDAPlayerWeaponData.generated.h"
 
 class UHDAPlayerMovementComponent;
@@ -151,32 +153,14 @@ struct FLocationSwayData
 	UPROPERTY()
 	TWeakObjectPtr<UHDAPlayerMovementComponent> PlayerMovementComponent = nullptr;
 
-	void InterpolateLateralOffset(const FVector& TargetLateralOffset, const float DeltaTime)
-	{
-		CurrentLateralOffset = FMath::VInterpTo(CurrentLateralOffset,
-		                                        TargetLateralOffset,
-		                                        DeltaTime,
-		                                        Speed);
+	void InterpolateLateralOffset(const FVector& TargetLateralOffset, const float DeltaTime);
 
-		CurrentLateralOffset.X = CheckDeadZone(CurrentLateralOffset.X);
-		CurrentLateralOffset.Y = CheckDeadZone(CurrentLateralOffset.Y);
-	}
+	void InterpolateVerticalOffset(const float TargetVerticalOffset, const float DeltaTime);
 
-	void InterpolateVerticalOffset(const float TargetVerticalOffset, const float DeltaTime)
-	{
-		CurrentVerticalOffset = FMath::FInterpTo(CurrentVerticalOffset,
-		                                         TargetVerticalOffset,
-		                                         DeltaTime,
-		                                         Speed);
-		
-		CurrentVerticalOffset = CheckDeadZone(CurrentVerticalOffset);
-	}
+	void CalculateLocationOffset(const float DeltaTime, FVector& OutLocation);
 
 private:
-	float CheckDeadZone(const float Value) const
-	{
-		return FMath::Abs(Value) >= DeadZone ? Value : 0.f;
-	}
+	float CheckDeadZone(const float Value) const;
 };
 
 /**
