@@ -375,61 +375,15 @@ void UHDAPlayerWeaponManager::AnimateRotationSway(const float DeltaTime) const
 		return;
 	}
 
-	const FRotator CurrentSwayRotation = CurrentWeapon->GetRootComponent()->GetRelativeRotation();
-	FRotator NewRotation = FMath::RInterpTo(CurrentSwayRotation,
-	                                        RotationSwayData.TargetRotation,
-	                                        DeltaTime,
-	                                        RotationSwayData.Speed);
-
-	NewRotation.Roll = FMath::Clamp(NewRotation.Roll,
-	                                -RotationSwayData.Threshold.Roll,
-	                                RotationSwayData.Threshold.Roll);
-	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch,
-	                                 -RotationSwayData.Threshold.Pitch,
-	                                 RotationSwayData.Threshold.Pitch);
-	NewRotation.Yaw = FMath::Clamp(NewRotation.Yaw,
-	                               -RotationSwayData.Threshold.Yaw,
-	                               RotationSwayData.Threshold.Yaw);
-
-	CurrentWeapon->SetActorRelativeRotation(NewRotation);
+	FRotator CurrentRotation = CurrentWeapon->GetRootComponent()->GetRelativeRotation();
+	RotationSwayData.InterpolateCurrentRotation(DeltaTime, CurrentRotation);
+	CurrentWeapon->SetActorRelativeRotation(CurrentRotation);
 }
 
 void UHDAPlayerWeaponManager::AnimateLocationSway(const float DeltaTime)
 {
 	FVector WeaponOffset = FVector::ZeroVector;
-
-	if (LocationSwayData.PlayerMovementComponent.IsValid())
-	{
-		FVector TargetLateralOffset = UKismetMathLibrary::Quat_UnrotateVector(
-			GetOwner()->GetActorRotation().Quaternion(),
-			LocationSwayData.PlayerMovementComponent->GetLateralVelocity());
-
-		TargetLateralOffset = TargetLateralOffset / LocationSwayData.PlayerMovementComponent->MaxWalkSpeed;
-		TargetLateralOffset.X = FMath::Clamp(TargetLateralOffset.X, -1.f, 1.f);
-		TargetLateralOffset.Y = FMath::Clamp(TargetLateralOffset.Y, -1.f, 1.f);
-
-		LocationSwayData.InterpolateLateralOffset(TargetLateralOffset, DeltaTime);
-		WeaponOffset = LocationSwayData.CurrentLateralOffset * LocationSwayData.Threshold;
-
-		float TargetVerticalOffset = LocationSwayData.PlayerMovementComponent->GetNormalizedVerticalSpeed();
-		TargetVerticalOffset = FMath::Clamp(TargetVerticalOffset, -1.0f, 1.0f);
-		LocationSwayData.InterpolateVerticalOffset(TargetVerticalOffset, DeltaTime);
-		WeaponOffset.Z += LocationSwayData.CurrentVerticalOffset * LocationSwayData.Threshold.Z;
-
-		const float NormalizedLateralSpeed = LocationSwayData.PlayerMovementComponent->GetNormalizedLateralSpeed();
-
-		if (!LocationSwayData.PlayerMovementComponent->IsFalling() && NormalizedLateralSpeed >= 1.f)
-		{
-			const float Time = GetWorld()->GetTimeSeconds();
-			const float MovementSin = FMath::Sin(NormalizedLateralSpeed * LocationSwayData.Frequency * Time);
-			const float MovementSinSquared = MovementSin * MovementSin;
-
-			WeaponOffset.X += LocationSwayData.Amplitude.X * MovementSinSquared;
-			WeaponOffset.Y += LocationSwayData.Amplitude.Y * MovementSin;
-			WeaponOffset.Z += LocationSwayData.Amplitude.Z * MovementSinSquared;
-		}
-	}
-
+	LocationSwayData.CalculateLocationOffset(DeltaTime, WeaponOffset);
 	AHDAPlayerWeaponBase* CurrentWeapon = GetCurrentWeapon();
 
 	if (!IsValid(CurrentWeapon))
@@ -440,8 +394,8 @@ void UHDAPlayerWeaponManager::AnimateLocationSway(const float DeltaTime)
 	const FVector CurrentLocation = CurrentWeapon->GetRootComponent()->GetRelativeLocation();
 	const FVector TargetLocation = WeaponSpawnLocation + WeaponOffset;
 	const FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, LocationSwayData.Speed);
-
-	GetCurrentWeapon()->SetActorRelativeLocation(NewLocation);
+	
+	CurrentWeapon->SetActorRelativeLocation(NewLocation);
 }
 
 void UHDAPlayerWeaponManager::HideCurrentWeapon()
