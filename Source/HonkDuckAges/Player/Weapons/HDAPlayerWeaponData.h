@@ -160,6 +160,31 @@ private:
 	float CheckDeadZone(const float Value) const;
 };
 
+USTRUCT(BlueprintType)
+struct FBreathingAnimationData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly,
+			BlueprintReadOnly,
+			Category="WeaponSway",
+			meta=(ClampMin=0, UIMin=0))
+	float Frequency = 2.f;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintReadOnly,
+		Category="WeaponSway",
+		meta=(ForceUnits="Centimeters"))
+	FVector Amplitude = FVector(0.f, 0.f, 1.f);
+
+	void CalculateLocationOffset(const float Time, FVector& OutLocation) const
+	{
+		OutLocation.X = Amplitude.X * FMath::Sin(Frequency * Time);
+		OutLocation.Y = Amplitude.Y * FMath::Sin(Frequency * Time);
+		OutLocation.Z = Amplitude.Z * FMath::Sin(Frequency * Time);
+	}
+};
+
 /**
  * 
  */
@@ -180,6 +205,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Animation")
 	FLocationSwayData LocationSwayData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Animation")
+	FBreathingAnimationData BreathAnimationData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="WeaponManager", meta=(InvalidEnumValues="None"))
 	EWeaponSlot DefaultWeaponSlot = EWeaponSlot::Shotgun;

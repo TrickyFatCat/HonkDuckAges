@@ -39,6 +39,7 @@ void UHDAPlayerWeaponManager::InitializeComponent()
 			SwitchingAnimationData = WeaponData->SwitchingAnimationData;
 			RotationSwayData = WeaponData->RotationSwayData;
 			LocationSwayData = WeaponData->LocationSwayData;
+			BreathingAnimationData = WeaponData->BreathAnimationData;
 		}
 
 		CameraComponent = GetOwner()->GetComponentByClass<UCameraComponent>();
@@ -384,6 +385,14 @@ void UHDAPlayerWeaponManager::AnimateLocationSway(const float DeltaTime)
 {
 	FVector WeaponOffset = FVector::ZeroVector;
 	LocationSwayData.CalculateLocationOffset(DeltaTime, WeaponOffset);
+
+	FVector BreathingOffset = FVector::ZeroVector;
+	if (LocationSwayData.PlayerMovementComponent->Velocity.IsNearlyZero()
+		&& GetCurrentWeapon()->GetCurrentState() != EWeaponState::Shooting)
+	{
+		BreathingAnimationData.CalculateLocationOffset(GetWorld()->GetTimeSeconds(), BreathingOffset);
+	}
+
 	AHDAPlayerWeaponBase* CurrentWeapon = GetCurrentWeapon();
 
 	if (!IsValid(CurrentWeapon))
@@ -392,9 +401,9 @@ void UHDAPlayerWeaponManager::AnimateLocationSway(const float DeltaTime)
 	}
 
 	const FVector CurrentLocation = CurrentWeapon->GetRootComponent()->GetRelativeLocation();
-	const FVector TargetLocation = WeaponSpawnLocation + WeaponOffset;
+	const FVector TargetLocation = WeaponSpawnLocation + WeaponOffset + BreathingOffset;
 	const FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetLocation, DeltaTime, LocationSwayData.Speed);
-	
+
 	CurrentWeapon->SetActorRelativeLocation(NewLocation);
 }
 

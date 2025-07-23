@@ -177,6 +177,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation")
 	FLocationSwayData LocationSwayData;
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation")
+	FBreathingAnimationData BreathingAnimationData;
+	
 	void AnimateLocationSway(const float DeltaTime);
 	
 private:
