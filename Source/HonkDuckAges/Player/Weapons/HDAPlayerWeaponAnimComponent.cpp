@@ -38,7 +38,7 @@ void UHDAPlayerWeaponAnimComponent::TickComponent(float DeltaTime,
 	const FRotator TargetRotation = OwningWeapon.IsValid() && OwningWeapon->GetCurrentState() == EWeaponState::OutOfAmmo
 		                                ? TargetOutOfAmmoRotation
 		                                : FRotator::ZeroRotator;
-	CurrentOutOfAmmoRotation = FMath::RInterpTo(CurrentOutOfAmmoRotation, TargetRotation, DeltaTime, 20.f);
+	CurrentOutOfAmmoRotation = FMath::RInterpTo(CurrentOutOfAmmoRotation, TargetRotation, DeltaTime, OutOfAmmoRotationSpeed);
 	NewRotation = UKismetMathLibrary::ComposeRotators(NewRotation, CurrentOutOfAmmoRotation);
 
 	SetRelativeLocationAndRotation(NewLocation, NewRotation);

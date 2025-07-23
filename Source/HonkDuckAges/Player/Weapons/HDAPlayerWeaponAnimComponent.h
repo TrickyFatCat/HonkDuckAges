@@ -97,6 +97,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inactive")
 	FRotator TargetOutOfAmmoRotation = FRotator(-15.f, -25.f, 0.f);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inactive", meta=(ClampMin=0, UIMin=0, Delta=1))
+	float OutOfAmmoRotationSpeed = 10.f;
+
 private:
 	FVector InitialLocation = FVector::ZeroVector;
 
