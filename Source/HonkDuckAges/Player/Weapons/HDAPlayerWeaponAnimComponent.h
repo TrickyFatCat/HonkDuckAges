@@ -92,6 +92,11 @@ protected:
 
 	float RecoilTargetStrength = 0.f;
 
+	FRotator CurrentOutOfAmmoRotation = FRotator::ZeroRotator;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inactive")
+	FRotator TargetOutOfAmmoRotation = FRotator(-15.f, -25.f, 0.f);
+
 private:
 	FVector InitialLocation = FVector::ZeroVector;
 
@@ -106,7 +111,7 @@ private:
 	float GetNormalizedElapsedTime() const;
 
 	void CalculateRecoilOffset(const float DeltaTime, FVector& OutLocation, FRotator& OutRotation);
-
+	
 	UFUNCTION()
 	void HandleWeaponShot(AHDAPlayerWeaponBase* Weapon);
 };

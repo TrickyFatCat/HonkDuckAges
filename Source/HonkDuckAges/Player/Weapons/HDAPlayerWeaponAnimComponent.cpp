@@ -33,7 +33,14 @@ void UHDAPlayerWeaponAnimComponent::TickComponent(float DeltaTime,
 	const FRotator RotationOffset = UKismetMathLibrary::ComposeRotators(ShakeRotation, RecoilRotation);
 
 	const FVector NewLocation = InitialLocation + ShakeOffset + RecoilOffset;
-	const FRotator NewRotation = UKismetMathLibrary::ComposeRotators(InitialRotation, RotationOffset);
+	FRotator NewRotation = UKismetMathLibrary::ComposeRotators(InitialRotation, RotationOffset);
+
+	const FRotator TargetRotation = OwningWeapon.IsValid() && OwningWeapon->GetCurrentState() == EWeaponState::OutOfAmmo
+		                                ? TargetOutOfAmmoRotation
+		                                : FRotator::ZeroRotator;
+	CurrentOutOfAmmoRotation = FMath::RInterpTo(CurrentOutOfAmmoRotation, TargetRotation, DeltaTime, 20.f);
+	NewRotation = UKismetMathLibrary::ComposeRotators(NewRotation, CurrentOutOfAmmoRotation);
+
 	SetRelativeLocationAndRotation(NewLocation, NewRotation);
 }
 
