@@ -9,6 +9,10 @@
 AHDAPickupAmmoBase::AHDAPickupAmmoBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
+	MeshComponent->SetupAttachment(GetRootComponent());
 }
 
 bool AHDAPickupAmmoBase::CanBeActivated_Implementation(AActor* Activator)

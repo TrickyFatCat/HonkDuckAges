@@ -18,6 +18,9 @@ public:
 	AHDAPickupAmmoBase();
 
 protected:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UStaticMeshComponent> MeshComponent = nullptr;
+	
 	virtual bool CanBeActivated_Implementation(AActor* Activator) override;
 
 	virtual void HandleActivationSuccess_Implementation(AActor* Activator) override;
