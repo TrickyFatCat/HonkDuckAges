@@ -18,11 +18,14 @@ public:
 	AHDAWeaponPickupBase();
 
 protected:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UStaticMeshComponent> MeshComponent = nullptr;
+	
 	virtual bool CanBeActivated_Implementation(AActor* Activator) override;
 
 	virtual void HandleActivationSuccess_Implementation(AActor* Activator) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Pickup")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Pickup", meta=(InvalidEnumValues="EWeaponSlot::None"))
 	EWeaponSlot WeaponToGive = EWeaponSlot::SlugShot;
 
 private:

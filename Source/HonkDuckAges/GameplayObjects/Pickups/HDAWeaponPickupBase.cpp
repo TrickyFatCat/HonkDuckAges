@@ -9,6 +9,11 @@
 AHDAWeaponPickupBase::AHDAWeaponPickupBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
+	MeshComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	MeshComponent->SetupAttachment(GetRootComponent());
 }
 
 bool AHDAWeaponPickupBase::CanBeActivated_Implementation(AActor* Activator)
