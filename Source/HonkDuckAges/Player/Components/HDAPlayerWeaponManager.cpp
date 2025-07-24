@@ -152,11 +152,11 @@ void UHDAPlayerWeaponManager::AddWeapon(const EWeaponSlot WeaponSlot)
 
 bool UHDAPlayerWeaponManager::HasWeapon(const EWeaponSlot WeaponSlot)
 {
-	if (CurrentWeaponSlot == EWeaponSlot::None)
+	if (AcquiredWeapons.IsEmpty())
 	{
 		return false;
 	}
-
+	
 	return IsValid(AcquiredWeapons[WeaponSlot]);
 }
 
