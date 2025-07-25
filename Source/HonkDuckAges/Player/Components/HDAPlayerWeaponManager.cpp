@@ -156,7 +156,7 @@ bool UHDAPlayerWeaponManager::HasWeapon(const EWeaponSlot WeaponSlot)
 	{
 		return false;
 	}
-	
+
 	return IsValid(AcquiredWeapons[WeaponSlot]);
 }
 
@@ -185,44 +185,44 @@ void UHDAPlayerWeaponManager::ChooseWeaponByIndex(const int32 Index)
 
 void UHDAPlayerWeaponManager::ChooseNextWeapon()
 {
-	TArray<EWeaponSlot> Slots;
-	AcquiredWeapons.GetKeys(Slots);
+	TArray<AHDAPlayerWeaponBase*> Weapons;
+	GetAcquiredWeapons(Weapons);
 
-	if (Slots.IsEmpty() || !Slots.Contains(CurrentWeaponSlot))
+	if (Weapons.Num() <= 1)
 	{
 		return;
 	}
 
-	int32 Index = Slots.IndexOfByKey(CurrentWeaponSlot);
+	int32 Index = Weapons.IndexOfByKey(AcquiredWeapons[CurrentWeaponSlot]);
 	Index += 1;
 
-	if (!Slots.IsValidIndex(Index))
+	if (!Weapons.IsValidIndex(Index))
 	{
 		return;
 	}
 
-	ChooseWeapon(Slots[Index]);
+	ChooseWeapon(*AcquiredWeapons.FindKey(Weapons[Index]));
 }
 
 void UHDAPlayerWeaponManager::ChoosePreviousWeapon()
 {
-	TArray<EWeaponSlot> Slots;
-	AcquiredWeapons.GetKeys(Slots);
+	TArray<AHDAPlayerWeaponBase*> Weapons;
+	GetAcquiredWeapons(Weapons);
 
-	if (Slots.IsEmpty() || !Slots.Contains(CurrentWeaponSlot))
+	if (Weapons.Num() <= 1)
 	{
 		return;
 	}
 
-	int32 Index = Slots.IndexOfByKey(CurrentWeaponSlot);
+	int32 Index = Weapons.IndexOfByKey(AcquiredWeapons[CurrentWeaponSlot]);
 	Index -= 1;
 
-	if (!Slots.IsValidIndex(Index))
+	if (!Weapons.IsValidIndex(Index))
 	{
 		return;
 	}
 
-	ChooseWeapon(Slots[Index]);
+	ChooseWeapon(*AcquiredWeapons.FindKey(Weapons[Index]));
 }
 
 void UHDAPlayerWeaponManager::ChooseLastWeapon()
@@ -458,7 +458,7 @@ void UHDAPlayerWeaponManager::PlaySwitchAnimation(const float DeltaTime)
 
 void UHDAPlayerWeaponManager::StartSwitchingWeapon(const EWeaponSlot WeaponSlot)
 {
-	if (!IsValid(AcquiredWeapons[WeaponSlot]) || CurrentWeaponSlot == WeaponSlot)
+	if (!HasWeapon(WeaponSlot) || CurrentWeaponSlot == WeaponSlot)
 	{
 		return;
 	}
