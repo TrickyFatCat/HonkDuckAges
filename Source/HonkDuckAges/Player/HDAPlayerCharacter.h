@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "HDAPlayerCharacter.generated.h"
 
+class UInteractionQueueComponent;
 class UHDAPlayerWeaponManager;
 class UKeyringComponent;
 class UHDALifeStateComponent;
@@ -53,6 +54,9 @@ protected:
 	UInputAction* AimAction = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
+	UInputAction* InteractAction = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
 	UInputAction* JumpAction = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Inputs")
@@ -88,7 +92,10 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDAPlayerWeaponManager> WeaponManagerComponent = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UInteractionQueueComponent> InteractionQueueComponent = nullptr;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UHDAPlayerMovementComponent> PlayerMovementComponent = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement")
@@ -120,6 +127,9 @@ private:
 
 	UFUNCTION()
 	void Aim(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void Interact();
 
 	UFUNCTION()
 	void Dash();

@@ -3,7 +3,9 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InteractionQueueComponent.h"
 #include "StatusEffectsManagerComponent.h"
+#include "TrickyInteractionInterface.h"
 #include "Components/HDAPlayerMovementComponent.h"
 #include "Components/HDAPlayerWeaponManager.h"
 #include "HonkDuckAges/Shared/Components/HDALifeStateComponent.h"
@@ -23,6 +25,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 	StatusEffectsManager = CreateDefaultSubobject<UStatusEffectsManagerComponent>(TEXT("StatusEffectsManager"));
 	KeyringComponent = CreateDefaultSubobject<UKeyringComponent>(TEXT("KeyringComponent"));
 	WeaponManagerComponent = CreateDefaultSubobject<UHDAPlayerWeaponManager>(TEXT("WeaponManagerComponent"));
+	InteractionQueueComponent = CreateDefaultSubobject<UInteractionQueueComponent>(TEXT("InteractionQueue"));
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetRootComponent());
@@ -63,6 +66,8 @@ void AHDAPlayerCharacter::BeginPlay()
 	ensureMsgf(MoveAction != nullptr, TEXT("MoveAction wasn't set for %s"), *GetActorNameOrLabel());
 
 	ensureMsgf(AimAction != nullptr, TEXT("AimAction wasn't set for %s"), *GetActorNameOrLabel());
+
+	ensureMsgf(InteractAction != nullptr, TEXT("InteractAction wasn't set for %s"), *GetActorNameOrLabel());
 
 	ensureMsgf(JumpAction != nullptr, TEXT("JumpAction wasn't set for %s"), *GetActorNameOrLabel());
 
@@ -119,6 +124,10 @@ void AHDAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		                                   this,
 		                                   &AHDAPlayerCharacter::StopMoving);
 		EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Triggered, this, &AHDAPlayerCharacter::Aim);
+		EnhancedInputComponent->BindAction(InteractAction,
+		                                   ETriggerEvent::Started,
+		                                   this,
+		                                   &AHDAPlayerCharacter::Interact);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AHDAPlayerCharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction,
 		                                   ETriggerEvent::Completed,
@@ -197,6 +206,11 @@ void AHDAPlayerCharacter::Aim(const FInputActionValue& Value)
 	AddControllerYawInput(AimDirection.X);
 	AddControllerPitchInput(AimDirection.Y);
 	WeaponManagerComponent->CalculateTargetSwayRotation(AimDirection);
+}
+
+void AHDAPlayerCharacter::Interact()
+{
+	InteractionQueueComponent->ForceInteraction();
 }
 
 void AHDAPlayerCharacter::Dash()
