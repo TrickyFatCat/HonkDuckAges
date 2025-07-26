@@ -25,12 +25,15 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 	StatusEffectsManager = CreateDefaultSubobject<UStatusEffectsManagerComponent>(TEXT("StatusEffectsManager"));
 	KeyringComponent = CreateDefaultSubobject<UKeyringComponent>(TEXT("KeyringComponent"));
 	WeaponManagerComponent = CreateDefaultSubobject<UHDAPlayerWeaponManager>(TEXT("WeaponManagerComponent"));
-	InteractionQueueComponent = CreateDefaultSubobject<UInteractionQueueComponent>(TEXT("InteractionQueue"));
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(GetRootComponent());
 	CameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, BaseEyeHeight));
 	CameraComponent->bUsePawnControlRotation = true;
+	
+	InteractionQueueComponent = CreateDefaultSubobject<UInteractionQueueComponent>(TEXT("InteractionQueue"));
+	InteractionQueueComponent->SetUseLineOfSight(true);
+	InteractionQueueComponent->RegisterCamera(CameraComponent);
 }
 
 void AHDAPlayerCharacter::BeginPlay()
