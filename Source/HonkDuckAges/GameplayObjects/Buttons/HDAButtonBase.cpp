@@ -57,7 +57,7 @@ void AHDAButtonBase::PostInitializeComponents()
 
 	UWorld* World = GetWorld();
 
-	if (IsValid(World) || World->IsGameWorld())
+	if (IsValid(World) && World->IsGameWorld())
 	{
 		ensureMsgf(AnimationCurve != nullptr,
 		           TEXT("AnimationCurve is not set for %s"),
@@ -116,10 +116,12 @@ void AHDAButtonBase::PostEditChangeProperty(struct FPropertyChangedEvent& Proper
 		{
 		case EButtonState::Released:
 			InteractionTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			ProcessAnimation(0.f);
 			break;
 
 		case EButtonState::Pressed:
 			InteractionTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			ProcessAnimation(1.f);
 
 		case EButtonState::Disabled:
 			InteractionTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
