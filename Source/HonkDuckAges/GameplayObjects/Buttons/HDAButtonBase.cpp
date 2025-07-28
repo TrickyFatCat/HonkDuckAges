@@ -235,6 +235,8 @@ void AHDAButtonBase::HandleStateChanged(UButtonStateControllerComponent* Compone
 		}
 		break;
 	}
+
+	OnButtonStateChanged.Broadcast(Component, NewState, bChangedImmediately);
 }
 
 void AHDAButtonBase::HandleTransitionStarted(UButtonStateControllerComponent* Component,
@@ -254,6 +256,8 @@ void AHDAButtonBase::HandleTransitionStarted(UButtonStateControllerComponent* Co
 		AnimationComponent->ReverseFromEnd();
 		break;
 	}
+
+	OnButtonStateTransitionStarted.Broadcast(Component, TargetState);
 }
 
 void AHDAButtonBase::HandleTransitionReversed(UButtonStateControllerComponent* Component,
@@ -271,6 +275,13 @@ void AHDAButtonBase::HandleTransitionReversed(UButtonStateControllerComponent* C
 		AnimationComponent->Reverse();
 		break;
 	}
+
+	OnButtonStateTransitionReversed.Broadcast(Component, NewTargetState);
+}
+
+void AHDAButtonBase::HandleTransitionFinished(UButtonStateControllerComponent* Component, const EButtonState NewState)
+{
+	OnButtonStateTransitionFinished.Broadcast(Component, NewState);
 }
 
 void AHDAButtonBase::CalculateAnimationPlayRate(const EButtonState State) const

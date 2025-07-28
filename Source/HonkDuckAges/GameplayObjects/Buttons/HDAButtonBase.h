@@ -38,6 +38,18 @@ protected:
 #endif
 
 public:
+	UPROPERTY(BlueprintAssignable, Category="Button")
+	FOnButtonStateChangedDynamicSignature OnButtonStateChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="Button")
+	FOnButtonStateTransitionStartedDynamicSignature OnButtonStateTransitionStarted;
+
+	UPROPERTY(BlueprintAssignable, Category="Button")
+	FOnButtonStateTransitionReversedDynamicSignature OnButtonStateTransitionReversed;
+
+	UPROPERTY(BlueprintAssignable, Category="Button")
+	FOnButtonStateTransitionFinishedDynamicSignature OnButtonStateTransitionFinished;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Button")
 	FInteractionData InteractionData{
 		FText::FromString(TEXT("Press")),
@@ -120,13 +132,13 @@ protected:
 		BlueprintReadOnly,
 		Category="Button")
 	bool bSeparateAnimationCurve = false;
-	
+
 	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="Button",
 		meta=(EditCondition="bSeparateAnimationCurve == true"))
 	UCurveFloat* ReleaseAnimationCurve = nullptr;
-	
+
 	const FName AnimationTrackName = TEXT("Progress");
 
 	UFUNCTION(BlueprintImplementableEvent, Category="Button")
@@ -170,6 +182,10 @@ private:
 	UFUNCTION()
 	void HandleTransitionReversed(UButtonStateControllerComponent* Component,
 	                              const EButtonState NewTargetState);
+
+	UFUNCTION()
+	void HandleTransitionFinished(UButtonStateControllerComponent* Component,
+	                              const EButtonState NewState);
 
 	void CalculateAnimationPlayRate(const EButtonState State) const;
 
