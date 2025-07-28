@@ -80,7 +80,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Button")
 	EButtonType ButtonType = EButtonType::Normal;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Button", meta=(InvalidEnumValues="EButtonState::Transition"))
 	EButtonState InitialState = EButtonState::Released;
 
@@ -113,8 +113,21 @@ protected:
 			EditCondition="bSeparateAnimationDuration == true"))
 	float ReleaseAnimationDuration = 0.25f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Button")
-	UCurveFloat* AnimationCurve = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Button")
+	UCurveFloat* PressAnimationCurve = nullptr;
+
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="Button")
+	bool bSeparateAnimationCurve = false;
+	
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="Button",
+		meta=(EditCondition="bSeparateAnimationCurve == true"))
+	UCurveFloat* ReleaseAnimationCurve = nullptr;
+	
+	const FName AnimationTrackName = TEXT("Progress");
 
 	UFUNCTION(BlueprintImplementableEvent, Category="Button")
 	void AnimationProcessed(const float Progress);
@@ -159,6 +172,8 @@ private:
 	                              const EButtonState NewTargetState);
 
 	void CalculateAnimationPlayRate(const EButtonState State) const;
+
+	void SwapAnimationCurve(const EButtonState State) const;
 
 	UFUNCTION()
 	void ProcessAnimation(const float Progress);

@@ -59,10 +59,14 @@ void AHDAButtonBase::PostInitializeComponents()
 
 	if (IsValid(World) && World->IsGameWorld())
 	{
-		ensureMsgf(AnimationCurve != nullptr,
-		           TEXT("AnimationCurve is not set for %s"),
+		ensureMsgf(PressAnimationCurve != nullptr,
+		           TEXT("PressAnimationCurve is not set for %s"),
 		           *GetActorNameOrLabel());
 
+		ensureMsgf(ReleaseAnimationCurve != nullptr && bSeparateAnimationCurve,
+				   TEXT("ReleaseAnimationCurve is not set for %s"),
+				   *GetActorNameOrLabel());
+		
 		InteractionTrigger->OnComponentBeginOverlap.AddUniqueDynamic(this,
 		                                                             &AHDAButtonBase::HandleTriggerEntered);
 		InteractionTrigger->OnComponentEndOverlap.AddUniqueDynamic(this,
@@ -75,14 +79,14 @@ void AHDAButtonBase::PostInitializeComponents()
 		StateControllerComponent->OnButtonStateTransitionReversed.AddUniqueDynamic(this,
 			&AHDAButtonBase::HandleTransitionReversed);
 
-		if (IsValid(AnimationCurve))
+		if (IsValid(PressAnimationCurve))
 		{
 			FOnTimelineFloat ButtonAnimationTimelineDelegate;
 			ButtonAnimationTimelineDelegate.BindUFunction(this, FName("ProcessAnimation"));
-			AnimationComponent->AddInterpFloat(AnimationCurve,
+			AnimationComponent->AddInterpFloat(PressAnimationCurve,
 			                                   ButtonAnimationTimelineDelegate,
 			                                   NAME_None,
-			                                   TEXT("Progress"));
+			                                   AnimationTrackName);
 
 			FOnTimelineEvent ButtonAnimationFinishedDelegate;
 			ButtonAnimationFinishedDelegate.BindUFunction(this, FName("FinishAnimation"));
@@ -228,6 +232,7 @@ void AHDAButtonBase::HandleTransitionStarted(UButtonStateControllerComponent* Co
 {
 	InteractionTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CalculateAnimationPlayRate(TargetState);
+	SwapAnimationCurve(TargetState);
 
 	switch (TargetState)
 	{
@@ -245,6 +250,7 @@ void AHDAButtonBase::HandleTransitionReversed(UButtonStateControllerComponent* C
                                               const EButtonState NewTargetState)
 {
 	CalculateAnimationPlayRate(NewTargetState);
+	SwapAnimationCurve(NewTargetState);
 
 	switch (NewTargetState)
 	{
@@ -261,7 +267,6 @@ void AHDAButtonBase::CalculateAnimationPlayRate(const EButtonState State) const
 {
 	if (!bSeparateAnimationDuration)
 	{
-		UTrickyUtilityLibrary::CalculateTimelinePlayRate(AnimationComponent, PressAnimationDuration);
 		return;
 	}
 
@@ -273,6 +278,25 @@ void AHDAButtonBase::CalculateAnimationPlayRate(const EButtonState State) const
 
 	case EButtonState::Released:
 		UTrickyUtilityLibrary::CalculateTimelinePlayRate(AnimationComponent, ReleaseAnimationDuration);
+		break;
+	}
+}
+
+void AHDAButtonBase::SwapAnimationCurve(const EButtonState State) const
+{
+	if (!bSeparateAnimationCurve)
+	{
+		return;
+	}
+
+	switch (State)
+	{
+	case EButtonState::Pressed:
+		AnimationComponent->SetFloatCurve(PressAnimationCurve, AnimationTrackName);
+		break;
+
+	case EButtonState::Released:
+		AnimationComponent->SetFloatCurve(ReleaseAnimationCurve, AnimationTrackName);
 		break;
 	}
 }
