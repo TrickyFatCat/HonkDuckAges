@@ -63,10 +63,13 @@ void AHDAButtonBase::PostInitializeComponents()
 		           TEXT("PressAnimationCurve is not set for %s"),
 		           *GetActorNameOrLabel());
 
-		ensureMsgf(ReleaseAnimationCurve != nullptr && bSeparateAnimationCurve,
-				   TEXT("ReleaseAnimationCurve is not set for %s"),
-				   *GetActorNameOrLabel());
-		
+		if (bSeparateAnimationCurve)
+		{
+			ensureMsgf(ReleaseAnimationCurve != nullptr,
+			           TEXT("ReleaseAnimationCurve is not set for %s"),
+			           *GetActorNameOrLabel());
+		}
+
 		InteractionTrigger->OnComponentBeginOverlap.AddUniqueDynamic(this,
 		                                                             &AHDAButtonBase::HandleTriggerEntered);
 		InteractionTrigger->OnComponentEndOverlap.AddUniqueDynamic(this,
@@ -93,12 +96,19 @@ void AHDAButtonBase::PostInitializeComponents()
 			AnimationComponent->SetTimelineFinishedFunc(ButtonAnimationFinishedDelegate);
 
 			if (!ensureMsgf(PressAnimationDuration > 0.0,
-			                TEXT("%s animation duration can't be less or equal zero. Force it to 1"),
+			                TEXT("%s press animation duration can't be less or equal zero. Force it to 1"),
 			                *GetActorNameOrLabel()))
 			{
 				PressAnimationDuration = 1.0f;
 			}
 
+			if (!ensureMsgf(ReleaseAnimationDuration > 0.0,
+							TEXT("%s release animation duration can't be less or equal zero. Force it to 1"),
+							*GetActorNameOrLabel()))
+			{
+				ReleaseAnimationDuration = 1.0f;
+			}
+			
 			UTrickyUtilityLibrary::CalculateTimelinePlayRate(AnimationComponent, PressAnimationDuration);
 		}
 	}
