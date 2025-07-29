@@ -54,16 +54,27 @@ protected:
 		Category="Door")
 	TSubclassOf<ULockKeyType> RequiredKey = nullptr;
 
-	UPROPERTY(EditDefaultsOnly,
-		BlueprintReadOnly,
-		Category="Door")
-	UCurveFloat* DoorAnimationCurve = nullptr;
-
-	UPROPERTY(EditDefaultsOnly,
+	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="Door",
 		meta=(ClampMin=0.0f, UIMin=0.0f, Delta=0.1f, ForceUnits="Seconds"))
-	float AnimationDuration = 0.25f;
+	float OpenAnimationDuration = 0.25f;
+	
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="Door")
+	bool bSeparateAnimationDuration = false;
+	
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="Door",
+		meta=(ClampMin=0.0f, UIMin=0.0f, Delta=0.1f, ForceUnits="Seconds"))
+	float CloseAnimationDuration = 0.25f;
+	
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="Door")
+	UCurveFloat* DoorAnimationCurve = nullptr;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<USceneComponent> Root = nullptr;
@@ -98,6 +109,7 @@ private:
 	                              const EDoorState NewTargetState);
 
 protected:
+	void CalculateAnimationPlayRate(const EDoorState State) const;
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleDefaultsOnly, Category="Components")
 	TObjectPtr<UArrowComponent> ForwardVector = nullptr;

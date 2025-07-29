@@ -108,14 +108,24 @@ void AHDADoorBase::PostInitializeComponents()
 			DoorAnimationFinishedDelegate.BindUFunction(this, FName("FinishAnimation"));
 			DoorAnimationTimeline->SetTimelineFinishedFunc(DoorAnimationFinishedDelegate);
 
-			if (!ensureMsgf(AnimationDuration > 0.0,
-			                TEXT("%s animation duration can't be less or equal zero. Force it to 1"),
+			if (!ensureMsgf(OpenAnimationDuration > 0.0,
+			                TEXT("%s open animation duration can't be less or equal zero. Force it to 1"),
 			                *GetActorNameOrLabel()))
 			{
-				AnimationDuration = 1.0f;
+				OpenAnimationDuration = 1.0f;
 			}
 
-			UTrickyUtilityLibrary::CalculateTimelinePlayRate(DoorAnimationTimeline, AnimationDuration);
+			if (bSeparateAnimationDuration)
+			{
+				if (!ensureMsgf(CloseAnimationDuration > 0.0,
+				                TEXT("%s close animation duration can't be less or equal zero. Force it to 1"),
+				                *GetActorNameOrLabel()))
+				{
+					CloseAnimationDuration = 1.0f;
+				}
+			}
+
+			UTrickyUtilityLibrary::CalculateTimelinePlayRate(DoorAnimationTimeline, OpenAnimationDuration);
 		}
 	}
 }
@@ -168,6 +178,8 @@ void AHDADoorBase::HandleLockStateChanged(ULockStateControllerComponent* Compone
 void AHDADoorBase::HandleTransitionStarted(UDoorStateControllerComponent* Component,
                                            const EDoorState TargetState)
 {
+	CalculateAnimationPlayRate(TargetState);
+
 	switch (TargetState)
 	{
 	case EDoorState::Opened:
@@ -183,6 +195,8 @@ void AHDADoorBase::HandleTransitionStarted(UDoorStateControllerComponent* Compon
 void AHDADoorBase::HandleTransitionReversed(UDoorStateControllerComponent* Component,
                                             const EDoorState NewTargetState)
 {
+	CalculateAnimationPlayRate(NewTargetState);
+
 	switch (NewTargetState)
 	{
 	case EDoorState::Opened:
@@ -191,6 +205,25 @@ void AHDADoorBase::HandleTransitionReversed(UDoorStateControllerComponent* Compo
 
 	case EDoorState::Closed:
 		DoorAnimationTimeline->Reverse();
+		break;
+	}
+}
+
+void AHDADoorBase::CalculateAnimationPlayRate(const EDoorState State) const
+{
+	if (!bSeparateAnimationDuration)
+	{
+		return;
+	}
+
+	switch (State)
+	{
+	case EDoorState::Opened:
+		UTrickyUtilityLibrary::CalculateTimelinePlayRate(DoorAnimationTimeline, OpenAnimationDuration);
+		break;
+
+	case EDoorState::Closed:
+		UTrickyUtilityLibrary::CalculateTimelinePlayRate(DoorAnimationTimeline, CloseAnimationDuration);
 		break;
 	}
 }
@@ -211,6 +244,17 @@ void AHDADoorBase::UpdateDebugText()
 	DebugText = DebugText.Appendf(TEXT("Key: %s\n"), *KeyName);
 	const FString StateName = StaticEnum<EDoorState>()->GetNameStringByValue(static_cast<int64>(InitialState));
 	DebugText = DebugText.Appendf(TEXT("Initial State: %s\n"), *StateName);
+
+	if (bSeparateAnimationDuration)
+	{
+		DebugText = DebugText.Appendf(TEXT("Open Animation Duration: %.2f\n"), OpenAnimationDuration);
+		DebugText = DebugText.Appendf(TEXT("Close Animation Duration: %.2f\n"), CloseAnimationDuration);
+	}
+	else
+	{
+		DebugText = DebugText.Appendf(TEXT("Animation Duration: %.2f\n"), OpenAnimationDuration);
+	}
+
 	DebugText_F->SetText(FText::FromString(DebugText));
 	DebugText_B->SetText(FText::FromString(DebugText));
 }
