@@ -93,16 +93,23 @@ void AHDADoorBase::PostInitializeComponents()
 		DoorStateControllerComponent->OnDoorTransitionReversed.AddUniqueDynamic(this,
 			&AHDADoorBase::HandleTransitionReversed);
 
-		ensureMsgf(IsValid(DoorAnimationCurve), TEXT("%s animation curve isn't set"), *GetActorNameOrLabel());
+		ensureMsgf(IsValid(OpenAnimationCurve), TEXT("%s open animation curve isn't set"), *GetActorNameOrLabel());
 
-		if (IsValid(DoorAnimationCurve))
+		if (bSeparateAnimationCurve)
+		{
+			ensureMsgf(IsValid(CloseAnimationCurve),
+			           TEXT("%s close animation curve isn't set"),
+			           *GetActorNameOrLabel());
+		}
+
+		if (IsValid(OpenAnimationCurve))
 		{
 			FOnTimelineFloat DoorAnimationTimelineDelegate;
 			DoorAnimationTimelineDelegate.BindUFunction(this, FName("AnimateDoor"));
-			DoorAnimationTimeline->AddInterpFloat(DoorAnimationCurve,
+			DoorAnimationTimeline->AddInterpFloat(OpenAnimationCurve,
 			                                      DoorAnimationTimelineDelegate,
 			                                      NAME_None,
-			                                      TEXT("Progress"));
+			                                      AnimationTrackName);
 
 			FOnTimelineEvent DoorAnimationFinishedDelegate;
 			DoorAnimationFinishedDelegate.BindUFunction(this, FName("FinishAnimation"));
@@ -179,6 +186,7 @@ void AHDADoorBase::HandleTransitionStarted(UDoorStateControllerComponent* Compon
                                            const EDoorState TargetState)
 {
 	CalculateAnimationPlayRate(TargetState);
+	SwapAnimationCurve(TargetState);
 
 	switch (TargetState)
 	{
@@ -196,6 +204,7 @@ void AHDADoorBase::HandleTransitionReversed(UDoorStateControllerComponent* Compo
                                             const EDoorState NewTargetState)
 {
 	CalculateAnimationPlayRate(NewTargetState);
+	SwapAnimationCurve(NewTargetState);
 
 	switch (NewTargetState)
 	{
@@ -224,6 +233,25 @@ void AHDADoorBase::CalculateAnimationPlayRate(const EDoorState State) const
 
 	case EDoorState::Closed:
 		UTrickyUtilityLibrary::CalculateTimelinePlayRate(DoorAnimationTimeline, CloseAnimationDuration);
+		break;
+	}
+}
+
+void AHDADoorBase::SwapAnimationCurve(const EDoorState State) const
+{
+	if (!bSeparateAnimationCurve)
+	{
+		return;
+	}
+
+	switch (State)
+	{
+	case EDoorState::Opened:
+		DoorAnimationTimeline->SetFloatCurve(OpenAnimationCurve, AnimationTrackName);
+		break;
+
+	case EDoorState::Closed:
+		DoorAnimationTimeline->SetFloatCurve(CloseAnimationCurve, AnimationTrackName);
 		break;
 	}
 }

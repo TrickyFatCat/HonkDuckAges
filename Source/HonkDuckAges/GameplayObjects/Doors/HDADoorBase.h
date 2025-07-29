@@ -68,13 +68,27 @@ protected:
 	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="Door",
-		meta=(ClampMin=0.0f, UIMin=0.0f, Delta=0.1f, ForceUnits="Seconds"))
+		meta=(ClampMin=0.0f, UIMin=0.0f, Delta=0.1f, ForceUnits="Seconds",
+			EditCondition="bSeparateAnimationDuration == true"))
 	float CloseAnimationDuration = 0.25f;
 	
 	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="Door")
-	UCurveFloat* DoorAnimationCurve = nullptr;
+	UCurveFloat* OpenAnimationCurve = nullptr;
+
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="Door")
+	bool bSeparateAnimationCurve = false;
+
+	UPROPERTY(EditAnywhere,
+		BlueprintReadOnly,
+		Category="Door",
+		meta=(EditCondition="bSeparateAnimationCurve == true"))
+	UCurveFloat* CloseAnimationCurve = nullptr;
+	
+	const FName AnimationTrackName = TEXT("Progress");
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
 	TObjectPtr<USceneComponent> Root = nullptr;
@@ -110,6 +124,8 @@ private:
 
 protected:
 	void CalculateAnimationPlayRate(const EDoorState State) const;
+
+	void SwapAnimationCurve(const EDoorState State) const;
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleDefaultsOnly, Category="Components")
 	TObjectPtr<UArrowComponent> ForwardVector = nullptr;
