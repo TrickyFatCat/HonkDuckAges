@@ -33,7 +33,6 @@ void AHDADoorAutoBase::PostInitializeComponents()
 
 	ActivationTriggerComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &AHDADoorAutoBase::HandleTriggerEntered);
 	ActivationTriggerComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &AHDADoorAutoBase::HandleTriggerExited);
-	DoorStateControllerComponent->OnDoorStateChanged.AddUniqueDynamic(this, &AHDADoorAutoBase::HandleDoorStateChanged);
 }
 
 void AHDADoorAutoBase::HandleTriggerEntered(UPrimitiveComponent* OverlappedComponent,
@@ -112,6 +111,8 @@ void AHDADoorAutoBase::HandleDoorStateChanged(UDoorStateControllerComponent* Com
 		Execute_DisableDoor(this, false);
 		ActivationTriggerComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	Super::HandleDoorStateChanged(Component, NewState, bChangedImmediately);
 }
 
 #if WITH_EDITOR

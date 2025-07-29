@@ -43,6 +43,18 @@ public:
 	virtual bool ReverseDoorStateTransition_Implementation() override;
 
 protected:
+	UPROPERTY(BlueprintAssignable, Category="Door")
+	FOnDoorStateChangedDynamicSignature OnDoorStateChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="Door")
+	FOnDoorStateTransitionStartedDynamicSignature OnDoorStateTransitionStarted;
+
+	UPROPERTY(BlueprintAssignable, Category="Door")
+	FOnDoorStateTransitionReversedDynamicSignature OnDoorStateTransitionReversed;
+
+	UPROPERTY(BlueprintAssignable, Category="Door")
+	FOnDoorStateTransitionFinishedDynamicSignature OnDoorStateTransitionFinished;
+
 	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="Door",
@@ -59,19 +71,19 @@ protected:
 		Category="Door",
 		meta=(ClampMin=0.0f, UIMin=0.0f, Delta=0.1f, ForceUnits="Seconds"))
 	float OpenAnimationDuration = 0.25f;
-	
+
 	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="Door")
 	bool bSeparateAnimationDuration = false;
-	
+
 	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="Door",
 		meta=(ClampMin=0.0f, UIMin=0.0f, Delta=0.1f, ForceUnits="Seconds",
 			EditCondition="bSeparateAnimationDuration == true"))
 	float CloseAnimationDuration = 0.25f;
-	
+
 	UPROPERTY(EditAnywhere,
 		BlueprintReadOnly,
 		Category="Door")
@@ -87,7 +99,7 @@ protected:
 		Category="Door",
 		meta=(EditCondition="bSeparateAnimationCurve == true"))
 	UCurveFloat* CloseAnimationCurve = nullptr;
-	
+
 	const FName AnimationTrackName = TEXT("Progress");
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Components")
@@ -105,7 +117,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="Door")
 	void AnimateDoor(const float Progress);
 
-private:
 	UFUNCTION()
 	void FinishAnimation();
 
@@ -115,12 +126,21 @@ private:
 	                            bool bChangedImmediately);
 
 	UFUNCTION()
+	virtual void HandleDoorStateChanged(UDoorStateControllerComponent* Component,
+	                                    const EDoorState NewState,
+	                                    const bool bChangedImmediately);
+
+	UFUNCTION()
 	void HandleTransitionStarted(UDoorStateControllerComponent* Component,
 	                             const EDoorState TargetState);
 
 	UFUNCTION()
 	void HandleTransitionReversed(UDoorStateControllerComponent* Component,
 	                              const EDoorState NewTargetState);
+
+	UFUNCTION()
+	void HandleTransitionFinished(UDoorStateControllerComponent* Component,
+	                              const EDoorState NewState);
 
 protected:
 	void CalculateAnimationPlayRate(const EDoorState State) const;

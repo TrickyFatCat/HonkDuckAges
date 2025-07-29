@@ -88,10 +88,13 @@ void AHDADoorBase::PostInitializeComponents()
 	if (IsValid(World) && World->IsGameWorld())
 	{
 		LockStateControllerComponent->OnLockStateChanged.AddUniqueDynamic(this, &AHDADoorBase::HandleLockStateChanged);
+		DoorStateControllerComponent->OnDoorStateChanged.AddUniqueDynamic(this, &AHDADoorBase::HandleDoorStateChanged);
 		DoorStateControllerComponent->OnDoorStateTransitionStarted.AddUniqueDynamic(this,
 			&AHDADoorBase::HandleTransitionStarted);
 		DoorStateControllerComponent->OnDoorTransitionReversed.AddUniqueDynamic(this,
 			&AHDADoorBase::HandleTransitionReversed);
+		DoorStateControllerComponent->OnDoorStateTransitionFinished.AddUniqueDynamic(this,
+			&AHDADoorBase::HandleTransitionFinished);
 
 		ensureMsgf(IsValid(OpenAnimationCurve), TEXT("%s open animation curve isn't set"), *GetActorNameOrLabel());
 
@@ -182,6 +185,13 @@ void AHDADoorBase::HandleLockStateChanged(ULockStateControllerComponent* Compone
 	}
 }
 
+void AHDADoorBase::HandleDoorStateChanged(UDoorStateControllerComponent* Component,
+                                          const EDoorState NewState,
+                                          const bool bChangedImmediately)
+{
+	OnDoorStateChanged.Broadcast(Component, NewState, bChangedImmediately);
+}
+
 void AHDADoorBase::HandleTransitionStarted(UDoorStateControllerComponent* Component,
                                            const EDoorState TargetState)
 {
@@ -198,6 +208,8 @@ void AHDADoorBase::HandleTransitionStarted(UDoorStateControllerComponent* Compon
 		DoorAnimationTimeline->ReverseFromEnd();
 		break;
 	}
+
+	OnDoorStateTransitionStarted.Broadcast(Component, TargetState);
 }
 
 void AHDADoorBase::HandleTransitionReversed(UDoorStateControllerComponent* Component,
@@ -216,6 +228,13 @@ void AHDADoorBase::HandleTransitionReversed(UDoorStateControllerComponent* Compo
 		DoorAnimationTimeline->Reverse();
 		break;
 	}
+
+	OnDoorStateTransitionReversed.Broadcast(Component, NewTargetState);
+}
+
+void AHDADoorBase::HandleTransitionFinished(UDoorStateControllerComponent* Component, const EDoorState NewState)
+{
+	OnDoorStateTransitionFinished.Broadcast(Component, NewState);
 }
 
 void AHDADoorBase::CalculateAnimationPlayRate(const EDoorState State) const

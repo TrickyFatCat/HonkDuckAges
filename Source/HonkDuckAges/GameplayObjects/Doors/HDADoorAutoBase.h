@@ -46,10 +46,9 @@ private:
 	                         UPrimitiveComponent* OtherComp,
 	                         int32 OtherBodyIndex);
 
-	UFUNCTION()
-	void HandleDoorStateChanged(UDoorStateControllerComponent* Component,
-	                            const EDoorState NewState,
-	                            const bool bChangedImmediately);
+	virtual void HandleDoorStateChanged(UDoorStateControllerComponent* Component,
+	                                    const EDoorState NewState,
+	                                    const bool bChangedImmediately) override;
 protected:
 #if WITH_EDITOR
 	virtual void UpdateDebugText() override;
