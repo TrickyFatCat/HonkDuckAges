@@ -25,6 +25,30 @@ void UHDALifeStateComponent::InitializeComponent()
 	GetOwner()->OnTakeAnyDamage.AddUniqueDynamic(this, &UHDALifeStateComponent::HandleDamageTaken);
 }
 
+void UHDALifeStateComponent::SetDefaultHealth(const int32 Value)
+{
+	if (Value <= 0 || DefaultHealth == Value)
+	{
+		return;
+	}
+
+	DefaultHealth = Value;
+	Health.Value = DefaultHealth;
+	Health.MaxValue = DefaultHealth;
+}
+
+void UHDALifeStateComponent::SetDefaultArmor(const int32 Value)
+{
+	if (Value <= 0 || DefaultArmor == Value)
+	{
+		return;
+	}
+
+	DefaultArmor = Value;
+	Armor.Value = DefaultArmor;
+	Armor.MaxValue = DefaultArmor;
+}
+
 bool UHDALifeStateComponent::IncreaseHealth(const int32 Value)
 {
 	if (Value <= 0 || Health.ReachedMaxValue())

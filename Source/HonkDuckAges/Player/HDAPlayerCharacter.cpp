@@ -21,7 +21,7 @@ AHDAPlayerCharacter::AHDAPlayerCharacter(const FObjectInitializer& ObjectInitial
 	PrimaryActorTick.bCanEverTick = true;
 
 	LifeStateComponent = CreateDefaultSubobject<UHDALifeStateComponent>(TEXT("LifeStateComponent"));
-	LifeStateComponent->DefaultArmor = 25;
+	LifeStateComponent->SetDefaultArmor(25);
 	StatusEffectsManager = CreateDefaultSubobject<UStatusEffectsManagerComponent>(TEXT("StatusEffectsManager"));
 	KeyringComponent = CreateDefaultSubobject<UKeyringComponent>(TEXT("KeyringComponent"));
 	WeaponManagerComponent = CreateDefaultSubobject<UHDAPlayerWeaponManager>(TEXT("WeaponManagerComponent"));

@@ -20,7 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnPropertyChangedDynamicSignatur
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPropertyReachedZeroDynamicSignature,
                                             UHDALifeStateComponent*, Component);
 
-UCLASS(ClassGroup=(Gameplay), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Gameplay), meta=(BlueprintSpawnableComponent), PrioritizeCategories="LifeState")
 class HONKDUCKAGES_API UHDALifeStateComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -62,15 +62,17 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="LifeState")
 	FOnPropertyReachedZeroDynamicSignature OnArmorReachedZero;
 
-	UPROPERTY(EditDefaultsOnly,
-		Category="LifeState",
-		meta=(ClampMin=1, UIMin=1))
-	int32 DefaultHealth = 100;
+	UFUNCTION(BlueprintGetter, Category="LifeState")
+	int32 GetDefaultHealth() const { return DefaultHealth; }
 
-	UPROPERTY(EditDefaultsOnly,
-		Category="LifeState",
-		meta=(ClampMin=1, UIMin=1))
-	int32 DefaultArmor = 0;
+	UFUNCTION(BlueprintSetter, Category="LifeState")
+	void SetDefaultHealth(const int32 Value);
+
+	UFUNCTION(BlueprintGetter, Category="LifeState")
+	int32 GetDefaultArmor() const { return DefaultArmor; }
+
+	UFUNCTION(BlueprintSetter, Category="LifeState")
+	void SetDefaultArmor(const int32 Value);
 
 	UFUNCTION(BlueprintCallable, Category="LifeState")
 	bool IncreaseHealth(const int32 Value);
@@ -97,6 +99,20 @@ public:
 	FTrickyPropertyInt GetArmor() const { return Armor; }
 
 private:
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintGetter=GetDefaultHealth,
+		BlueprintSetter=SetDefaultHealth,
+		Category="LifeState",
+		meta=(ClampMin=1, UIMin=1))
+	int32 DefaultHealth = 100;
+
+	UPROPERTY(EditDefaultsOnly,
+		BlueprintGetter=GetDefaultArmor,
+		BlueprintSetter=SetDefaultArmor,
+		Category="LifeState",
+		meta=(ClampMin=1, UIMin=1))
+	int32 DefaultArmor = 0;
+	
 	UPROPERTY(VisibleInstanceOnly,
 		BlueprintGetter=GetIsInvulnerable,
 		BlueprintSetter=SetIsInvulnerable,
